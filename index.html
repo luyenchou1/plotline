@@ -83,19 +83,32 @@ a{color:var(--accent-ink)}
   <ul class="stories" aria-label="Plots">
     <li>
       <a class="story" href="national-debt/">
-        <span class="kicker"><span>Federal finance</span><span class="pill live">Live</span></span>
+        <span class="kicker"><span>Economy</span><span class="pill live">Live</span></span>
         <h2>The National Debt</h2>
         <p>Thirty-three years of Treasury's daily count, with GDP alongside it, the laws and shocks that bent the curve, and how long each trillion took.</p>
         <svg class="spark" viewBox="0 0 300 44" preserveAspectRatio="none" aria-hidden="true">
           <path class="fill" d="M0,40 L30,39 L60,38 L90,36 L120,32 L150,25 L180,22 L210,18 L230,10 L260,7 L300,2 L300,44 L0,44 Z"/>
           <path d="M0,40 L30,39 L60,38 L90,36 L120,32 L150,25 L180,22 L210,18 L230,10 L260,7 L300,2"/>
         </svg>
-        <span class="meta"><span>Treasury · FRED</span><span>Data through Sep 2026</span></span>
+        <span class="meta"><span>Treasury · FRED</span><span data-updated="national-debt">Updated Sep 20, 2026</span></span>
+      </a>
+    </li>
+    <li>
+      <a class="story" href="the-curve/">
+        <span class="kicker"><span>Technology</span><span class="pill live">Live</span></span>
+        <h2>The Curve</h2>
+        <p>Chips have doubled every two years since 1971. The AI built on them doubles every six months. Four exponentials on one axis, and how fast the tests fall.</p>
+        <svg class="spark" viewBox="0 0 300 44" preserveAspectRatio="none" aria-hidden="true">
+          <path class="fill" d="M0,42 L60,40 L120,37 L170,33 L200,30 L220,26 L240,20 L260,13 L280,7 L300,2 L300,44 L0,44 Z"/>
+          <path d="M0,42 L60,40 L120,37 L170,33 L200,30 L220,26 L240,20 L260,13 L280,7 L300,2"/>
+          <path d="M0,43 L100,41 L200,38 L300,34" style="stroke:var(--muted);stroke-dasharray:4 3"/>
+        </svg>
+        <span class="meta"><span>Epoch AI · Wikipedia</span><span data-updated="the-curve">Updated Sep 20, 2026</span></span>
       </a>
     </li>
     <li>
       <div class="story soon">
-        <span class="kicker"><span>New York City</span><span class="pill soon">In progress</span></span>
+        <span class="kicker"><span>Politics</span><span class="pill soon">In progress</span></span>
         <h2>The Mamdani Scorecard</h2>
         <p>Campaign promises against the record: what was pledged, what has moved, and what the city's own numbers say.</p>
         <span class="meta"><span>City records</span><span>Coming</span></span>
@@ -110,6 +123,7 @@ a{color:var(--accent-ink)}
 </div>
 <script>
 (function(){const root=document.documentElement;try{const s=localStorage.getItem('plotline-theme');if(s)root.dataset.theme=s}catch(e){}
+document.querySelectorAll('[data-updated]').forEach(async s=>{try{const r=await fetch(s.dataset.updated+'/meta.json',{cache:'no-cache'});if(!r.ok)return;const m=await r.json();s.textContent='Updated '+new Date(m.updated+'T12:00:00Z').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric',timeZone:'UTC'})}catch(e){}});
 document.getElementById('theme').onclick=()=>{const dark=getComputedStyle(root).colorScheme==='dark';root.dataset.theme=dark?'light':'dark';try{localStorage.setItem('plotline-theme',root.dataset.theme)}catch(e){}}})();
 </script>
 </body>

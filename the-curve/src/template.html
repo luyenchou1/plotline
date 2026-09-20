@@ -1,0 +1,567 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>The Curve</title>
+<meta name="description" content="Chips, AI training compute, accelerators and model size on one log axis, and how fast benchmarks fall.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  color-scheme:light;
+  --bg:#f1f4f2;--surface:#fbfcfb;--surface-2:#e9eeeb;--ink:#14201a;--ink-2:#4f5c55;--muted:#7f8a84;
+  --grid:#e1e7e3;--axis:#c3cbc6;--border:rgba(20,32,26,.11);--band:rgba(20,32,26,.04);
+  --accent:#1d7a4e;--accent-ink:#17643f;--accent-soft:rgba(29,122,78,.13);
+  --l-transistors:#4f5c55;--l-compute:#1d7a4e;--l-hardware:#2a78d6;--l-params:#8054ad;
+  --event:#8a6a24;--event-soft:rgba(138,106,36,.12);
+  --tip-bg:#14201a;--tip-ink:#f6f8f7;--tip-muted:#aab5ae;--event-tip:#e0bd63;--focus:#1d7a4e;--shadow:0 6px 24px rgba(20,32,26,.10);
+  --sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',sans-serif;--mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#0e1311;--surface:#161c19;--surface-2:#1f2622;--ink:#eef3f0;--ink-2:#b6c1ba;--muted:#86918b;
+    --grid:#242c28;--axis:#38423c;--border:rgba(255,255,255,.10);--band:rgba(255,255,255,.045);
+    --accent:#4cc38a;--accent-ink:#6fd3a1;--accent-soft:rgba(76,195,138,.16);
+    --l-transistors:#b6c1ba;--l-compute:#4cc38a;--l-hardware:#4a95ec;--l-params:#b39ae8;
+    --event:#d4b36a;--event-soft:rgba(212,179,106,.14);
+    --tip-bg:#eef3f0;--tip-ink:#14201a;--tip-muted:#5c6862;--event-tip:#7a5c1a;--focus:#4cc38a;--shadow:0 6px 24px rgba(0,0,0,.4);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0e1311;--surface:#161c19;--surface-2:#1f2622;--ink:#eef3f0;--ink-2:#b6c1ba;--muted:#86918b;
+  --grid:#242c28;--axis:#38423c;--border:rgba(255,255,255,.10);--band:rgba(255,255,255,.045);
+  --accent:#4cc38a;--accent-ink:#6fd3a1;--accent-soft:rgba(76,195,138,.16);
+  --l-transistors:#b6c1ba;--l-compute:#4cc38a;--l-hardware:#4a95ec;--l-params:#b39ae8;
+  --event:#d4b36a;--event-soft:rgba(212,179,106,.14);
+  --tip-bg:#eef3f0;--tip-ink:#14201a;--tip-muted:#5c6862;--event-tip:#7a5c1a;--focus:#4cc38a;--shadow:0 6px 24px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 var(--sans);-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:var(--accent-ink)}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.page{max-width:1180px;margin:0 auto;padding-block:20px 56px;padding-inline:clamp(16px,3vw,32px)}
+.site-nav{display:flex;align-items:baseline;gap:12px;margin-bottom:14px;font-size:12.5px;color:var(--muted)}
+.site-nav .updated{margin-left:auto;font-variant-numeric:tabular-nums}
+.site-nav .updated b{font-weight:500;color:var(--ink-2)}
+.site-nav a{font-family:var(--mono);font-weight:500;font-size:14px;color:var(--ink);text-decoration:none}
+.site-nav a::before{content:"←";margin-right:6px;color:var(--muted)}
+.site-nav a:hover{color:var(--accent-ink)}
+.top{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:12px}
+.eyebrow{display:block;font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:500;margin-bottom:6px}
+h1{font-size:clamp(22px,2.6vw,28px);font-weight:600;letter-spacing:-.02em;margin:0;line-height:1.15}
+.top-right{display:flex;align-items:center;gap:14px;color:var(--ink-2);font-size:13px}
+.top-right b{color:var(--ink);font-weight:500}
+.icon-btn{width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:var(--surface);display:grid;place-items:center;font-size:15px;color:var(--ink-2)}
+.icon-btn:hover{color:var(--ink);border-color:var(--axis)}
+
+/* lede + hero */
+.lede{max-width:70ch;font-size:15.5px;color:var(--ink-2);line-height:1.6;margin:0 0 16px}
+.lede b{color:var(--ink);font-weight:500}
+.hero{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:10px;margin-bottom:12px}
+.big{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 16px 11px;display:flex;flex-direction:column;justify-content:center;min-width:0}
+.big-label{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:500}
+.big-figure{font-family:var(--mono);font-weight:500;font-size:clamp(26px,3.4vw,40px);line-height:1.15;margin:4px 0 5px;letter-spacing:-.01em}
+.big-figure small{font-size:.5em;color:var(--ink-2);font-family:var(--sans);font-weight:400;letter-spacing:0}
+.big-note{font-size:12px;color:var(--ink-2);line-height:1.5}
+.big-note b{color:var(--ink);font-weight:500}
+.link{background:none;border:none;padding:0;color:var(--accent-ink);text-decoration:underline;text-underline-offset:3px;font-size:inherit}
+.tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;min-width:0}
+.tile{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:9px 12px 8px;display:flex;flex-direction:column;gap:1px;min-width:0;border-top:3px solid var(--tile)}
+.tile-label{font-size:11px;color:var(--muted);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tile-value{font-family:var(--mono);font-size:clamp(17px,1.6vw,20px);font-weight:500;line-height:1.2;margin-top:2px}
+.tile-value small{font-family:var(--sans);font-size:11px;color:var(--muted);font-weight:400;margin-left:4px}
+.tile-sub{font-size:11px;color:var(--ink-2);line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* panels + controls */
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 20px 14px;margin-bottom:16px}
+.panel-head{display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap;margin-bottom:8px}
+.panel h2{font-size:17px;font-weight:600;margin:0;letter-spacing:-.01em}
+.panel-head p{margin:0;color:var(--ink-2);font-size:13px;max-width:72ch}
+.controls{display:flex;justify-content:space-between;align-items:center;gap:12px 20px;flex-wrap:wrap;margin-bottom:8px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.chips .sep{width:1px;height:18px;background:var(--border);margin:0 4px}
+.chip{border:1px solid var(--border);background:transparent;border-radius:999px;padding:4px 11px;font-size:12.5px;color:var(--ink-2);line-height:1.3}
+.chip:hover{border-color:var(--axis);color:var(--ink)}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.controls-right{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.seg{display:inline-flex;border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.seg button{border:none;background:transparent;padding:5px 11px;font-size:12.5px;color:var(--ink-2)}
+.seg button+button{border-left:1px solid var(--border)}
+.seg button[aria-pressed="true"]{background:var(--surface-2);color:var(--ink);font-weight:500}
+.check{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink-2);cursor:pointer}
+.check input{accent-color:var(--accent);margin:0}
+/* layer legend with doubling readouts */
+.layers{display:flex;gap:6px;flex-wrap:wrap;margin:2px 0 6px}
+.layer{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border);border-radius:8px;padding:5px 10px;font-size:12.5px;color:var(--ink-2);background:transparent;text-align:left}
+.layer i{width:14px;height:0;border-top:2.5px solid var(--lc);border-radius:2px;flex:0 0 auto}
+.layer .nm{color:var(--ink);font-weight:500}
+.layer .dt{font-family:var(--mono);font-size:12px;color:var(--ink);font-variant-numeric:tabular-nums}
+.layer .dt small{font-family:var(--sans);color:var(--muted);font-size:11px}
+.layer[aria-pressed="false"]{opacity:.45}
+.layer[aria-pressed="false"] i{border-top-style:dotted}
+.layer:hover{border-color:var(--axis)}
+
+.chart-wrap{position:relative}
+svg{display:block;width:100%;overflow:visible}
+svg text{font-family:var(--sans);font-size:11.5px;fill:var(--muted)}
+.grid line{stroke:var(--grid)}
+.axis-y text{font-variant-numeric:tabular-nums}
+.axis-title{font-size:11px;fill:var(--muted)}
+.rec{fill:none;stroke-width:2.2;stroke-linejoin:round;stroke-linecap:round}
+.rec.dim{opacity:.35}
+.pt{stroke:var(--surface);stroke-width:1}
+.pt.dim{opacity:.35}
+.fitline{fill:none;stroke-width:1.5;stroke-dasharray:5 4;opacity:.8}
+.ref-line{stroke:var(--ink-2);stroke-dasharray:4 3;opacity:.6}
+.ref-label{font-size:10.5px;fill:var(--ink-2)}
+.end-label{font-size:11px;font-weight:600;paint-order:stroke;stroke:var(--surface);stroke-width:3px;stroke-linejoin:round}
+.pt-label{font-size:10.5px;fill:var(--ink-2);paint-order:stroke;stroke:var(--surface);stroke-width:3px;stroke-linejoin:round}
+.base-line{stroke:var(--axis);stroke-dasharray:2 3}
+.base-label{font-size:10.5px;fill:var(--muted)}
+.cross{stroke:var(--axis);stroke-width:1}
+.cross.ev{stroke:var(--event);stroke-dasharray:3 3;opacity:.7}
+.dot{stroke:var(--surface);stroke-width:2}
+.hit{fill:transparent;cursor:crosshair;touch-action:pan-y}
+.ev-line{stroke:var(--event);stroke-dasharray:2 4;opacity:.45}
+.ev-dot{fill:var(--surface);stroke:var(--event);stroke-width:2;cursor:pointer}
+.ev-dot:hover,.ev-dot.on{fill:var(--event)}
+.ev-label{font-size:11px;fill:var(--event);cursor:pointer}
+.ev-label:hover{text-decoration:underline}
+.ev-halo{fill:none;stroke:var(--event);stroke-width:2;opacity:.6}
+.nav-bg{fill:var(--surface-2)}
+.nav-line{fill:none;stroke-width:1.2;opacity:.7}
+.nav-dim{fill:var(--surface);opacity:.62}
+.nav-win{fill:none;stroke:var(--ink);stroke-width:1.2}
+.nav-handle{fill:var(--ink);cursor:ew-resize}
+.nav-grab{fill:transparent;cursor:grab}
+.nav-new{fill:transparent;cursor:crosshair}
+.nav-text{font-size:10.5px;fill:var(--muted)}
+.hint{font-size:12px;color:var(--muted);margin-top:8px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.hint kbd{font-family:var(--mono);font-size:11px;border:1px solid var(--border);border-radius:4px;padding:0 4px;color:var(--ink-2)}
+
+.tooltip{position:absolute;z-index:4;background:var(--tip-bg);color:var(--tip-ink);border-radius:10px;padding:11px 13px 10px;font-size:12.5px;line-height:1.45;pointer-events:none;box-shadow:var(--shadow);width:max-content;max-width:300px}
+.tooltip.pinned{pointer-events:auto}
+.tooltip.event{border:1.5px solid var(--event-tip)}
+.tip-date{font-size:11px;color:var(--tip-muted);letter-spacing:.04em;text-transform:uppercase;font-weight:500;margin-bottom:6px;padding-right:20px}
+.tip-tag{display:inline-block;font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:var(--tip-bg);background:var(--event-tip);border-radius:4px;padding:1px 6px;margin-right:8px;vertical-align:1px}
+.tip-head{font-size:14px;font-weight:600;color:var(--event-tip);line-height:1.3;margin:2px 0 1px}
+.tip-title{font-size:12px;color:var(--tip-muted);line-height:1.4;margin-bottom:8px}
+.tip-row{display:flex;justify-content:space-between;gap:18px;align-items:baseline}
+.tip-row+.tip-row{margin-top:4px}
+.tip-row .k{display:flex;align-items:center;gap:7px;color:var(--tip-muted);min-width:0}
+.tip-row .k i{width:12px;height:0;border-top:2px solid var(--accent);display:inline-block;border-radius:2px;flex:0 0 auto}
+.tip-row b{font-family:var(--mono);font-weight:500;font-variant-numeric:tabular-nums;color:var(--tip-ink);font-size:13px;text-align:right}
+.tip-row .d{display:block;font-size:11px;color:var(--tip-muted);font-family:var(--sans);font-weight:400;text-align:right}
+.tip-name{font-size:13.5px;font-weight:600;color:var(--tip-ink);margin:0 0 2px}
+.tip-sub{font-size:11.5px;color:var(--tip-muted);margin-bottom:6px}
+.tip-cue{margin-top:8px;font-size:11px;color:var(--tip-muted)}
+.tip-close{position:absolute;right:6px;top:4px;background:none;border:none;color:var(--tip-muted);font-size:16px;line-height:1;padding:2px 5px}
+.tip-btn{display:inline-block;margin-top:9px;border:1px solid var(--event-tip);background:transparent;color:var(--event-tip);border-radius:6px;padding:4px 10px;font-size:12px;font-weight:500;cursor:pointer}
+.tip-btn:hover{background:var(--event-tip);color:var(--tip-bg)}
+
+.events{list-style:none;padding:0;margin:14px 0 0;display:flex;gap:6px;overflow-x:auto;scrollbar-width:thin;padding-bottom:4px}
+.events li{flex:0 0 auto}
+.ev-chip{border:1px solid var(--border);background:transparent;border-radius:8px;padding:5px 9px;font-size:12px;color:var(--ink-2);display:flex;flex-direction:column;align-items:flex-start;line-height:1.3;text-align:left}
+.ev-chip span{font-family:var(--mono);font-size:10.5px;color:var(--muted)}
+.ev-chip:hover{border-color:var(--event);color:var(--ink)}
+.ev-chip.in{background:var(--event-soft);border-color:transparent;color:var(--ink)}
+.ev-chip.on{border-color:var(--event);background:var(--event-soft);color:var(--ink)}
+.event-dialog{border:1px solid var(--border);border-left:4px solid var(--event);border-radius:12px;background:var(--surface);color:var(--ink);padding:20px 24px 18px;max-width:min(560px,calc(100vw - 32px));box-shadow:var(--shadow)}
+.event-dialog::backdrop{background:rgba(10,14,12,.45);backdrop-filter:blur(2px)}
+.event-dialog .eyebrow{margin-bottom:8px}
+.event-dialog .tag{display:inline-block;font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:var(--surface);background:var(--event);border-radius:4px;padding:1px 6px;margin-right:8px;vertical-align:1px}
+.event-dialog h3{margin:0 0 8px;font-size:17px;font-weight:600;line-height:1.3;text-wrap:balance}
+.event-dialog p{margin:0;font-size:14px;color:var(--ink-2);line-height:1.6}
+.event-dialog .row{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap;align-items:center}
+.btn{border:1px solid var(--border);background:var(--surface);border-radius:8px;padding:6px 12px;font-size:13px;color:var(--ink)}
+.btn:hover{border-color:var(--axis)}
+.btn.primary{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.event-dialog .src{margin-left:auto;font-size:13px}
+
+/* benchmarks */
+.bgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}
+.bpanel{border:1px solid var(--border);border-radius:10px;padding:10px 12px 8px;position:relative;background:var(--surface)}
+.bpanel h3{margin:0;font-size:13.5px;font-weight:600;display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.bpanel h3 span{font-family:var(--mono);font-size:12px;font-weight:500;color:var(--ink)}
+.bpanel .dom{font-size:11px;color:var(--muted);margin:1px 0 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bpanel .stat{font-size:11.5px;color:var(--ink-2);margin-top:4px;line-height:1.4;min-height:16px}
+.bpanel .stat b{color:var(--ink);font-weight:500}
+.b-line{fill:none;stroke:var(--accent);stroke-width:2;stroke-linejoin:round}
+.b-area{fill:var(--accent-soft)}
+.b-pt{fill:var(--accent);stroke:var(--surface);stroke-width:1.2}
+.b-bg{fill:var(--muted);opacity:.3}
+.b-thresh{stroke:var(--ink-2);stroke-dasharray:4 3;opacity:.7}
+.b-rel{stroke:var(--event);stroke-width:1.5}
+.b-rel-label{font-size:10px;fill:var(--event);font-weight:500}
+.b-cross{stroke:var(--axis)}
+.b-ax{font-size:10px;fill:var(--muted)}
+.b-tip{position:absolute;z-index:3;background:var(--tip-bg);color:var(--tip-ink);border-radius:8px;padding:7px 10px;font-size:11.5px;line-height:1.4;pointer-events:none;box-shadow:var(--shadow);width:max-content;max-width:220px}
+.b-tip b{font-family:var(--mono);font-weight:500}
+.b-tip small{display:block;color:var(--tip-muted)}
+.ms-bar{fill:var(--accent)}
+.ms-bar.open{fill:url(#hatch)}
+.ms-x{font-size:11.5px;fill:var(--ink)}
+.ms-x2{font-size:10.5px;fill:var(--muted)}
+.ms-val{font-size:11.5px;fill:var(--ink);font-weight:500;font-family:var(--mono)}
+.ms-val.dim{fill:var(--muted);font-weight:400;font-family:var(--sans)}
+
+/* table */
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:500;text-align:left;padding:6px 10px 8px 0;border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:8px 10px 8px 0;border-bottom:1px solid var(--grid);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;font-family:var(--mono);font-size:13px}
+th.num{font-family:var(--sans);font-size:11.5px}
+td .who{font-weight:500;color:var(--ink)}
+td .when{display:block;font-size:11.5px;color:var(--muted)}
+.conf{display:inline-block;font-size:10.5px;letter-spacing:.04em;border-radius:4px;padding:1px 6px;border:1px solid var(--border);color:var(--ink-2)}
+.conf.S{border-style:dashed}
+.table-wrap{overflow-x:auto}
+.note{font-size:12.5px;color:var(--muted);margin:10px 0 0;line-height:1.5}
+
+.foot{color:var(--ink-2);font-size:13px;line-height:1.6}
+.foot h2{font-size:15px;margin:0 0 6px;color:var(--ink)}
+.foot p{margin:0 0 10px;max-width:78ch}
+@media (max-width:820px){.hero{grid-template-columns:1fr}}
+@media (max-width:520px){
+  .page{padding-block:16px 40px}
+  .panel{padding:14px 12px 12px;border-radius:12px}
+  .chips{overflow-x:auto;flex-wrap:nowrap;max-width:100%;padding-bottom:2px;scrollbar-width:none}
+  .layer .dt small{display:none}
+}
+</style>
+</head>
+<body>
+<div class="page">
+<nav class="site-nav"><a href="../">Plotline</a><span>Current events, drawn from the data</span><span class="updated">Updated <b id="updated"></b></span></nav>
+<header class="top">
+  <div><span class="eyebrow">Technology · chips, models and capability · 1950 to today</span><h1>The Curve</h1></div>
+  <div class="top-right"><span>Data through <b id="asof"></b></span><button class="icon-btn" id="theme" aria-label="Switch light or dark theme" title="Light / dark">◐</button></div>
+</header>
+
+<p class="lede">I've shown a version of this chart to rooms full of educators two years running, because most people have heard of Moore's Law but have never seen what sits on top of it. Chips have doubled their transistor count roughly every two years for fifty-five years, which is astonishing on its own. The AI curves stacked on that foundation double every five or six months. That gap is the thing I most wanted to see for myself, so this page starts there - <b>every line is a real chip, model or test run, and every point has a source.</b></p>
+
+<section class="hero" aria-label="Headline figures">
+  <div class="big">
+    <div class="big-label">Frontier AI training compute, doubling time since 2012</div>
+    <div class="big-figure" id="big-figure">—</div>
+    <div class="big-note" id="big-note"></div>
+  </div>
+  <div class="tiles" id="tiles"></div>
+</section>
+
+<section class="panel" aria-labelledby="main-h">
+  <div class="panel-head"><h2 id="main-h">Four exponentials on one axis</h2><p id="main-desc">Each line is the record holder over time, indexed to its own 2012 level so the slopes compare. A straight line on this axis is a constant doubling time; steeper means faster.</p></div>
+  <div class="controls">
+    <div class="chips" id="ranges" role="group" aria-label="Time range"></div>
+    <div class="controls-right">
+      <div class="seg" role="group" aria-label="View"><button data-mode="indexed" aria-pressed="true">Compare (indexed)</button><button data-mode="transistors">Transistors</button><button data-mode="compute">Training compute</button><button data-mode="hardware">Accelerators</button><button data-mode="params">Parameters</button></div>
+      <label class="check"><input type="checkbox" id="events-toggle" checked> Milestones</label>
+      <button class="link" id="replay">Replay</button>
+    </div>
+  </div>
+  <div class="layers" id="layers" role="group" aria-label="Layers and doubling times"></div>
+  <div class="chart-wrap">
+    <svg id="main" tabindex="0" role="img" aria-label="Growth of transistors per chip, AI training compute, accelerator throughput and model parameters over time on a logarithmic axis."></svg>
+    <div class="tooltip" id="tip" hidden></div>
+  </div>
+  <div class="nav-wrap" style="margin-top:10px"><svg id="nav" aria-label="Zoom control: drag to choose a period"></svg></div>
+  <div class="hint"><span>Hover to read · click to pin · <kbd>Esc</kbd> clears · drag the strip to zoom · double-click it to reset</span><span id="fitnote"></span></div>
+  <ol class="events" id="event-list" aria-label="Milestones"></ol>
+  <dialog id="event-dialog" class="event-dialog" aria-labelledby="ev-dlg-title"></dialog>
+</section>
+
+<section class="panel" aria-labelledby="bench-h">
+  <div class="panel-head"><h2 id="bench-h">How fast the tests fall</h2><p>The best score any model had reached on each benchmark, month by month, on one shared timeline. The gold tick is the day the benchmark was published. Same evaluator and protocol throughout, so the figures read lower than vendor leaderboards.</p></div>
+  <div class="controls"><div class="chips"><span style="font-size:12px;color:var(--muted);margin-right:4px">Count a test as solved at</span><div class="seg" role="group" aria-label="Threshold"><button data-thresh="50">50%</button><button data-thresh="80" aria-pressed="true">80%</button><button data-thresh="90">90%</button></div></div></div>
+  <div class="bgrid" id="bgrid"></div>
+  <h2 style="font-size:15px;margin:22px 0 2px">Months from publication to solved</h2>
+  <p class="note" style="margin:0 0 8px">Benchmarks in order of publication. Hatched bars are still open, drawn to today with the best score so far.</p>
+  <svg id="ms" role="img" aria-label="Bar chart of months from each benchmark's publication until a model reached the chosen score"></svg>
+  <p class="note" id="ms-note"></p>
+</section>
+
+<section class="panel" aria-labelledby="runs-h">
+  <div class="panel-head"><h2 id="runs-h">The largest training runs on record</h2><p>Estimated total compute used to train each model, in floating-point operations. Frontier labs stopped publishing these figures around 2023, so many of the largest are inferred from hardware, duration and cost; the confidence label is Epoch's.</p></div>
+  <div class="table-wrap"><table id="runs"></table></div>
+</section>
+
+<section class="foot" aria-labelledby="src-h">
+  <h2 id="src-h">Reading this page</h2>
+  <p><b>Transistors</b> are per-chip counts for CPUs, systems-on-chip and GPUs from public specifications, as compiled on Wikipedia's <a href="https://en.wikipedia.org/wiki/Transistor_count" target="_blank" rel="noopener">Transistor count</a> page. Multi-die packages count as one chip; wafer-scale parts are excluded. <b>Training compute</b>, <b>parameters</b> and <b>accelerator throughput</b> come from Epoch AI's open datasets: <a href="https://epoch.ai/data/notable-ai-models" target="_blank" rel="noopener">Notable AI Models</a> and <a href="https://epoch.ai/data/machine-learning-hardware" target="_blank" rel="noopener">Machine Learning Hardware</a>, both CC-BY 4.0. Throughput is dense FP16/BF16 tensor performance per accelerator, which is the figure that matters for training; it understates chips reported only at lower precisions.</p>
+  <p><b>Benchmarks</b> come from Epoch AI's <a href="https://epoch.ai/benchmarks" target="_blank" rel="noopener">Benchmarking Hub</a>, which runs a fixed protocol per benchmark or collects external results under one; the AIME figures use OTIS mock exams, and the METR series is the length of software task, in human-minutes, that a model completes half the time. "Solved" here means the best score reached the threshold you pick, and the months are counted from the benchmark's publication date; models released before a benchmark were scored on it afterwards, which is why some lines start left of the gold tick.</p>
+  <p>The <b>record line</b> for each layer follows the highest value published up to that date. Doubling times are least-squares fits to the record line, in log space, over whatever period is in view; the fit needs a few points and at least a year, so very narrow ranges show none. Indexing to 2012 is a choice, not a fact: it is the year AlexNet made GPUs the engine of AI, and it puts the four lines through one point so their slopes can be compared. The parameters layer leaves out a handful of pre-2010 systems whose published "parameter" counts are n-gram tables or kernel machines rather than learned weights, which would otherwise sit above every neural network until 2021. Milestones are context, not causes. Snapshot retrieved <span id="retrieved"></span>.</p>
+</section>
+</div>
+
+<script>
+/*__DATA__*/
+(function(){
+'use strict';
+const $=s=>document.querySelector(s), DAY=864e5, YEAR=365.25*DAY;
+const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const el=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!=null)n.textContent=text;return n};
+const svgEl=(tag,attrs,text)=>{const n=document.createElementNS('http://www.w3.org/2000/svg',tag);for(const k in attrs)n.setAttribute(k,attrs[k]);if(text!=null)n.textContent=text;return n};
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const P=(d)=>Date.parse(d.length===4?d+'-07-01':d.length===7?d+'-15':d);
+const fmtDate=t=>new Date(t).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric',timeZone:'UTC'});
+const fmtMY=t=>new Date(t).toLocaleDateString('en-US',{month:'short',year:'numeric',timeZone:'UTC'});
+const fmtY=t=>new Date(t).getUTCFullYear();
+const SUP='⁰¹²³⁴⁵⁶⁷⁸⁹';const sup=n=>String(n).split('').map(c=>c==='-'?'⁻':SUP[+c]).join('');
+const fmtPow=v=>'10'+sup(Math.round(Math.log10(v)));
+const fmtCount=v=>{if(v>=1e12)return (v/1e12).toFixed(v>=1e13?0:1)+' trillion';if(v>=1e9)return (v/1e9).toFixed(v>=1e10?0:1)+' billion';if(v>=1e6)return (v/1e6).toFixed(v>=1e7?0:1)+' million';return Math.round(v).toLocaleString('en-US')};
+const fmtSci=(v,unit)=>{const e=Math.floor(Math.log10(v)),m=v/Math.pow(10,e);return (m>=9.95?'1':m.toFixed(1))+'×10'+sup(m>=9.95?e+1:e)+(unit?' '+unit:'')};
+const fmtFlops=v=>{const u=[[1e18,'EFLOP/s'],[1e15,'PFLOP/s'],[1e12,'TFLOP/s'],[1e9,'GFLOP/s']];for(const [k,s] of u)if(v>=k)return (v/k).toFixed(v/k>=10?0:1)+' '+s;return v.toFixed(0)+' FLOP/s'};
+const fmtMult=v=>{if(v>=1e4)return fmtPow(v)+'×';if(v>=100)return Math.round(v).toLocaleString('en-US')+'×';if(v>=1)return (v).toFixed(v>=10?0:1)+'×';if(v>=1e-3)return v.toPrecision(2)+'×';return fmtPow(v)+'×'};
+const fmtMonths=m=>m==null?'n/a':m<12?m.toFixed(1)+' mo':(m/12).toFixed(1)+' yr';
+
+/* ---------- theme ---------- */
+const root=document.documentElement;
+try{const s=localStorage.getItem('plotline-theme');if(s)root.dataset.theme=s}catch(e){}
+$('#theme').onclick=()=>{const dark=getComputedStyle(root).colorScheme==='dark';root.dataset.theme=dark?'light':'dark';try{localStorage.setItem('plotline-theme',root.dataset.theme)}catch(e){}drawAll();drawBench()};
+
+/* ---------- layers ---------- */
+const CONF={C:'Confident',L:'Likely',S:'Speculative',U:'Unknown'};
+const L={
+ transistors:{key:'transistors',label:'Transistors per chip',short:'Transistors',unit:'transistors',color:'var(--l-transistors)',fmt:fmtCount,
+   pts:DATA.chips.map(c=>({t:P(String(c[1])),v:c[2],name:c[0],sub:c[3]+' · '+(c[4]==='gpu'?'GPU':'CPU / SoC'),yearOnly:true}))},
+ compute:{key:'compute',label:'AI training compute',short:'Training compute',unit:'FLOP',color:'var(--l-compute)',fmt:v=>fmtSci(v,'FLOP'),
+   pts:DATA.models.filter(m=>m[3]).map(m=>({t:P(m[2]),v:m[3],name:m[0],sub:m[1]+' · '+(CONF[m[5]]||'')+(m[6]?' · frontier':''),conf:m[5]}))},
+ hardware:{key:'hardware',label:'Accelerator throughput',short:'Accelerators',unit:'FLOP/s',color:'var(--l-hardware)',fmt:fmtFlops,
+   pts:DATA.hardware.map(h=>({t:P(h[2]),v:h[3],name:h[0],sub:h[1]+' · dense FP16/BF16'}))},
+ params:{key:'params',label:'Model parameters',short:'Parameters',unit:'parameters',color:'var(--l-params)',fmt:fmtCount,
+   pts:DATA.models.filter(m=>m[4]&&!(m[2]<'2010'&&m[4]>1e9)).map(m=>({t:P(m[2]),v:m[4],name:m[0],sub:m[1]+(m[6]?' · frontier':''),conf:m[5]}))},
+};
+const KEYS=['transistors','compute','hardware','params'];
+for(const k of KEYS){const l=L[k];l.pts.sort((a,b)=>a.t-b.t||a.v-b.v);l.rec=[];let mx=-1;for(const p of l.pts){if(p.v>mx){mx=p.v;l.rec.push(p)}}
+  l.t0=l.pts[0].t;l.t1=l.pts[l.pts.length-1].t}
+const BASE_T=Date.UTC(2012,6,1);
+function recAt(l,t){let lo=0,hi=l.rec.length;while(lo<hi){const m=(lo+hi)>>1;if(l.rec[m].t<=t)lo=m+1;else hi=m}return lo?l.rec[lo-1]:null}
+for(const k of KEYS){const r=recAt(L[k],BASE_T);L[k].base=r?r.v:null}
+const T0=Date.UTC(1950,0,1),T1=Math.max(...KEYS.map(k=>L[k].t1),Date.parse(DATA.retrieved));
+const events=DATA.events.map((e,i)=>({...e,t:Date.parse(e.date),id:i}));
+const idx=(l,v)=>v/l.base;
+
+/* doubling time (months) by log-linear least squares on record points in [a,b] */
+function doubling(l,a,b){const pts=l.rec.filter(p=>p.t>=a&&p.t<=b);const ra=recAt(l,a);if(ra&&ra.t<a)pts.unshift({t:a,v:ra.v});const rb=recAt(l,b);if(rb&&rb.t<b)pts.push({t:b,v:rb.v});
+  if(pts.length<3||pts[pts.length-1].t-pts[0].t<YEAR)return null;const n=pts.length;let sx=0,sy=0,sxy=0,sxx=0;for(const p of pts){const x=p.t/YEAR,y=Math.log2(p.v);sx+=x;sy+=y;sxy+=x*y;sxx+=x*x}
+  const slope=(n*sxy-sx*sy)/(n*sxx-sx*sx);if(!(slope>0))return null;return {months:12/slope,slope,intercept:(sy-slope*sx)/n}}
+
+/* ---------- headline ---------- */
+$('#asof').textContent=fmtMY(T1);$('#updated').textContent=fmtDate(Date.parse(DATA.retrieved));$('#retrieved').textContent=fmtDate(Date.parse(DATA.retrieved));
+{const dc=doubling(L.compute,BASE_T,T1),dt=doubling(L.transistors,Date.UTC(1971,0,1),T1);
+ $('#big-figure').innerHTML='×2 every '+dc.months.toFixed(1)+' <small>months</small>';
+ const top=L.compute.rec[L.compute.rec.length-1],topChip=L.transistors.rec[L.transistors.rec.length-1];
+ $('#big-note').innerHTML='Moore\'s Law, measured the same way over the same chips since 1971, is <b>every '+dt.months.toFixed(1)+' months</b>. The largest training run on record is <b>'+top.name+'</b> at '+fmtSci(top.v,'FLOP')+'; the most transistors on one chip is <b>'+topChip.name+'</b> at '+fmtCount(topChip.v)+'.';
+ const tiles=[['transistors',doubling(L.transistors,Date.UTC(1971,0,1),T1),'since 1971'],['hardware',doubling(L.hardware,L.hardware.t0,T1),'since '+fmtY(L.hardware.t0)],['compute',dc,'since 2012'],['params',doubling(L.params,BASE_T,T1),'since 2012']];
+ for(const [k,d,since] of tiles){const l=L[k],rec=l.rec[l.rec.length-1];const t=el('div','tile');t.style.setProperty('--tile',l.color);t.append(el('div','tile-label',l.label));const v=el('div','tile-value');v.append(document.createTextNode(d?'×2 / '+d.months.toFixed(1)+' mo':'n/a'));v.append(el('small',null,since));t.append(v,el('div','tile-sub','Record: '+rec.name+' · '+l.fmt(rec.v)));$('#tiles').append(t)}}
+
+/* ---------- state ---------- */
+const S={t0:Date.UTC(1971,0,1),t1:T1,mode:'indexed',on:{transistors:true,compute:true,hardware:true,params:true},events:true,pinned:null,evHover:null,evOpen:null,thresh:80};
+const rangeChips=[{id:'all',label:'All',range:()=>[T0,T1]},{id:'4004',label:'Since the 4004',range:()=>[Date.UTC(1971,0,1),T1]},{id:'dl',label:'Deep learning era',range:()=>[Date.UTC(2010,0,1),T1]},{id:'llm',label:'LLM era',range:()=>[Date.UTC(2019,0,1),T1]},{id:'3y',label:'3y',range:()=>[T1-3*YEAR,T1]}];
+{const box=$('#ranges');for(const c of rangeChips){const b=el('button','chip',c.label);b.dataset.id=c.id;b.setAttribute('aria-pressed','false');b.onclick=()=>setRange(...c.range());box.append(b)}}
+function setRange(a,b){a=clamp(a,T0,T1-YEAR);b=clamp(b,a+YEAR,T1);S.t0=a;S.t1=b;S.pinned=null;drawAll()}
+document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{S.mode=b.dataset.mode;S.pinned=null;drawAll()});
+$('#events-toggle').onchange=e=>{S.events=e.target.checked;if(!S.events){S.evOpen=null;S.pinned=null;clearCursor()}drawAll()};
+{const box=$('#layers');for(const k of KEYS){const l=L[k];const b=el('button','layer');b.style.setProperty('--lc',l.color);b.dataset.layer=k;b.setAttribute('aria-pressed','true');b.append(el('i'),el('span','nm',l.label),el('span','dt',''));b.onclick=()=>{if(S.mode!=='indexed'){S.mode='indexed'}S.on[k]=!S.on[k];if(!KEYS.some(x=>S.on[x]))S.on[k]=true;drawAll()};box.append(b)}}
+
+/* ---------- scales ---------- */
+let G=null;
+function xTicks(t0,t1,w){const span=(t1-t0)/YEAR,target=Math.max(3,Math.floor(w/90));let step=[1,2,5,10,20][[1,2,5,10,20].findIndex(s=>span/s<=target)]||20;const out=[];const y0=Math.ceil(fmtY(t0)/step)*step;for(let y=y0;;y+=step){const t=Date.UTC(y,0,1);if(t>t1)break;out.push({t,label:String(y)})}return out}
+function drawMain(){
+  const svg=$('#main'),w=svg.clientWidth||800,mobile=w<640,h=mobile?320:430;
+  const m={l:mobile?54:72,r:mobile?14:20,t:mobile?46:52,b:26};
+  const t0=S.t0,t1=S.t1,span=t1-t0,x=t=>m.l+(t-t0)/span*(w-m.l-m.r);
+  const single=S.mode!=='indexed';const layers=single?[L[S.mode]]:KEYS.filter(k=>S.on[k]).map(k=>L[k]);
+  const val=(l,v)=>single?v:idx(l,v);
+  // y domain (log)
+  let lo=Infinity,hi=-Infinity;
+  for(const l of layers){const inr=(single?l.pts:l.rec).filter(p=>p.t>=t0&&p.t<=t1);for(const p of inr){const v=val(l,p.v);if(v<lo)lo=v;if(v>hi)hi=v}
+    const ra=recAt(l,t0);if(ra){const v=val(l,ra.v);if(v<lo)lo=v;if(v>hi)hi=v}const rb=recAt(l,t1);if(rb){const v=val(l,rb.v);if(v>hi)hi=v}}
+  if(!isFinite(lo)){lo=1;hi=10}
+  let la=Math.log10(lo)-0.25,lb=Math.log10(hi)+0.35;if(lb-la<1){la-=0.5;lb+=0.5}
+  const y=v=>h-m.b-(Math.log10(v)-la)/(lb-la)*(h-m.b-m.t);
+  G={x,y,w,h,m,t0,t1,single,layers,mobile};
+  svg.setAttribute('viewBox',`0 0 ${w} ${h}`);svg.setAttribute('height',h);svg.replaceChildren();
+  const defs=svgEl('defs',{});const cp=svgEl('clipPath',{id:'clip-main'});cp.append(svgEl('rect',{id:'clip-rect',x:m.l,y:0,width:w-m.l-m.r,height:h}));defs.append(cp);svg.append(defs);
+  // grid + y axis: one tick per decade, thinned
+  const grid=svgEl('g',{class:'grid'}),ay=svgEl('g',{class:'axis-y'});const dec=Math.max(1,Math.ceil((lb-la)/(mobile?5:8)));
+  for(let e=Math.ceil(la);e<=Math.floor(lb);e++){if(((e%dec)+dec)%dec)continue;const v=Math.pow(10,e);grid.append(svgEl('line',{x1:m.l,x2:w-m.r,y1:y(v),y2:y(v)}));ay.append(svgEl('text',{x:m.l-8,y:y(v)+4,'text-anchor':'end'},single?fmtPow(v):(e===0?'1×':fmtPow(v)+'×')))}
+  if(!single&&la<0&&lb>0){grid.append(svgEl('line',{class:'base-line',x1:m.l,x2:w-m.r,y1:y(1),y2:y(1)}));grid.append(svgEl('text',{class:'base-label',x:w-m.r-4,y:y(1)-4,'text-anchor':'end'},'2012 level'))}
+  const title=single?L[S.mode].label+(L[S.mode].unit?' ('+L[S.mode].unit+', log scale)':''):'× the 2012 record, log scale';
+  ay.append(svgEl('text',{class:'axis-title',transform:`translate(${mobile?12:16},${(m.t+h-m.b)/2}) rotate(-90)`,'text-anchor':'middle'},title));
+  svg.append(grid,ay);
+  const ax=svgEl('g',{class:'axis-x'});for(const tk of xTicks(t0,t1,w-m.l-m.r)){ax.append(svgEl('line',{x1:x(tk.t),x2:x(tk.t),y1:h-m.b,y2:h-m.b+4,stroke:'var(--axis)'}),svgEl('text',{x:x(tk.t),y:h-m.b+16,'text-anchor':'middle'},tk.label))}ax.append(svgEl('line',{x1:m.l,x2:w-m.r,y1:h-m.b,y2:h-m.b,stroke:'var(--axis)'}));svg.append(ax);
+  // 2012 marker
+  if(!single&&BASE_T>t0&&BASE_T<t1)svg.append(svgEl('line',{class:'base-line',x1:x(BASE_T),x2:x(BASE_T),y1:m.t,y2:h-m.b}));
+  const plot=svgEl('g',{'clip-path':'url(#clip-main)'});const endLabels=[];
+  // reference lines (single mode)
+  if(single&&S.mode==='params'){const v=1e14;if(v>lo/3&&v<hi*3){plot.append(svgEl('line',{class:'ref-line',x1:m.l,x2:w-m.r,y1:y(v),y2:y(v)}));plot.append(svgEl('text',{class:'ref-label',x:m.l+6,y:y(v)-5},'Human brain, ~10¹⁴ synapses (a loose analogy, not an equivalence)'))}}
+  if(single&&S.mode==='transistors'){const t=Date.UTC(1969,6,20),v=6;if(t>t0&&t<t1&&v>lo/3){plot.append(svgEl('circle',{class:'pt',cx:x(t),cy:y(v),r:4,fill:'var(--ink)'}));plot.append(svgEl('text',{class:'pt-label',x:x(t)+8,y:y(v)+4},'Apollo Guidance Computer IC, 1969 · 6 transistors (dual 3-input NOR gate)'))}}
+  // points + record lines
+  for(const l of layers){
+    const rec=l.rec.filter(p=>p.t>=t0-YEAR&&p.t<=t1);const ra=recAt(l,t0);const line=[];if(ra&&ra.t<t0)line.push({t:t0,v:ra.v});for(const p of rec){if(line.length)line.push({t:p.t,v:line[line.length-1].v});line.push(p)}const rb=recAt(l,t1);if(rb)line.push({t:t1,v:rb.v});
+    if(single){for(const p of l.pts){if(p.t<t0||p.t>t1)continue;const isRec=l.rec.includes(p);plot.append(svgEl('circle',{class:'pt'+(isRec?'':' dim'),cx:x(p.t).toFixed(1),cy:y(p.v).toFixed(1),r:isRec?3.5:2.2,fill:l.color}))}}
+    const d=line.map((p,i)=>(i?'L':'M')+x(p.t).toFixed(1)+','+y(val(l,p.v)).toFixed(1)).join('');
+    plot.append(svgEl('path',{class:'rec',d,style:'stroke:'+l.color+(single?';stroke-width:2.6':'')}));
+    // fit line for the visible range
+    const f=doubling(l,t0,t1);l.fitNow=f;
+    if(f&&single){const ya=Math.pow(2,f.intercept+f.slope*(t0/YEAR)),yb=Math.pow(2,f.intercept+f.slope*(t1/YEAR));plot.append(svgEl('path',{class:'fitline',d:`M${x(t0)},${y(ya)}L${x(t1)},${y(yb)}`,style:'stroke:'+l.color}))}
+    // end label
+    if(rb&&!single)endLabels.push({y:y(val(l,rb.v))-6,text:l.short,color:l.color});
+    // record labels in single mode: spaced
+    if(single){let lastX=-1e9,lastY=1e9;const recIn=l.rec.filter(p=>p.t>=t0&&p.t<=t1);const minGap=mobile?70:56;for(let i=recIn.length-1;i>=0;i--){const p=recIn[i],px=x(p.t),py=y(p.v);if(lastX-px<minGap&&Math.abs(lastY-py)<14)continue;lastX=px;lastY=py;const anchorEnd=px>w-m.r-120;svg.append(svgEl('text',{class:'pt-label',x:anchorEnd?px-8:px+8,y:py-6,'text-anchor':anchorEnd?'end':'start'},p.name))}}
+  }
+  svg.append(plot);
+  endLabels.sort((a,b)=>a.y-b.y);for(let i=1;i<endLabels.length;i++){if(endLabels[i].y-endLabels[i-1].y<13)endLabels[i].y=endLabels[i-1].y+13}for(let i=endLabels.length-1;i>=0;i--){endLabels[i].y=Math.min(endLabels[i].y,h-m.b-4-(endLabels.length-1-i)*13)}
+  for(const e of endLabels)svg.append(svgEl('text',{class:'end-label',x:x(t1)-4,y:e.y,'text-anchor':'end',style:'fill:'+e.color},e.text));
+  // legend readouts
+  document.querySelectorAll('.layer').forEach(b=>{const l=L[b.dataset.layer];const on=single?b.dataset.layer===S.mode:S.on[b.dataset.layer];b.setAttribute('aria-pressed',on);const f=on?doubling(l,t0,t1):null;const dt=b.querySelector('.dt');dt.replaceChildren();if(on&&f){dt.append(document.createTextNode('×2 / '+f.months.toFixed(1)+' mo '));dt.append(el('small',null,'in view'))}else if(on){dt.append(el('small',null,'zoom out for a fit'))}});
+  $('#fitnote').textContent='Doubling times are fitted to the record lines over '+fmtY(t0)+'–'+fmtY(t1);
+  // hit + cursor
+  const hit=svgEl('rect',{class:'hit',x:m.l,y:m.t-16,width:w-m.l-m.r,height:h-m.t+16-m.b});svg.append(hit);
+  const tAt=e=>{const r=svg.getBoundingClientRect();return t0+(e.clientX-r.left-m.l)/(w-m.l-m.r)*span};
+  const pick=e=>{const r=svg.getBoundingClientRect(),px=e.clientX-r.left,py=e.clientY-r.top;const t=clamp(tAt(e),t0,t1);let best=null,bd=26;if(single){const l=layers[0];for(const p of l.pts){if(p.t<t0||p.t>t1)continue;const d=Math.hypot(x(p.t)-px,y(p.v)-py);if(d<bd){bd=d;best=p}}}return {t,pt:best}};
+  hit.addEventListener('pointermove',e=>{if(S.pinned!=null)return;S.evHover=null;const k=pick(e);setCursor(k.t,k.pt)});
+  hit.addEventListener('pointerleave',e=>{if(S.pinned==null&&!(e.relatedTarget&&e.relatedTarget.closest&&e.relatedTarget.closest('.events-layer')))clearCursor()});
+  hit.addEventListener('click',e=>{const k=pick(e);if(S.pinned&&Math.abs(S.pinned.t-k.t)<DAY&&!k.pt){S.pinned=null;clearCursor()}else{S.pinned={t:k.t,pt:k.pt};setCursor(k.t,k.pt,true)}});
+  // milestones
+  const evg=svgEl('g',{class:'events-layer'});
+  if(S.events){const lanes=[];for(const e of events){if(e.t<t0||e.t>t1)continue;const px=x(e.t);evg.append(svgEl('line',{class:'ev-line',x1:px,x2:px,y1:m.t,y2:h-m.b}));
+      const width=e.name.length*6.2+8,anchorEnd=px+width>w-m.r,left=anchorEnd?px-width:px,right=left+width;let lane=-1;for(let k=0;k<3;k++){if((lanes[k]??-1e9)+8<=left){lane=k;break}}
+      if(lane>=0){lanes[lane]=right;const tx=svgEl('text',{class:'ev-label',x:anchorEnd?px-5:px+5,y:m.t+12+lane*14,'text-anchor':anchorEnd?'end':'start'},e.name);tx.onclick=()=>openEvent(e);tx.onpointerenter=()=>{if(S.pinned==null)hoverEvent(e)};tx.onpointerleave=()=>{if(S.pinned==null)clearCursor()};evg.append(tx)}
+      const dot=svgEl('circle',{class:'ev-dot'+(S.evOpen===e.id?' on':''),cx:px,cy:h-m.b,r:mobile?3.5:5});dot.setAttribute('aria-label',e.name+' · '+fmtDate(e.t));dot.onclick=ev=>{ev.stopPropagation();openEvent(e)};dot.onpointerenter=()=>{if(S.pinned==null)hoverEvent(e)};dot.onpointerleave=()=>{if(S.pinned==null)clearCursor()};evg.append(dot)}}
+  svg.append(evg);svg.append(svgEl('g',{id:'cursor-main','pointer-events':'none'}));
+  if(S.pinned&&S.pinned.t>=t0&&S.pinned.t<=t1)setCursor(S.pinned.t,S.pinned.pt,true);else{S.pinned=null;clearCursor()}
+}
+
+/* ---------- cursor + tooltip ---------- */
+function hoverEvent(e){S.evHover=e.id;setCursor(e.t,null)}
+function setCursor(t,pt,pin=false){
+  const {x,y,w,h,m,single,layers}=G;const px=x(t);const isEv=S.evHover!=null;
+  const g=$('#cursor-main');g.replaceChildren();
+  g.append(svgEl('line',{class:'cross'+(isEv?' ev':''),x1:px,x2:px,y1:m.t,y2:h-m.b}));
+  const tip=$('#tip');tip.hidden=false;tip.classList.toggle('pinned',pin);tip.classList.toggle('event',isEv);tip.replaceChildren();
+  if(pin){const c=el('button','tip-close','×');c.setAttribute('aria-label','Unpin');c.onclick=()=>{S.pinned=null;clearCursor()};tip.append(c)}
+  const dateRow=el('div','tip-date');if(isEv)dateRow.append(el('span','tip-tag','Milestone'));dateRow.append(document.createTextNode(isEv?fmtDate(events[S.evHover].t):(pt?fmtDate(pt.t):fmtMY(t))));tip.append(dateRow);
+  if(isEv){const e=events[S.evHover];tip.append(el('div','tip-head',e.name),el('div','tip-title',e.title))}
+  const row=(label,val,delta,color)=>{const r=el('div','tip-row');const k=el('span','k');const i=el('i');if(color)i.style.borderColor=color;k.append(i,document.createTextNode(label));const b=el('b',null,val);if(delta)b.append(el('span','d',delta));r.append(k,b);return r};
+  let anchorY=null;
+  if(pt&&single){const l=layers[0];tip.append(el('div','tip-name',pt.name),el('div','tip-sub',pt.sub));tip.append(row(l.short,l.fmt(pt.v),l.base?fmtMult(idx(l,pt.v))+' the 2012 record':null,l.color));g.append(svgEl('circle',{class:'dot',cx:px,cy:y(pt.v),r:5.5,fill:l.color}));anchorY=y(pt.v);
+    if(isEv)g.append(svgEl('circle',{class:'ev-halo',cx:px,cy:h-m.b,r:11}))}
+  else{for(const l of layers){const r=recAt(l,t);if(!r)continue;const v=single?r.v:idx(l,r.v);const cy=y(v);if(cy>=m.t-2&&cy<=h-m.b+2){g.append(svgEl('circle',{class:'dot',cx:px,cy,r:4.5,fill:l.color}));if(anchorY==null)anchorY=cy}
+      tip.append(row(l.short,l.fmt(r.v),(single?'':fmtMult(v)+' · ')+'record: '+r.name,l.color))}
+    if(isEv)g.append(svgEl('circle',{class:'ev-halo',cx:px,cy:h-m.b,r:11}))}
+  if(isEv&&!pin)tip.append(el('div','tip-cue','Click the marker to pin, then read the full note'));
+  if(isEv&&pin){const b=el('button','tip-btn','Read the full note →');b.onclick=ev=>{ev.stopPropagation();showEventDialog(events[S.evHover])};tip.append(b)}
+  const tw=tip.offsetWidth,th=tip.offsetHeight;let left=px+14;if(left+tw>w-m.r)left=px-14-tw;tip.style.left=Math.max(0,left)+'px';const ay=anchorY==null?(m.t+h-m.b)/2:anchorY;tip.style.top=clamp(ay-th/2,m.t,h-m.b-th)+'px';
+}
+function clearCursor(){S.evHover=null;$('#cursor-main')?.replaceChildren();$('#tip').hidden=true}
+$('#main').addEventListener('keydown',e=>{if(e.key==='Escape'){S.pinned=null;clearCursor()}});
+
+/* ---------- milestones UI ---------- */
+function openEvent(e){S.evOpen=e.id;S.pinned={t:e.t,pt:null};drawAll();S.evHover=e.id;setCursor(e.t,null,true)}
+function showEventDialog(e){const dlg=$('#event-dialog');dlg.replaceChildren();
+  const eb=el('div','eyebrow');eb.append(el('span','tag','Milestone'),document.createTextNode(fmtDate(e.t)));
+  const h=el('h3',null,e.title);h.id='ev-dlg-title';
+  const row=el('div','row');const z=el('button','btn','Zoom to this period');z.onclick=()=>{dlg.close();setRange(e.t-4*YEAR,e.t+4*YEAR);openEvent(e)};
+  const c=el('button','btn primary','Close');c.onclick=()=>dlg.close();const a=el('a','src','Source ↗');a.href=e.url;a.target='_blank';a.rel='noopener';row.append(c,z,a);
+  dlg.append(eb,h,el('p',null,e.text),row);dlg.showModal();dlg.onclick=ev=>{if(ev.target===dlg)dlg.close()}}
+function drawEventList(){const ol=$('#event-list');ol.replaceChildren();for(const e of events){const li=el('li');const b=el('button','ev-chip'+(e.t>=S.t0&&e.t<=S.t1?' in':'')+(S.evOpen===e.id?' on':''));b.append(el('span',null,fmtMY(e.t)),document.createTextNode(e.name));b.onclick=()=>{if(e.t<S.t0||e.t>S.t1)setRange(e.t-4*YEAR,e.t+4*YEAR);openEvent(e);showEventDialog(e)};li.append(b);ol.append(li)}}
+
+/* ---------- navigator ---------- */
+let navBuilt=false;
+function drawNav(){
+  const svg=$('#nav'),w=G.w,h=48,m=G.m;svg.setAttribute('viewBox',`0 0 ${w} ${h}`);svg.setAttribute('height',h);svg.replaceChildren();
+  const x=t=>m.l+(t-T0)/(T1-T0)*(w-m.l-m.r);
+  svg.append(svgEl('rect',{class:'nav-bg',x:m.l,y:0,width:w-m.l-m.r,height:h,rx:4}));
+  let lo=Infinity,hi=-Infinity;for(const k of KEYS){for(const p of L[k].rec){const v=idx(L[k],p.v);if(v<lo)lo=v;if(v>hi)hi=v}}const la=Math.log10(lo),lb=Math.log10(hi);const y=v=>h-4-(Math.log10(v)-la)/(lb-la)*(h-8);
+  for(const k of KEYS){const l=L[k];const d=l.rec.map((p,i)=>(i?'L':'M')+x(p.t).toFixed(1)+','+y(idx(l,p.v)).toFixed(1)).join('')+'L'+x(T1).toFixed(1)+','+y(idx(l,l.rec[l.rec.length-1].v)).toFixed(1);svg.append(svgEl('path',{class:'nav-line',d,style:'stroke:'+l.color}))}
+  for(let yv=1960;yv<=2020;yv+=10){svg.append(svgEl('text',{class:'nav-text',x:x(Date.UTC(yv,0,1)),y:h-6,'text-anchor':'middle'},yv))}
+  const xa=x(S.t0),xb=x(S.t1);
+  svg.append(svgEl('rect',{class:'nav-dim',x:m.l,y:0,width:Math.max(0,xa-m.l),height:h}),svgEl('rect',{class:'nav-dim',x:xb,y:0,width:Math.max(0,w-m.r-xb),height:h}));
+  svg.append(svgEl('rect',{class:'nav-win',x:xa,y:.5,width:Math.max(1,xb-xa),height:h-1,rx:3}));
+  svg.append(svgEl('rect',{class:'nav-new',x:m.l,y:0,width:w-m.l-m.r,height:h,'data-mode':'new'}));
+  svg.append(svgEl('rect',{class:'nav-grab',x:xa,y:0,width:Math.max(1,xb-xa),height:h,'data-mode':'pan'}));
+  svg.append(svgEl('rect',{class:'nav-handle',x:xa-3,y:h/2-9,width:6,height:18,rx:2,'data-mode':'left'}),svgEl('rect',{class:'nav-handle',x:xb-3,y:h/2-9,width:6,height:18,rx:2,'data-mode':'right'}));
+  if(!navBuilt){navBuilt=true;let drag=null;const tAt=e=>{const r=svg.getBoundingClientRect();return T0+(e.clientX-r.left-m.l)/(w-m.l-m.r)*(T1-T0)};
+    svg.addEventListener('pointerdown',e=>{const mode=e.target.dataset.mode;if(!mode)return;e.preventDefault();svg.setPointerCapture(e.pointerId);drag={mode,t:tAt(e),t0:S.t0,t1:S.t1,moved:false}});
+    svg.addEventListener('pointermove',e=>{if(!drag)return;const t=tAt(e),dt=t-drag.t;drag.moved=true;let a=drag.t0,b=drag.t1;
+      if(drag.mode==='pan'){const sp=b-a;a=clamp(a+dt,T0,T1-sp);b=a+sp}else if(drag.mode==='left')a=clamp(t,T0,b-YEAR);else if(drag.mode==='right')b=clamp(t,a+YEAR,T1);else{a=Math.min(drag.t,t);b=Math.max(drag.t,t);if(b-a<YEAR)b=a+YEAR}
+      S.t0=clamp(a,T0,T1-YEAR);S.t1=clamp(b,S.t0+YEAR,T1);S.pinned=null;requestAnimationFrame(drawAll)});
+    const end=e=>{if(!drag)return;if(!drag.moved&&drag.mode==='new'){const t=tAt(e),half=Math.max(YEAR,(S.t1-S.t0)/2);setRange(t-half,t+half)}drag=null};
+    svg.addEventListener('pointerup',end);svg.addEventListener('pointercancel',()=>{drag=null});svg.addEventListener('dblclick',()=>setRange(T0,T1))}
+}
+
+/* ---------- replay ---------- */
+let replaying=false;
+$('#replay').onclick=()=>{if(replaying)return;replaying=true;S.pinned=null;drawAll();clearCursor();const clip=$('#clip-rect'),{m,w}=G,full=w-m.l-m.r,dur=reduced?800:6000,start=performance.now();
+  (function frame(now){const p=Math.min(1,(now-start)/dur);clip.setAttribute('width',Math.max(0,full*p));if(p<1)requestAnimationFrame(frame);else{replaying=false}})(start)};
+
+/* ---------- benchmarks ---------- */
+const B=DATA.benchmarks.map(b=>({...b,rel:b.release?Date.parse(b.release):null,pts:b.points.map(p=>({t:Date.parse(p[0]),name:p[1],org:p[2],v:p[3]})),fr:b.frontier.map(p=>({t:Date.parse(p[0]),name:p[1],org:p[2],v:p[3]}))}));
+const BT0=Date.UTC(2020,0,1),BT1=T1;
+document.querySelectorAll('[data-thresh]').forEach(b=>b.onclick=()=>{S.thresh=+b.dataset.thresh;document.querySelectorAll('[data-thresh]').forEach(x=>x.setAttribute('aria-pressed',x===b));drawBench()});
+function frAt(b,t){let r=null;for(const p of b.fr){if(p.t<=t)r=p;else break}return r}
+function solvedAt(b){if(b.unit!=='fraction')return null;const th=S.thresh/100;for(const p of b.fr){if(p.v>=th)return p}return null}
+function drawBench(){
+  const grid=$('#bgrid');grid.replaceChildren();
+  for(const b of B){
+    const panel=el('div','bpanel');const h3=el('h3');h3.append(document.createTextNode(b.name));const best=b.fr[b.fr.length-1];const sv=el('span',null,b.unit==='fraction'?Math.round(best.v*100)+'%':Math.round(best.v).toLocaleString('en-US')+' min');h3.append(sv);panel.append(h3,el('div','dom',b.domain));
+    const w=300,h=110,m={l:38,r:8,t:8,b:18};const x=t=>m.l+(t-BT0)/(BT1-BT0)*(w-m.l-m.r);
+    const logY=b.unit!=='fraction';const lo=logY?Math.log10(0.5):0,hi=logY?Math.log10(3000):1;const yv=v=>h-m.b-((logY?Math.log10(Math.max(v,0.5)):v)-lo)/(hi-lo)*(h-m.b-m.t);
+    const svg=svgEl('svg',{viewBox:`0 0 ${w} ${h}`,height:h,role:'img','aria-label':b.name});
+    const g=svgEl('g',{class:'grid'});const ticks=logY?[1,10,60,480]:[0,.5,1];for(const v of ticks){g.append(svgEl('line',{x1:m.l,x2:w-m.r,y1:yv(v),y2:yv(v)}));g.append(svgEl('text',{class:'b-ax',x:m.l-4,y:yv(v)+3,'text-anchor':'end'},logY?(v>=60?(v/60)+' hr':v+' min'):Math.round(v*100)+'%'))}
+    svg.append(g);for(let yr=2020;yr<=2026;yr+=2){svg.append(svgEl('text',{class:'b-ax',x:x(Date.UTC(yr,0,1)),y:h-5,'text-anchor':'middle'},yr))}
+    if(!logY){const th=S.thresh/100;svg.append(svgEl('line',{class:'b-thresh',x1:m.l,x2:w-m.r,y1:yv(th),y2:yv(th)}))}
+    for(const p of b.pts){if(p.t<BT0||p.t>BT1)continue;svg.append(svgEl('circle',{class:'b-bg',cx:x(p.t).toFixed(1),cy:yv(p.v).toFixed(1),r:1.6}))}
+    const line=[];const f0=frAt(b,BT0);if(f0)line.push({t:BT0,v:f0.v});for(const p of b.fr){if(p.t<BT0)continue;if(line.length)line.push({t:p.t,v:line[line.length-1].v});line.push(p)}if(line.length)line.push({t:BT1,v:line[line.length-1].v});
+    if(line.length){const d=line.map((p,i)=>(i?'L':'M')+x(p.t).toFixed(1)+','+yv(p.v).toFixed(1)).join('');if(!logY)svg.append(svgEl('path',{class:'b-area',d:d+`L${x(BT1).toFixed(1)},${h-m.b}L${x(line[0].t).toFixed(1)},${h-m.b}Z`}));svg.append(svgEl('path',{class:'b-line',d}))}
+    for(const p of b.fr){if(p.t<BT0)continue;svg.append(svgEl('circle',{class:'b-pt',cx:x(p.t).toFixed(1),cy:yv(p.v).toFixed(1),r:2.6}))}
+    if(b.rel&&b.rel>=BT0){svg.append(svgEl('line',{class:'b-rel',x1:x(b.rel),x2:x(b.rel),y1:m.t,y2:h-m.b}));svg.append(svgEl('text',{class:'b-rel-label',x:x(b.rel)+3,y:m.t+9},'published'))}
+    const cur=svgEl('g',{'pointer-events':'none'});svg.append(cur);
+    const hit=svgEl('rect',{class:'hit',x:m.l,y:0,width:w-m.l-m.r,height:h});svg.append(hit);
+    const tip=el('div','b-tip');tip.hidden=true;panel.append(svg,tip);
+    hit.addEventListener('pointermove',e=>{const r=svg.getBoundingClientRect();const t=clamp(BT0+(e.clientX-r.left)/r.width*w>=0?BT0+((e.clientX-r.left)/r.width*w-m.l)/(w-m.l-m.r)*(BT1-BT0):BT0,BT0,BT1);const f=frAt(b,t);cur.replaceChildren();cur.append(svgEl('line',{class:'b-cross',x1:x(t),x2:x(t),y1:m.t,y2:h-m.b}));tip.hidden=false;tip.replaceChildren();
+      if(f){cur.append(svgEl('circle',{class:'dot',cx:x(t),cy:yv(f.v),r:4,fill:'var(--accent)'}));const bb=el('b',null,b.unit==='fraction'?Math.round(f.v*100)+'%':Math.round(f.v)+' min');tip.append(bb,el('small',null,f.name+' · '+fmtMY(f.t)));tip.append(el('small',null,'best as of '+fmtMY(t)))}else tip.append(el('small',null,'no result yet · '+fmtMY(t)));
+      const pr=panel.getBoundingClientRect();let left=e.clientX-pr.left+12;if(left+tip.offsetWidth>pr.width-8)left=e.clientX-pr.left-12-tip.offsetWidth;tip.style.left=left+'px';tip.style.top=Math.max(4,e.clientY-pr.top-tip.offsetHeight-8)+'px'});
+    hit.addEventListener('pointerleave',()=>{cur.replaceChildren();tip.hidden=true});
+    const st=el('div','stat');
+    if(logY){const pts=b.fr.filter(p=>p.t>=Date.UTC(2023,0,1));let n=pts.length,sx=0,sy=0,sxy=0,sxx=0;for(const p of pts){const xx=p.t/YEAR,yy=Math.log2(p.v);sx+=xx;sy+=yy;sxy+=xx*yy;sxx+=xx*xx}const sl=(n*sxy-sx*sy)/(n*sxx-sx*sx);st.innerHTML='Doubling every <b>'+(12/sl).toFixed(1)+' months</b> since 2023 · latest: '+best.name}
+    else{const s=solvedAt(b);if(s){const months=b.rel?Math.max(0,(s.t-b.rel)/(YEAR/12)):null;st.innerHTML='Reached '+S.thresh+'% in <b>'+fmtMY(s.t)+'</b>'+(months!=null?' · <b>'+(months<1?'under a month':Math.round(months)+' months')+'</b> after publication':'')+' · '+s.name}else st.innerHTML='Not yet at '+S.thresh+'% · best <b>'+Math.round(best.v*100)+'%</b> · '+best.name}
+    panel.append(st);grid.append(panel)}
+  drawMonths();
+}
+function drawMonths(){
+  const svg=$('#ms'),w=svg.clientWidth||800,mobile=w<640;const rows=B.filter(b=>b.unit==='fraction'&&b.rel).sort((a,b)=>a.rel-b.rel).map(b=>{const s=solvedAt(b);const months=s?Math.max(0,(s.t-b.rel)/(YEAR/12)):(T1-b.rel)/(YEAR/12);return {b,s,months,open:!s}});
+  const rh=26,m={l:mobile?150:210,r:70,t:8,b:22},h=m.t+rows.length*rh+m.b;const maxM=Math.max(...rows.map(r=>r.months),12);
+  svg.setAttribute('viewBox',`0 0 ${w} ${h}`);svg.setAttribute('height',h);svg.replaceChildren();
+  const defs=svgEl('defs',{});const pat=svgEl('pattern',{id:'hatch',width:6,height:6,patternUnits:'userSpaceOnUse',patternTransform:'rotate(45)'});pat.append(svgEl('rect',{width:2.5,height:6,fill:'var(--accent)',opacity:.7}));defs.append(pat);svg.append(defs);
+  const x=v=>m.l+v/(maxM*1.05)*(w-m.l-m.r);const g=svgEl('g',{class:'grid'});const step=maxM>48?12:maxM>18?6:3;for(let v=0;v<=maxM*1.05;v+=step){g.append(svgEl('line',{x1:x(v),x2:x(v),y1:m.t,y2:h-m.b}));g.append(svgEl('text',{class:'b-ax',x:x(v),y:h-6,'text-anchor':'middle'},v+(v?' mo':'')))}svg.append(g);
+  rows.forEach((r,i)=>{const y=m.t+i*rh;svg.append(svgEl('text',{class:'ms-x',x:m.l-10,y:y+rh/2+1,'text-anchor':'end'},r.b.name));svg.append(svgEl('text',{class:'ms-x2',x:m.l-10,y:y+rh/2+12,'text-anchor':'end'},'published '+fmtMY(r.b.rel)));
+    svg.append(svgEl('rect',{class:'ms-bar'+(r.open?' open':''),x:m.l,y:y+5,width:Math.max(2,x(r.months)-m.l),height:rh-11,rx:3}));
+    svg.append(svgEl('text',{class:'ms-val'+(r.open?' dim':''),x:x(r.months)+6,y:y+rh/2+4},r.open?'still open · best '+Math.round(r.b.fr[r.b.fr.length-1].v*100)+'%':(r.months<1?'<1 mo':Math.round(r.months)+' mo')))});
+  const solved=rows.filter(r=>!r.open);const early=solved.slice(0,3),late=solved.slice(-3);const avg=a=>a.reduce((s,r)=>s+r.months,0)/a.length;
+  $('#ms-note').textContent=solved.length>=6?'The first three benchmarks to be solved took an average of '+Math.round(avg(early))+' months from publication; the three most recent took '+Math.round(avg(late))+'. Benchmarks are now written to be hard for the models that exist on the day they are published, and they still fall within a year or two.':'';
+}
+
+/* ---------- largest runs ---------- */
+{const rows=[...L.compute.pts].sort((a,b)=>b.v-a.v).slice(0,12);const tbl=$('#runs');const thead=el('thead'),tr=el('tr');[['Model',''],['Date','num'],['Training compute','num'],['Confidence','']].forEach(([t,c])=>tr.append(el('th',c,t)));thead.append(tr);tbl.append(thead);const tb=el('tbody');
+  for(const r of rows){const tr=el('tr');const c1=el('td');c1.append(el('span','who',r.name),el('span','when',r.sub.split(' · ')[0]));const c2=el('td','num',fmtMY(r.t));const c3=el('td','num',fmtSci(r.v,'FLOP'));const c4=el('td');const cf=el('span','conf '+(r.conf||'U'),CONF[r.conf]||'Unknown');c4.append(cf);tr.append(c1,c2,c3,c4);tb.append(tr)}tbl.append(tb)}
+
+/* ---------- orchestration ---------- */
+function syncControls(){document.querySelectorAll('#ranges .chip').forEach(b=>{const c=rangeChips.find(c=>c.id===b.dataset.id),[a,z]=c.range();b.setAttribute('aria-pressed',Math.abs(a-S.t0)<DAY&&Math.abs(z-S.t1)<DAY)});document.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.mode===S.mode));$('#events-toggle').checked=S.events;
+  $('#main-desc').textContent=S.mode==='indexed'?'Each line is the record holder over time, indexed to its own 2012 level so the slopes compare. A straight line on this axis is a constant doubling time; steeper means faster.':'Every point is a named '+({transistors:'chip',compute:'model',hardware:'accelerator',params:'model'})[S.mode]+'; the solid line follows the record and the dashed line is the exponential fitted to it over the period in view.'}
+function drawAll(){syncControls();drawMain();drawNav();drawEventList()}
+drawAll();drawBench();
+let rt;new ResizeObserver(()=>{clearTimeout(rt);rt=setTimeout(()=>{drawAll();drawBench()},60)}).observe($('.page'));
+})();
+</script>
+</body>
+</html>

@@ -35,4 +35,5 @@ import re
 art=re.sub(r'<!--DL-->.*?<!--/DL-->','',art,flags=re.S)
 art=re.sub(r"const dl=\$\('#download'\);.*?\n",'',art,flags=re.S)  # no page-initiated downloads in the artifact build
 open(root/'artifact.html','w').write(art)
+json.dump({'plot':'national-debt','updated':payload['retrieved'],'through':last[0]},open(root/'meta.json','w'))
 print('index.html',len(open(root/'index.html').read())//1024,'KB; artifact.html',len(art)//1024,'KB')

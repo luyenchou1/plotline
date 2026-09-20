@@ -43,6 +43,8 @@ a{color:var(--debt-ink)}
 
 /* site nav */
 .site-nav{display:flex;align-items:baseline;gap:12px;margin-bottom:14px;font-size:12.5px;color:var(--muted)}
+.site-nav .updated{margin-left:auto;font-variant-numeric:tabular-nums}
+.site-nav .updated b{font-weight:500;color:var(--ink-2)}
 .site-nav a{font-family:var(--mono);font-weight:500;font-size:14px;color:var(--ink);text-decoration:none;letter-spacing:-.01em}
 .site-nav a:hover{color:var(--debt-ink)}
 .site-nav a::before{content:"←";margin-right:6px;color:var(--muted)}
@@ -251,7 +253,7 @@ td .when{display:block;font-size:11.5px;color:var(--muted)}
 </style>
 </head><body>
 <div class="page">
-<nav class="site-nav"><a href="../">Plotline</a><span>Current events, drawn from the data</span></nav>
+<nav class="site-nav"><a href="../">Plotline</a><span>Current events, drawn from the data</span><span class="updated">Updated <b id="updated"></b></span></nav>
 <header class="top">
   <div class="brand"><span class="eyebrow">U.S. Treasury · Debt to the Penny · daily since April 1993</span><h1>The National Debt</h1></div>
   <div class="top-right"><span>Reported through <b id="asof"></b></span><button class="icon-btn" id="theme" aria-label="Switch light or dark theme" title="Light / dark">◐</button></div>
@@ -354,7 +356,7 @@ try{const s=localStorage.getItem('plotline-theme')||localStorage.getItem('debt-t
 $('#theme').onclick=()=>{const dark=getComputedStyle(root).colorScheme==='dark';root.dataset.theme=dark?'light':'dark';try{localStorage.setItem('plotline-theme',root.dataset.theme)}catch(e){}drawAll()};
 
 /* ---------- headline numbers ---------- */
-$('#asof').textContent=fmtDate(T1);$('#gdp-q').textContent='Q'+(Math.floor(new Date(GDP_LAST[0]).getUTCMonth()/3)+1)+' '+new Date(GDP_LAST[0]).getUTCFullYear();$('#retrieved').textContent=fmtDate(Date.parse(DATA.retrieved));
+$('#asof').textContent=fmtDate(T1);$('#updated').textContent=fmtDate(Date.parse(DATA.retrieved));$('#gdp-q').textContent='Q'+(Math.floor(new Date(GDP_LAST[0]).getUTCMonth()/3)+1)+' '+new Date(GDP_LAST[0]).getUTCFullYear();$('#retrieved').textContent=fmtDate(Date.parse(DATA.retrieved));
 const paceStart=atOrAfter(T1-90*DAY),pace=(LAST.total-paceStart.v)/((T1-paceStart.t)/1000);
 const lastTs=T1+20*3600e3; // Treasury's daily figure is as of close of business, roughly 4pm ET
 $('#clock-last').textContent=fmtFull(LAST.total);$('#clock-date').textContent=fmtDate(T1);$('#pace').textContent=fmtFull(pace);
