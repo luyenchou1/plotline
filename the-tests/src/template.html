@@ -331,9 +331,9 @@ function drawDetail(){
   hit.addEventListener('pointermove',e=>{const r=svg.getBoundingClientRect();const px=(e.clientX-r.left)/r.width*w,py=(e.clientY-r.top)/r.height*h;let best=null,bd=22;for(const d of dots){const dd=Math.hypot(x(d.p.t)-px,y(d.p.v)-py);if(dd<bd){bd=dd;best=d}}
     cur.replaceChildren();tip.hidden=false;tip.replaceChildren();
     if(best){const p=best.p;cur.append(svgEl('circle',{class:'dot',cx:x(p.t),cy:y(p.v),r:6,fill:b.color}));tip.append(el('div','tip-date','model released '+fmtDate(p.t)+(best.isRec?' · record':'')));const r2=el('div','tip-row');r2.append(el('span','k',p.name+(p.org?' · '+p.org:'')));r2.append(el('b',null,pct(p.v)));tip.append(r2);if(p.t<b.rel)tip.append(el('div','tip-cue','Released before the test was published; scored on it afterward.'));
-      tip.style.left=Math.max(0,Math.min(w-tip.offsetWidth,x(p.t)+12))+'px';tip.style.top=Math.max(0,y(p.v)-tip.offsetHeight-12)+'px'}
+      const tw=tip.offsetWidth,tht=tip.offsetHeight;let left=x(p.t)+14;if(left+tw>w-m.r)left=x(p.t)-14-tw;tip.style.left=Math.max(0,left)+'px';tip.style.top=clamp(y(p.v)-tht/2,0,h-tht)+'px'}
     else{const t=clamp(X0+(px-m.l)/(w-m.l-m.r)*(X1-X0),X0,X1);const f=frAt(b,t);cur.append(svgEl('line',{class:'cross',x1:x(t),x2:x(t),y1:m.t,y2:h-m.b}));tip.append(el('div','tip-date',fmtMY(t)));const r2=el('div','tip-row');r2.append(el('span','k',f?'best on record: '+f.name:'no result on record yet'));if(f)r2.append(el('b',null,pct(f.v)));tip.append(r2);
-      tip.style.left=Math.max(0,Math.min(w-tip.offsetWidth,x(t)+12))+'px';tip.style.top=Math.max(0,(f?y(f.v):h/2)-tip.offsetHeight/2)+'px'}});
+      const tw=tip.offsetWidth,tht=tip.offsetHeight;let left=x(t)+14;if(left+tw>w-m.r)left=x(t)-14-tw;tip.style.left=Math.max(0,left)+'px';tip.style.top=clamp((f?y(f.v):h/2)-tht/2,0,h-tht)+'px'}});
   hit.addEventListener('pointerleave',()=>{cur.replaceChildren();tip.hidden=true});
   // side panel
   const side=$('#dside');side.replaceChildren();side.append(el('h3',null,b.name),el('div','pub','Published '+fmtDate(b.rel)+' · '+b.n+' runs on record'),el('p','desc',b.desc));
