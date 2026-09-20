@@ -156,7 +156,9 @@ svg text{font-family:var(--sans);font-size:11.5px;fill:var(--muted)}
 .ms-line{stroke:var(--event);stroke-dasharray:2 4;opacity:.35}
 .ms-tick{fill:var(--surface);stroke:var(--event);stroke-width:2;cursor:pointer}
 .ms-tick:hover,.ms-tick.on{fill:var(--event)}
-.ms-label{font-size:10px;fill:var(--event);letter-spacing:.06em;text-transform:uppercase;font-weight:500;cursor:pointer}
+.ms-label{font-size:10.5px;fill:var(--event);letter-spacing:.04em;font-weight:500;cursor:pointer}
+.tooltip.mini{padding:5px 9px;font-size:12px;border-radius:7px}
+.tooltip.mini .tip-head{display:inline;font-size:12px;margin:0}
 .ms-label:hover{text-decoration:underline}
 .rec-label{font-size:10.5px;fill:var(--ink-2);paint-order:stroke;stroke:var(--surface);stroke-width:3px}
 .tooltip.event{border:1.5px solid var(--event)}
@@ -327,17 +329,17 @@ document.querySelectorAll('[data-thresh]').forEach(b=>b.onclick=()=>{S.thresh=+b
 /* ---------- same clock, stacked ---------- */
 function drawStack(){
   const svg=$('#clock'),w=svg.clientWidth||800,mobile=w<640;$('#clock-desc').textContent=DESC.abs;
-  const rows=B;const rh=mobile?54:60,m={l:mobile?118:200,r:mobile?66:96,t:mobile?76:116,b:24},h=m.t+rows.length*rh+m.b;
+  const rows=B;const rh=mobile?54:60,m={l:mobile?118:200,r:mobile?66:96,t:mobile?40:128,b:24},h=m.t+rows.length*rh+m.b;
   const X0=Math.min(...rows.map(b=>b.rel))-2*MONTH,X1=T1;const x=t=>m.l+(t-X0)/(X1-X0)*(w-m.l-m.r);
   svg.setAttribute('viewBox',`0 0 ${w} ${h}`);svg.setAttribute('height',h);svg.replaceChildren();
-  const th=S.thresh/100;const ctip=$('#ctip');const hideTip=()=>{ctip.hidden=true;ctip.classList.remove('event')};
+  const th=S.thresh/100;const ctip=$('#ctip');const hideTip=()=>{ctip.hidden=true;ctip.classList.remove('event','mini')};
   const g=svgEl('g',{class:'grid'});for(let yr=new Date(X0).getUTCFullYear()+1;yr<=new Date(X1).getUTCFullYear();yr++){const t=Date.UTC(yr,0,1);g.append(svgEl('line',{x1:x(t),x2:x(t),y1:m.t-6,y2:h-m.b}));g.append(svgEl('text',{x:x(t),y:m.t-10,'text-anchor':'middle'},yr))}svg.append(g);
-  const msg=svgEl('g',{class:'ms-layer'});const lanes=[];
-  const msTip=(e,px,py)=>{ctip.hidden=false;ctip.classList.add('event');ctip.replaceChildren();const d=el('div','tip-date');d.append(el('span','tip-tag','Release'),document.createTextNode(fmtDate(e.t)));ctip.append(d,el('div','tip-head',e.name),el('div','tip-title',e.title),el('div','tip-cue','Click for the note and source'));const tw=ctip.offsetWidth;let l=px+14;if(l+tw>w-m.r)l=px-14-tw;ctip.style.left=Math.max(0,l)+'px';ctip.style.top=py+'px'};
+  const msg=svgEl('g',{class:'ms-layer'});
+  const msTip=(e,px,py)=>{ctip.hidden=false;ctip.classList.add('event','mini');ctip.replaceChildren();ctip.append(el('span','tip-head',e.name),document.createTextNode(' · '+fmtDate(e.t)+' · click for the note'));const tw=ctip.offsetWidth,tht=ctip.offsetHeight;let l=px+12;if(l+tw>w-m.r)l=px-12-tw;ctip.style.left=Math.max(0,l)+'px';ctip.style.top=(py-tht/2)+'px'};
   for(const e of MS){if(e.t<X0||e.t>X1)continue;const px=x(e.t);msg.append(svgEl('line',{class:'ms-line',x1:px,x2:px,y1:m.t-6,y2:h-m.b}));
-    const width=e.name.length*6.4+8,anchorEnd=px+width>w-m.r,left=anchorEnd?px-width:px,right=left+width;let lane=-1;for(let k=0;k<(mobile?1:3);k++){if((lanes[k]??-1e9)+8<=left){lane=k;break}}
-    if(lane>=0){lanes[lane]=right;const tx=svgEl('text',{class:'ms-label',x:anchorEnd?px-5:px+5,y:m.t-(mobile?50:86)+lane*14,'text-anchor':anchorEnd?'end':'start'},e.name);tx.onpointerenter=()=>msTip(e,px,m.t-4);tx.onpointerleave=hideTip;tx.onclick=()=>{hideTip();showMs(e)};msg.append(tx)}
-    const tick=svgEl('circle',{class:'ms-tick'+(msOpen===e.id?' on':''),cx:px,cy:m.t-38,r:4.5});tick.setAttribute('aria-label',e.name+' · '+fmtDate(e.t));tick.onpointerenter=()=>msTip(e,px,m.t-4);tick.onpointerleave=hideTip;tick.onclick=()=>{hideTip();showMs(e)};msg.append(tick)}
+    const cy=m.t-30;
+    if(!mobile){const tx=svgEl('text',{class:'ms-label',x:0,y:0,transform:`translate(${px+3.5},${cy-11}) rotate(-90)`},e.name);tx.onpointerenter=()=>msTip(e,px,cy);tx.onpointerleave=hideTip;tx.onclick=()=>{hideTip();showMs(e)};msg.append(tx)}
+    const tick=svgEl('circle',{class:'ms-tick'+(msOpen===e.id?' on':''),cx:px,cy,r:4.5});tick.setAttribute('aria-label',e.name+' · '+fmtDate(e.t));tick.onpointerenter=()=>msTip(e,px,cy);tick.onpointerleave=hideTip;tick.onclick=()=>{hideTip();showMs(e)};msg.append(tick)}
   svg.append(msg);
   const cur=svgEl('g',{'pointer-events':'none'});const reads=[];const rowHits=[];
   rows.forEach((b,i)=>{const y0=m.t+i*rh,yb=y0+rh-8,yt=y0+6;const yv=v=>yb-v*(yb-yt);
