@@ -81,7 +81,7 @@ hw=[]
 for r in csv.DictReader(open(raw/'ml_hardware.csv',encoding='utf-8')):
     d=r['Release date']; f=fnum(r['Tensor-FP16/BF16 performance (FLOP/s)']) or fnum(r['FP32 (single precision) performance (FLOP/s)'])
     if not d or not f: continue
-    hw.append({'name':r['Hardware name'],'maker':r['Manufacturer'],'date':d,'flops':f,'transistors':(fnum(r['Transistors (millions)']) or 0)*1e6 or None,'tdp':fnum(r['TDP (W)'])})
+    hw.append({'name':r['Hardware name'],'maker':r['Manufacturer'],'date':d,'flops':f,'transistors':(fnum(r['Transistors (millions)']) or 0)*1e6 or None,'tdp':fnum(r['TDP (W)']),'link':r.get('Link to datasheet','')})
 hw.sort(key=lambda h:h['date'])
 out['hardware']=hw
 out['sources']['hardware']='https://epoch.ai/data/machine-learning-hardware'

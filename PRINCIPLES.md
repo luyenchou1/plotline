@@ -1,0 +1,50 @@
+# Plotline principles
+
+A living record of the design principles and patterns we settle on while building the site. Add to it whenever a decision is made in conversation; date the additions. The site is Luyen's, so the principles are written as his, with the patterns that follow from them.
+
+## What the site is for
+
+- Plotline is an expression of one person's curiosity about understanding the world through data. It should read as that, warm and first-person, and never as a cold journalistic resource. *(2026-09-20)*
+- Each entry is a **plot**, never a "story" or a "chart page". *(2026-09-20)*
+- Every plot is built from primary sources, every figure cites where it came from, and there are no accounts and no tracking.
+
+## No complexity for complexity's sake
+
+- A great plot is not the one with the most interactive features. It has just the right amount to be genuinely interesting, tell a powerful story and engage the reader without confusing or frustrating them. Every control has to earn its place; if a reader would not miss it, remove it. *(2026-09-20)*
+- The corollary for building: when a review finds a screen "too much" (the row of doubling-rate chips under The Curve, the two competing label systems on one chart), the fix is to take things away, not to add a toggle. *(2026-09-20)*
+
+## Every plot has an aha
+
+- This is visual storytelling, not information visualization. Each plot is shaped to lead the reader to one or two epiphanies without labeling them as such. The design question for every plot is: what is the aha, and does the default view deliver it? *(2026-09-20)*
+  - The National Debt: the debt line crossing above GDP in February 2013.
+  - The Curve: the AI lines peeling away from Moore's Law after 2012, and Moore's Law turning out to be the slowest of the four exponentials.
+  - How Fast the Tests Fall: benchmarks that once took years to solve now fall in months.
+- A plot answers one question. When a section answers a different question (the benchmark panels inside The Curve, for example), it becomes its own plot, with a cross-link. *(2026-09-20)*
+
+## Each plot is its own thing
+
+- Plots do not share a design framework. Each gets the layout and interaction that best tells its story: single page, vertical scroll, new interactive elements, whatever fits. The site stays interesting because the plots differ. *(2026-09-20)*
+- What stays consistent is the shared furniture, so a reader never has to relearn it: the site nav with the "Auto-updated" stamp, the light/dark toggle, callouts and pinned callouts, gold milestone markers with their dialogs, source links, and the notes section at the foot. *(2026-09-20)*
+- Milestones are always visually distinct from data: gold, small caps, on the baseline. Data labels never compete with them; in a view where the data is labeled, milestone labels stay off until hovered. *(2026-09-20)*
+- Explain for a layperson. Each view of a chart carries a short explainer that says what the series is, where it comes from, and the headline rate in plain words, with an anchor a reader can feel (the Moon landing's six-transistor chips against today's chip). Rates live in the explainer text, not in a row of chips under the chart. *(2026-09-20)*
+- Honest charts: one y-axis per chart, no dual axes; a log axis is labeled as one and a fitted axis says it does not start at zero; the evaluation protocol is named wherever numbers differ across sources. Where a linear view tells the story better (the vertical takeoff), offer it, with log one click away. *(2026-09-20)*
+- Drama comes from the data and the framing, not from motion. A replay that draws the line through time is fine; decorative animation is not.
+
+## Plots update themselves
+
+- Auto-updating is a feature to sell, not hide. Every plot shows "Auto-updated <date>" subtly in its nav line, the landing cards show the same date, and a scheduled job re-fetches, rebuilds and commits. Going to a plot should always show the latest record holder and the latest state of the art. *(2026-09-20)*
+- Every number on a page is computed from the data file at build time. Nothing is typed into the page. *(2026-09-20)*
+- Prefer machine-readable primary sources (Treasury's API, FRED CSVs, Epoch AI's datasets). Where the official leaderboard is not machine-readable, say which source the plot follows and how it lags. *(2026-09-20)*
+- Check currency before shipping: compare the plot's frontier against the official leaderboard and note protocol differences (HLE: Scale's official numbers versus Artificial Analysis's text-only subset). *(2026-09-20)*
+
+## Themes
+
+- Plots are grouped by theme: Economy, Technology, Politics, Culture, Warfare. Themes appear as card kickers now; a visual grouping (a map view rather than a Venn diagram) is planned once there are enough plots to warrant it. *(2026-09-20)*
+
+## Voice
+
+- Each plot opens with a short first-person lede, "why I made this", in Luyen's voice: warm, direct, flowing sentences, spaced hyphens never em dashes, plain idiom, no bold-label bullets, no manufactured drama, no negation pivots. Explainers and notes are plainer but still a person talking. Luyen edits every lede. *(2026-09-20)*
+
+## Process
+
+- Luyen reviews each plot by walking through it and giving commentary; the commentary is collected, then applied as a batch. Design comps are produced as full pages to compare against the live design. The current "ledger green" design was kept after a four-way comparison. *(2026-09-20)*

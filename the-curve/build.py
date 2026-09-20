@@ -13,13 +13,9 @@ payload = {
   'retrieved': d['retrieved'],
   'sources': d['sources'],
   'chips': [[c['name'], c['year'], r3(c['count']), c['designer'], c['kind']] for c in d['transistors']['chips']],
-  'models': [[m['name'], m['org'], m['date'], r3(m['compute']), r3(m['params']), m['confidence'][:1] if m['confidence'] else '', 1 if m['frontier'] else 0, m['domain'].split(',')[0]]
+  'models': [[m['name'], m['org'], m['date'], r3(m['compute']), r3(m['params']), m['confidence'][:1] if m['confidence'] else '', 1 if m['frontier'] else 0, m['domain'].split(',')[0], m.get('link','')]
              for m in d['models']],
-  'hardware': [[h['name'], h['maker'], h['date'], r3(h['flops'])] for h in d['hardware']],
-  'benchmarks': [{'key': b['key'], 'name': b['name'], 'domain': b['domain'], 'release': b['release'], 'unit': b['unit'], 'n': b['n'],
-                  'points': [[p['date'], p['display'] or p['model'], p['org'], r3(p['score'])] for p in b['points']],
-                  'frontier': [[p['date'], p['display'] or p['model'], p['org'], r3(p['score'])] for p in b['frontier']]}
-                 for b in d['benchmarks']],
+  'hardware': [[h['name'], h['maker'], h['date'], r3(h['flops']), h.get('link','')] for h in d['hardware']],
   'events': events,
 }
 js = 'const DATA=' + json.dumps(payload, separators=(',', ':'), ensure_ascii=False) + ';'
