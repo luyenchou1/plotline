@@ -350,8 +350,8 @@ const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /* ---------- theme ---------- */
 const root=document.documentElement;
-try{const s=localStorage.getItem('debt-theme');if(s)root.dataset.theme=s}catch(e){}
-$('#theme').onclick=()=>{const dark=getComputedStyle(root).colorScheme==='dark';root.dataset.theme=dark?'light':'dark';try{localStorage.setItem('debt-theme',root.dataset.theme)}catch(e){}drawAll()};
+try{const s=localStorage.getItem('plotline-theme')||localStorage.getItem('debt-theme');if(s)root.dataset.theme=s}catch(e){}
+$('#theme').onclick=()=>{const dark=getComputedStyle(root).colorScheme==='dark';root.dataset.theme=dark?'light':'dark';try{localStorage.setItem('plotline-theme',root.dataset.theme)}catch(e){}drawAll()};
 
 /* ---------- headline numbers ---------- */
 $('#asof').textContent=fmtDate(T1);$('#gdp-q').textContent='Q'+(Math.floor(new Date(GDP_LAST[0]).getUTCMonth()/3)+1)+' '+new Date(GDP_LAST[0]).getUTCFullYear();$('#retrieved').textContent=fmtDate(Date.parse(DATA.retrieved));
