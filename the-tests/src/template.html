@@ -128,26 +128,31 @@ svg text{font-family:var(--sans);font-size:11.5px;fill:var(--muted)}
 .tip-row b{font-family:var(--mono);font-weight:500;font-variant-numeric:tabular-nums;color:var(--tip-ink);font-size:13px;white-space:nowrap}
 .tip-row .d{display:block;font-size:11px;color:var(--tip-muted);font-family:var(--sans);font-weight:400;text-align:right;max-width:150px;white-space:normal}
 
-/* small multiples */
-.bgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px}
-.bpanel{border:1px solid var(--border);border-radius:10px;padding:12px 14px 10px;position:relative;background:var(--surface);display:flex;flex-direction:column;gap:4px}
-.bpanel h3{margin:0;font-size:14px;font-weight:600;display:flex;justify-content:space-between;gap:8px;align-items:baseline}
-.bpanel h3 span{font-family:var(--mono);font-size:12.5px;font-weight:500;color:var(--ink)}
-.bpanel .desc{font-size:12.5px;color:var(--ink-2);line-height:1.5}
-.bpanel .stat{font-size:12px;color:var(--ink-2);line-height:1.4}
-.bpanel .stat b{color:var(--ink);font-weight:500}
-.bpanel .links{font-size:11.5px;color:var(--muted);display:flex;gap:10px;margin-top:2px}
-.b-line{fill:none;stroke:var(--accent);stroke-width:2;stroke-linejoin:round}
-.b-area{fill:var(--accent-soft)}
-.b-pt{fill:var(--accent);stroke:var(--surface);stroke-width:1.2}
-.b-bg{fill:var(--muted);opacity:.3}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:2px 0 12px}
+.tab{border:1px solid var(--border);background:transparent;border-radius:999px;padding:4px 11px 4px 9px;font-size:12.5px;color:var(--ink-2);display:inline-flex;align-items:center;gap:7px}
+.tab i{width:12px;height:0;border-top:2.5px solid var(--pc);border-radius:2px}
+.tab:hover{border-color:var(--axis);color:var(--ink)}
+.tab[aria-selected="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.detail{display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,32%);gap:18px 28px;align-items:start}
+.dside h3{margin:0 0 4px;font-size:18px;font-weight:600;letter-spacing:-.01em}
+.dside .pub{font-size:12px;color:var(--muted);margin-bottom:10px}
+.dside .desc{font-size:13.5px;color:var(--ink-2);line-height:1.55;margin:0 0 12px}
+.dside .kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:12.5px;margin-bottom:12px}
+.dside .kv dt{color:var(--muted);white-space:nowrap}
+.dside .kv dd{margin:0;color:var(--ink)}
+.dside .kv dd b{font-family:var(--mono);font-weight:500}
+.dside .kv dd small{display:block;color:var(--muted);font-size:11.5px}
+.dside .links{font-size:12.5px;display:flex;gap:12px;flex-wrap:wrap}
+.d-pt{stroke:var(--surface);stroke-width:1;opacity:.55}
+.d-pt.rec{opacity:1}
+.d-line{fill:none;stroke-width:2.2;stroke-linejoin:round}
+.d-area{opacity:.12}
 .b-thresh{stroke:var(--ink-2);stroke-dasharray:4 3;opacity:.7}
 .b-rel{stroke:var(--event);stroke-width:1.5}
 .b-rel-label{font-size:10px;fill:var(--event);font-weight:500;letter-spacing:.05em;text-transform:uppercase}
-.b-ax{font-size:10px;fill:var(--muted)}
-.b-tip{position:absolute;z-index:3;background:var(--tip-bg);color:var(--tip-ink);border-radius:8px;padding:7px 10px;font-size:11.5px;line-height:1.4;pointer-events:none;box-shadow:var(--shadow);width:max-content;max-width:220px}
-.b-tip b{font-family:var(--mono);font-weight:500}
-.b-tip small{display:block;color:var(--tip-muted)}
+.row-hit{fill:transparent;cursor:pointer}
+.row-hit:hover{fill:var(--ink);opacity:.04}
+.row-sel{fill:var(--accent);opacity:.07}
 .ms-bar{fill:var(--accent)}
 .ms-bar.open{fill:url(#hatch)}
 .ms-x{font-size:11.5px;fill:var(--ink)}
@@ -159,7 +164,7 @@ svg text{font-family:var(--sans);font-size:11.5px;fill:var(--muted)}
 .foot{color:var(--ink-2);font-size:13px;line-height:1.6}
 .foot h2{font-size:15px;margin:0 0 6px;color:var(--ink)}
 .foot p{margin:0 0 10px;max-width:78ch}
-@media (max-width:820px){.hero{grid-template-columns:1fr}}
+@media (max-width:820px){.hero{grid-template-columns:1fr}.detail{grid-template-columns:1fr}}
 @media (max-width:520px){.page{padding-block:16px 40px}.panel{padding:14px 12px 12px;border-radius:12px}}
 </style>
 </head>
@@ -185,17 +190,20 @@ svg text{font-family:var(--sans);font-size:11.5px;fill:var(--muted)}
 <section class="panel" aria-labelledby="clock-h">
   <div class="panel-head"><h2 id="clock-h">On the same clock</h2><p id="clock-desc"></p></div>
   <div class="controls">
-    <div><span class="lbl">Clock</span><div class="seg" role="group" aria-label="Clock"><button data-clock="rel" aria-pressed="true">Since publication</button><button data-clock="abs">Calendar</button></div></div>
     <div><span class="lbl">Count a test as solved at</span><div class="seg" role="group" aria-label="Threshold"><button data-thresh="50">50%</button><button data-thresh="80" aria-pressed="true">80%</button><button data-thresh="90">90%</button></div></div>
   </div>
   <div class="chart-wrap"><svg id="clock" role="img" aria-label="Best score on each benchmark against months since its publication, one row per benchmark"></svg></div>
-  <div class="hint">Hover to read every benchmark at the same age</div>
+  <div class="hint">Hover to read every benchmark on the same date · click a row to open that test below</div>
   <p class="note" id="ms-note"></p>
 </section>
 
-<section class="panel" aria-labelledby="each-h">
-  <div class="panel-head"><h2 id="each-h">Each test, in calendar time</h2><p>What each benchmark measures, when it was published (the gold tick), and the best score month by month. Same evaluator and protocol throughout, so figures can read lower than vendor leaderboards; the official leaderboard for each is linked.</p></div>
-  <div class="bgrid" id="bgrid"></div>
+<section class="panel" aria-labelledby="each-h" id="detail-panel">
+  <div class="panel-head"><h2 id="each-h">One test at a time</h2><p>Every recorded run on the chosen benchmark, with the best-score curve over them. Same evaluator and protocol throughout, so figures can read lower than vendor leaderboards; the official leaderboard is linked.</p></div>
+  <div class="tabs" id="dtabs" role="tablist" aria-label="Benchmark"></div>
+  <div class="detail">
+    <div class="chart-wrap"><svg id="detail" role="img" aria-label="All recorded runs on the chosen benchmark"></svg><div class="tooltip" id="dtip" hidden></div></div>
+    <aside class="dside" id="dside"></aside>
+  </div>
 </section>
 
 <section class="panel" aria-labelledby="metr-h">
@@ -244,8 +252,8 @@ const RAMP=['var(--r1)','var(--r2)','var(--r3)','var(--r4)','var(--r5)','var(--r
 B.forEach((b,i)=>{b.color=RAMP[Math.min(RAMP.length-1,Math.floor(i/B.length*RAMP.length))];b.on=true});
 $('#asof').textContent=fmtMY(T1);$('#updated').textContent=fmtDate(Date.parse(DATA.retrieved));
 function frAt(b,t){let r=null;for(const p of b.fr){if(p.t<=t)r=p;else break}return r}
-const S={thresh:80,clock:'rel'};
-const DESC={rel:'One row per benchmark, oldest at the top, all starting from the day each was published. The curve is the best score so far; the dot marks the month it was solved. Read down the page and the dots walk left. A dotted stretch at the start means no result is on record yet, which is not the same as a score of zero.',abs:'The same rows in calendar time. The gold tick is the day each benchmark was published; the dot is the day it was solved. Read down the page and the gap between tick and dot closes. A dotted stretch after a tick means no result is on record for that period, which is not the same as a score of zero.'};
+const S={thresh:80,clock:'abs',sel:null};
+const DESC={rel:'One row per benchmark, oldest at the top, all starting from the day each was published. The curve is the best score so far; the dot marks the month it was solved. Read down the page and the dots walk left. A dotted stretch at the start means no result is on record yet, which is not the same as a score of zero.',abs:'One row per benchmark, oldest at the top. The gold tick is the day each was published, the curve is the best score on record since, and the dot is the day it was solved, labeled with how long that took. Read down the page and the gap between tick and dot closes. A dotted stretch after a tick means no result is on record yet, which is not the same as a score of zero. Click a row to open that test.'};
 function solvedAt(b){const th=S.thresh/100;for(const p of b.fr){if(p.v>=th)return p}return null}
 function monthsTo(b){const s=solvedAt(b);return s?Math.max(0,(s.t-b.rel)/MONTH):null}
 
@@ -262,7 +270,6 @@ function fitLog(pts){let n=pts.length,sx=0,sy=0,sxy=0,sxx=0;for(const p of pts){
 
 /* ---------- controls ---------- */
 document.querySelectorAll('[data-thresh]').forEach(b=>b.onclick=()=>{S.thresh=+b.dataset.thresh;document.querySelectorAll('[data-thresh]').forEach(x=>x.setAttribute('aria-pressed',x===b));drawAll()});
-document.querySelectorAll('[data-clock]').forEach(b=>b.onclick=()=>{S.clock=b.dataset.clock;document.querySelectorAll('[data-clock]').forEach(x=>x.setAttribute('aria-pressed',x===b));drawStack()});
 
 /* ---------- same clock, stacked ---------- */
 function drawStack(){
@@ -276,8 +283,9 @@ function drawStack(){
   if(rel){const step=X1>48?12:6;for(let v=0;v<=X1;v+=step){g.append(svgEl('line',{x1:x(v),x2:x(v),y1:m.t-6,y2:h-m.b,style:v?'':'stroke:var(--axis)'}));g.append(svgEl('text',{x:x(v),y:m.t-10,'text-anchor':'middle'},v?v+' mo':'published'))}}
   else{for(let yr=new Date(X0).getUTCFullYear()+1;yr<=new Date(X1).getUTCFullYear();yr++){const t=Date.UTC(yr,0,1);g.append(svgEl('line',{x1:x(t),x2:x(t),y1:m.t-6,y2:h-m.b}));g.append(svgEl('text',{x:x(t),y:m.t-10,'text-anchor':'middle'},yr))}}
   svg.append(g);
-  const cur=svgEl('g',{'pointer-events':'none'});const reads=[];
+  const cur=svgEl('g',{'pointer-events':'none'});const reads=[];const rowHits=[];
   rows.forEach((b,i)=>{const y0=m.t+i*rh,yb=y0+rh-8,yt=y0+6;const yv=v=>yb-v*(yb-yt);
+    if(S.sel===b.key)svg.append(svgEl('rect',{class:'row-sel',x:0,y:y0,width:w,height:rh,rx:6}));
     svg.append(svgEl('text',{class:'row-name',x:m.l-12,y:y0+rh/2-1,'text-anchor':'end'},b.name));svg.append(svgEl('text',{class:'row-sub',x:m.l-12,y:y0+rh/2+12,'text-anchor':'end'},'published '+fmtMY(b.rel)));
     svg.append(svgEl('line',{class:'row-base',x1:m.l,x2:w-m.r,y1:yb,y2:yb}));svg.append(svgEl('line',{class:'row-thresh',x1:m.l,x2:w-m.r,y1:yv(th),y2:yv(th)}));
     const fr=b.fr.filter(p=>p.t>=b.rel);const line=[];const f0=frAt(b,b.rel);if(f0)line.push({a:ax(b,b.rel),v:f0.v});for(const p of fr){const a=ax(b,p.t);if(line.length)line.push({a,v:line[line.length-1].v});line.push({a,v:p.v})}const last=b.fr[b.fr.length-1];const aNow=ax(b,T1);if(last)line.push({a:aNow,v:last.v});
@@ -288,8 +296,10 @@ function drawStack(){
     const sp=solvedAt(b);
     if(sp){const mo=Math.max(0,(sp.t-b.rel)/MONTH);const a=rel?mo:Math.max(sp.t,b.rel);svg.append(svgEl('circle',{class:'row-dot',cx:x(a),cy:yv(th),r:5.5,fill:b.color}));svg.append(svgEl('text',{class:'row-val',x:x(a)+9,y:yv(th)-7},(mo<1?'<1 mo':Math.round(mo)+' mo')+(rel?'':' · '+fmtMY(sp.t))))}
     else{const best=b.fr[b.fr.length-1];svg.append(svgEl('text',{class:'row-val open',x:x(aNow)+8,y:yv(best.v)+4},'still open · '+pct(best.v)))}
-    reads.push({b,yv,y0})});
+    reads.push({b,yv,y0});rowHits.push({b,y0})});
   svg.append(cur);const hit=svgEl('rect',{class:'hit',x:m.l,y:m.t-6,width:w-m.l-m.r,height:h-m.t+6-m.b});svg.append(hit);
+  for(const {b,y0} of rowHits){const rh2=svgEl('rect',{class:'row-hit',x:0,y:y0,width:w,height:rh,rx:6});rh2.setAttribute('role','button');rh2.setAttribute('aria-label','Open '+b.name);rh2.addEventListener('click',()=>{S.sel=b.key;drawStack();drawDetail();$('#detail-panel').scrollIntoView({block:'start',behavior:'smooth'})});
+    rh2.addEventListener('pointermove',e=>hit.dispatchEvent(new PointerEvent('pointermove',{clientX:e.clientX,clientY:e.clientY,bubbles:false})));rh2.addEventListener('pointerleave',()=>cur.replaceChildren());svg.append(rh2)}
   hit.addEventListener('pointermove',e=>{const r=svg.getBoundingClientRect();const xv=clamp(X0+((e.clientX-r.left)/r.width*w-m.l)/(w-m.l-m.r)*(X1-X0),X0,X1);cur.replaceChildren();cur.append(svgEl('line',{class:'cross',x1:x(xv),x2:x(xv),y1:m.t-6,y2:h-m.b}));cur.append(svgEl('text',{class:'row-read',x:x(xv),y:h-m.b+16,'text-anchor':'middle'},rel?(xv<0.5?'at publication':Math.round(xv)+' months after publication'):fmtMY(xv)));
     for(const {b,yv,y0} of reads){const t=rel?b.rel+xv*MONTH:xv;if(t>T1||t<b.rel)continue;const f=frAt(b,t);if(!f)continue;cur.append(svgEl('circle',{class:'dot',cx:x(xv),cy:yv(f.v),r:4,fill:b.color}));cur.append(svgEl('text',{class:'row-read',x:w-m.r+8,y:y0+rh/2+4},pct(f.v)))}});
   hit.addEventListener('pointerleave',()=>cur.replaceChildren());
@@ -297,30 +307,36 @@ function drawStack(){
   $('#ms-note').textContent=solved.length>=6?'The first three benchmarks to be solved took an average of '+Math.round(avg(solved.slice(0,3)))+' months from publication; the three most recent took '+Math.round(avg(solved.slice(-3)))+'. Benchmarks are now written to be hard for the models that exist on the day they are published, and they still fall within a year or two.':'';
 }
 
-/* ---------- small multiples ---------- */
-function drawGrid(){
-  const grid=$('#bgrid');grid.replaceChildren();const BT0=Date.UTC(2020,0,1),BT1=T1;
-  for(const b of B){
-    const panel=el('div','bpanel');const best=b.fr[b.fr.length-1];const h3=el('h3');h3.append(document.createTextNode(b.name),el('span',null,pct(best.v)));panel.append(h3);
-    const w=320,h=110,m={l:36,r:8,t:8,b:18};const x=t=>m.l+(t-BT0)/(BT1-BT0)*(w-m.l-m.r);const yv=v=>h-m.b-v*(h-m.b-m.t);
-    const svg=svgEl('svg',{viewBox:`0 0 ${w} ${h}`,height:h,role:'img','aria-label':b.name});
-    const g=svgEl('g',{class:'grid'});for(const v of [0,.5,1]){g.append(svgEl('line',{x1:m.l,x2:w-m.r,y1:yv(v),y2:yv(v)}));g.append(svgEl('text',{class:'b-ax',x:m.l-4,y:yv(v)+3,'text-anchor':'end'},Math.round(v*100)+'%'))}svg.append(g);
-    for(let yr=2020;yr<=2026;yr+=2)svg.append(svgEl('text',{class:'b-ax',x:x(Date.UTC(yr,0,1)),y:h-5,'text-anchor':'middle'},yr));
-    svg.append(svgEl('line',{class:'b-thresh',x1:m.l,x2:w-m.r,y1:yv(S.thresh/100),y2:yv(S.thresh/100)}));
-    for(const p of b.pts){if(p.t<BT0||p.t>BT1)continue;svg.append(svgEl('circle',{class:'b-bg',cx:x(p.t).toFixed(1),cy:yv(p.v).toFixed(1),r:1.6}))}
-    const line=[];const f0=frAt(b,BT0);if(f0)line.push({t:BT0,v:f0.v});for(const p of b.fr){if(p.t<BT0)continue;if(line.length)line.push({t:p.t,v:line[line.length-1].v});line.push(p)}if(line.length)line.push({t:BT1,v:line[line.length-1].v});
-    if(line.length){const d=line.map((p,i)=>(i?'L':'M')+x(p.t).toFixed(1)+','+yv(p.v).toFixed(1)).join('');svg.append(svgEl('path',{class:'b-area',d:d+`L${x(BT1).toFixed(1)},${h-m.b}L${x(line[0].t).toFixed(1)},${h-m.b}Z`}));svg.append(svgEl('path',{class:'b-line',d,style:'stroke:'+b.color}))}
-    for(const p of b.fr){if(p.t<BT0)continue;svg.append(svgEl('circle',{class:'b-pt',cx:x(p.t).toFixed(1),cy:yv(p.v).toFixed(1),r:2.6,style:'fill:'+b.color}))}
-    if(b.rel>=BT0){svg.append(svgEl('line',{class:'b-rel',x1:x(b.rel),x2:x(b.rel),y1:m.t,y2:h-m.b}));svg.append(svgEl('text',{class:'b-rel-label',x:x(b.rel)+3,y:m.t+9},'published'))}
-    const cur=svgEl('g',{'pointer-events':'none'});svg.append(cur);const hit=svgEl('rect',{class:'hit',x:m.l,y:0,width:w-m.l-m.r,height:h});svg.append(hit);const tip=el('div','b-tip');tip.hidden=true;
-    hit.addEventListener('pointermove',e=>{const r=svg.getBoundingClientRect();const t=clamp(BT0+((e.clientX-r.left)/r.width*w-m.l)/(w-m.l-m.r)*(BT1-BT0),BT0,BT1);const f=frAt(b,t);cur.replaceChildren();cur.append(svgEl('line',{class:'cross',x1:x(t),x2:x(t),y1:m.t,y2:h-m.b}));tip.hidden=false;tip.replaceChildren();
-      if(f){cur.append(svgEl('circle',{class:'dot',cx:x(t),cy:yv(f.v),r:4,fill:b.color}));tip.append(el('b',null,pct(f.v)),el('small',null,f.name+' · '+fmtMY(f.t)),el('small',null,'best as of '+fmtMY(t)))}else tip.append(el('small',null,'no result yet · '+fmtMY(t)));
-      const pr=panel.getBoundingClientRect();let left=e.clientX-pr.left+12;if(left+tip.offsetWidth>pr.width-8)left=e.clientX-pr.left-12-tip.offsetWidth;tip.style.left=left+'px';tip.style.top=Math.max(4,e.clientY-pr.top-tip.offsetHeight-8)+'px'});
-    hit.addEventListener('pointerleave',()=>{cur.replaceChildren();tip.hidden=true});
-    panel.append(svg,tip,el('div','desc',b.desc));
-    const st=el('div','stat');const s=solvedAt(b);if(s){const months=Math.max(0,(s.t-b.rel)/MONTH);st.innerHTML='Published '+fmtMY(b.rel)+' · reached '+S.thresh+'% in <b>'+fmtMY(s.t)+'</b>, <b>'+fmtMo(months)+'</b> later · '+s.name}else st.innerHTML='Published '+fmtMY(b.rel)+' · not yet at '+S.thresh+'% · best <b>'+pct(best.v)+'</b> · '+best.name;panel.append(st);
-    const links=el('div','links');if(b.paper){const a=el('a',null,'Paper ↗');a.href=b.paper;a.target='_blank';a.rel='noopener';links.append(a)}if(b.board){const a=el('a',null,(b.boardName||'Official')+' leaderboard ↗');a.href=b.board;a.target='_blank';a.rel='noopener';links.append(a)}panel.append(links);
-    grid.append(panel)}
+/* ---------- one test at a time ---------- */
+function drawDetail(){
+  if(!S.sel)S.sel=B[0].key;const b=B.find(x=>x.key===S.sel)||B[0];
+  const tabs=$('#dtabs');tabs.replaceChildren();for(const x of B){const t=el('button','tab');t.setAttribute('role','tab');t.setAttribute('aria-selected',x===b);t.style.setProperty('--pc',x.color);t.append(el('i'),document.createTextNode(x.name));t.onclick=()=>{S.sel=x.key;drawStack();drawDetail()};tabs.append(t)}
+  const svg=$('#detail'),w=svg.clientWidth||700,mobile=w<640,h=mobile?300:400,m={l:mobile?40:48,r:mobile?14:20,t:22,b:30};
+  const X0=b.rel-3*MONTH,X1=T1;const x=t=>m.l+(t-X0)/(X1-X0)*(w-m.l-m.r);const y=v=>h-m.b-v*(h-m.b-m.t);
+  svg.setAttribute('viewBox',`0 0 ${w} ${h}`);svg.setAttribute('height',h);svg.replaceChildren();
+  const g=svgEl('g',{class:'grid'});for(const v of [0,.25,.5,.75,1]){g.append(svgEl('line',{x1:m.l,x2:w-m.r,y1:y(v),y2:y(v)}));g.append(svgEl('text',{x:m.l-8,y:y(v)+4,'text-anchor':'end'},Math.round(v*100)+'%'))}svg.append(g);
+  const span=(X1-X0)/YEAR;const yStep=span>4?1:span>2?0.5:0.25;const ax=svgEl('g',{});
+  for(let yr=new Date(X0).getUTCFullYear();yr<=new Date(X1).getUTCFullYear()+1;yr++)for(let q=0;q<12;q+=yStep*12){const t=Date.UTC(yr,q,1);if(t<X0||t>X1)continue;ax.append(svgEl('text',{x:x(t),y:h-m.b+16,'text-anchor':'middle'},yStep>=1?String(yr):fmtMY(t)))}
+  ax.append(svgEl('line',{x1:m.l,x2:w-m.r,y1:h-m.b,y2:h-m.b,stroke:'var(--axis)'}));svg.append(ax);
+  const th=S.thresh/100;svg.append(svgEl('line',{class:'b-thresh',x1:m.l,x2:w-m.r,y1:y(th),y2:y(th)}));svg.append(svgEl('text',{class:'thresh-label',x:w-m.r-6,y:y(th)-5,'text-anchor':'end'},'solved at '+S.thresh+'%'));
+  svg.append(svgEl('line',{class:'b-rel',x1:x(b.rel),x2:x(b.rel),y1:m.t,y2:h-m.b}));svg.append(svgEl('text',{class:'b-rel-label',x:x(b.rel)+4,y:m.t+10},'published'));
+  const line=[];const f0=frAt(b,b.rel);if(f0)line.push({t:b.rel,v:f0.v});for(const p of b.fr){if(p.t<b.rel)continue;if(line.length)line.push({t:p.t,v:line[line.length-1].v});line.push(p)}if(line.length)line.push({t:X1,v:line[line.length-1].v});
+  if(line.length){const d=line.map((p,i)=>(i?'L':'M')+x(p.t).toFixed(1)+','+y(p.v).toFixed(1)).join('');svg.append(svgEl('path',{class:'d-area',d:d+`L${x(X1).toFixed(1)},${h-m.b}L${x(line[0].t).toFixed(1)},${h-m.b}Z`,fill:b.color}));svg.append(svgEl('path',{class:'d-line',d,style:'stroke:'+b.color}))}
+  const recSet=new Set(b.fr);const dots=[];for(const p of b.pts){if(p.t<X0||p.t>X1)continue;const isRec=recSet.has(p)||b.fr.some(f=>f.t===p.t&&f.v===p.v);svg.append(svgEl('circle',{class:'d-pt'+(isRec?' rec':''),cx:x(p.t).toFixed(1),cy:y(p.v).toFixed(1),r:isRec?4:2.6,fill:b.color}));dots.push({p,isRec})}
+  const cur=svgEl('g',{'pointer-events':'none'});svg.append(cur);const hit=svgEl('rect',{class:'hit',x:m.l,y:0,width:w-m.l-m.r,height:h});svg.append(hit);const tip=$('#dtip');
+  hit.addEventListener('pointermove',e=>{const r=svg.getBoundingClientRect();const px=(e.clientX-r.left)/r.width*w,py=(e.clientY-r.top)/r.height*h;let best=null,bd=22;for(const d of dots){const dd=Math.hypot(x(d.p.t)-px,y(d.p.v)-py);if(dd<bd){bd=dd;best=d}}
+    cur.replaceChildren();tip.hidden=false;tip.replaceChildren();
+    if(best){const p=best.p;cur.append(svgEl('circle',{class:'dot',cx:x(p.t),cy:y(p.v),r:6,fill:b.color}));tip.append(el('div','tip-date',fmtDate(p.t)+(best.isRec?' · record':'')));const r2=el('div','tip-row');r2.append(el('span','k',p.name+(p.org?' · '+p.org:'')));r2.append(el('b',null,pct(p.v)));tip.append(r2);
+      tip.style.left=Math.max(0,Math.min(w-tip.offsetWidth,x(p.t)+12))+'px';tip.style.top=Math.max(0,y(p.v)-tip.offsetHeight-12)+'px'}
+    else{const t=clamp(X0+(px-m.l)/(w-m.l-m.r)*(X1-X0),X0,X1);const f=frAt(b,t);cur.append(svgEl('line',{class:'cross',x1:x(t),x2:x(t),y1:m.t,y2:h-m.b}));tip.append(el('div','tip-date',fmtMY(t)));const r2=el('div','tip-row');r2.append(el('span','k',f?'best on record: '+f.name:'no result on record yet'));if(f)r2.append(el('b',null,pct(f.v)));tip.append(r2);
+      tip.style.left=Math.max(0,Math.min(w-tip.offsetWidth,x(t)+12))+'px';tip.style.top=Math.max(0,(f?y(f.v):h/2)-tip.offsetHeight/2)+'px'}});
+  hit.addEventListener('pointerleave',()=>{cur.replaceChildren();tip.hidden=true});
+  // side panel
+  const side=$('#dside');side.replaceChildren();side.append(el('h3',null,b.name),el('div','pub','Published '+fmtDate(b.rel)+' · '+b.n+' runs on record'),el('p','desc',b.desc));
+  const kv=el('dl','kv');const add=(k,v,sub)=>{kv.append(el('dt',null,k));const dd=el('dd');dd.append(el('b',null,v));if(sub)dd.append(el('small',null,sub));kv.append(dd)};
+  for(const t of [50,80,90]){const s=b.fr.find(p=>p.v>=t/100);if(s){const mo=Math.max(0,(s.t-b.rel)/MONTH);add('Reached '+t+'%',fmtMY(s.t),s.name+' · '+(mo<1?'under a month':Math.round(mo)+' months')+' after publication')}else add('Reached '+t+'%','not yet','')}
+  const best=b.fr[b.fr.length-1];add('Current record',pct(best.v),best.name+' · '+fmtMY(best.t));side.append(kv);
+  const links=el('div','links');if(b.paper){const a=el('a',null,'Paper ↗');a.href=b.paper;a.target='_blank';a.rel='noopener';links.append(a)}if(b.board){const a=el('a',null,(b.boardName||'Official')+' leaderboard ↗');a.href=b.board;a.target='_blank';a.rel='noopener';links.append(a)}side.append(links);
 }
 
 /* ---------- METR ---------- */
@@ -345,7 +361,7 @@ function drawMetr(){
   $('#metr-note').innerHTML='The record has doubled every <b>'+fit.months.toFixed(1)+' months</b> since 2023. The latest record is <b>'+last.name+'</b> at '+(last.v>=60?(last.v/60).toFixed(1)+' hours':Math.round(last.v)+' minutes')+'. Source: <a href="'+METR.paper+'" target="_blank" rel="noopener">METR</a>.';
 }
 
-function drawAll(){headline();drawStack();drawGrid();drawMetr()}
+function drawAll(){headline();drawStack();drawDetail();drawMetr()}
 drawAll();
 let rt;new ResizeObserver(()=>{clearTimeout(rt);rt=setTimeout(drawAll,60)}).observe($('.page'));
 })();
