@@ -1,0 +1,513 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Plotline</title>
+<meta name="description" content="Current events, drawn from the data. Small interactive plots built from primary sources.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,100..900;1,62..125,100..900&family=Source+Serif+4:ital,opsz,wght@0,8..60,300..700;1,8..60,300..700&display=swap">
+<style>
+  :root {
+    color-scheme: light;
+    --bg: #E6E7E2;
+    --bg2: #DBDDD6;
+    --ink: #141613;
+    --ink2: #40443F;
+    --mute: #676B65;
+    --line: #C3C6BE;
+    --gold: #A8790A;
+    --on-field: #F3F4EF;
+
+    --economy: #167A50;   --economy-field: #167A50;
+    --technology: #1D4FCB; --technology-field: #1D4FCB;
+    --politics: #B3212B;  --politics-field: #B3212B;
+    --culture: #6B3AB8;   --culture-field: #6B3AB8;
+    --warfare: #A4471A;   --warfare-field: #A4471A;
+
+    --display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+    --text: "Source Serif 4", Georgia, "Times New Roman", serif;
+    --gutter: clamp(16px, 4vw, 56px);
+    --max: 1320px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --bg: #14171A;
+      --bg2: #1B1F23;
+      --ink: #ECEDE8;
+      --ink2: #C3C6BF;
+      --mute: #8F948E;
+      --line: #2C3136;
+      --gold: #E0B53D;
+      --on-field: #ECEDE8;
+      --economy: #2FA56F;   --economy-field: #0E3A27;
+      --technology: #4F82EE; --technology-field: #142455;
+      --politics: #E84E58;  --politics-field: #4A1418;
+      --culture: #9A6EF0;   --culture-field: #2C1A55;
+      --warfare: #DB7330;   --warfare-field: #43200E;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #14171A;
+    --bg2: #1B1F23;
+    --ink: #ECEDE8;
+    --ink2: #C3C6BF;
+    --mute: #8F948E;
+    --line: #2C3136;
+    --gold: #E0B53D;
+    --on-field: #ECEDE8;
+    --economy: #2FA56F;   --economy-field: #0E3A27;
+    --technology: #4F82EE; --technology-field: #142455;
+    --politics: #E84E58;  --politics-field: #4A1418;
+    --culture: #9A6EF0;   --culture-field: #2C1A55;
+    --warfare: #DB7330;   --warfare-field: #43200E;
+  }
+
+  * { box-sizing: border-box; }
+  html { background: var(--bg); }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--text);
+    font-size: 18px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; }
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+  .wrap { max-width: var(--max); margin-inline: auto; padding-inline: var(--gutter); }
+
+  /* labels: the utility voice */
+  .label {
+    font-family: var(--display);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    line-height: 1.2;
+  }
+  .display { font-family: var(--display); }
+
+  /* masthead */
+  .mast {
+    border-bottom: 1px solid var(--line);
+  }
+  .mast .wrap {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 24px;
+    min-height: 72px;
+  }
+  .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+  .brand svg { width: 30px; height: 30px; display: block; }
+  .brand .name {
+    font-family: var(--display);
+    font-stretch: 125%;
+    font-weight: 800;
+    font-size: 20px;
+    letter-spacing: -0.01em;
+  }
+  .tag { font-family: var(--text); font-style: italic; font-size: 16px; color: var(--mute); }
+  .mast nav { display: flex; align-items: center; gap: 20px; }
+  .mast nav a { text-decoration: none; color: var(--ink2); }
+  .mast nav a:hover { color: var(--ink); }
+  .toggle {
+    appearance: none; border: 1px solid var(--line); background: transparent; color: var(--ink);
+    font: inherit; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 10px; border-radius: 0;
+  }
+  .toggle svg { width: 14px; height: 14px; display: block; }
+  .toggle .t-dark, :root[data-theme="dark"] .toggle .t-light { display: none; }
+  :root[data-theme="dark"] .toggle .t-dark { display: inline; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .toggle .t-light { display: none; }
+    :root:not([data-theme="light"]) .toggle .t-dark { display: inline; }
+  }
+
+  /* hero */
+  .hero .wrap {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 28px;
+    padding-block: clamp(40px, 7vw, 104px) clamp(40px, 6vw, 88px);
+  }
+  .hero h1 {
+    margin: 0;
+    font-family: var(--display);
+    font-stretch: 72%;
+    font-weight: 700;
+    font-size: clamp(48px, 8vw, 120px);
+    line-height: 0.92;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+    max-width: 14ch;
+  }
+  .hero .intro {
+    max-width: 52ch;
+    margin: 0;
+    font-size: 20px;
+    color: var(--ink2);
+  }
+  .hero .index {
+    display: flex; flex-wrap: wrap; gap: 8px 28px;
+    color: var(--mute);
+    margin-top: 8px;
+  }
+  .hero .index span { display: inline-flex; align-items: center; gap: 8px; }
+  .hero .index i { width: 10px; height: 10px; background: var(--sw); display: inline-block; }
+
+  /* poster panels */
+  .panel { --acc: var(--ink); --field: var(--ink); }
+  .panel.economy { --acc: var(--economy); --field: var(--economy-field); }
+  .panel.technology { --acc: var(--technology); --field: var(--technology-field); }
+  .panel.politics { --acc: var(--politics); --field: var(--politics-field); }
+
+  .band { background: var(--field); color: var(--on-field); }
+  .band .wrap {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 16px 32px;
+    min-height: 64px;
+    padding-block: 14px;
+  }
+  .band .theme { font-family: var(--display); font-stretch: 125%; font-weight: 800; font-size: 18px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .band .which { color: inherit; opacity: 0.9; }
+  .band .updated { color: inherit; opacity: 0.85; font-family: var(--text); font-style: italic; font-size: 15px; text-transform: none; letter-spacing: 0; font-weight: 400; }
+
+  .panel .body {
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    gap: clamp(28px, 4vw, 64px);
+    padding-block: clamp(40px, 6vw, 88px);
+    border-bottom: 1px solid var(--line);
+  }
+  .poster { display: grid; gap: 20px; align-content: start; }
+  .big {
+    font-family: var(--display);
+    font-stretch: 125%;
+    font-weight: 900;
+    font-size: clamp(54px, 10vw, 136px);
+    line-height: 0.9;
+    letter-spacing: -0.035em;
+    font-variant-numeric: lining-nums;
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+  .big small { font-size: 0.42em; font-weight: 700; font-stretch: 100%; letter-spacing: -0.01em; vertical-align: 0.1em; }
+  .claim {
+    margin: 0;
+    font-family: var(--display);
+    font-stretch: 72%;
+    font-weight: 600;
+    font-size: clamp(26px, 3.4vw, 44px);
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    max-width: 22ch;
+    text-wrap: balance;
+  }
+  .poster h2 {
+    margin: 8px 0 0;
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: 0.02em;
+    color: var(--mute);
+  }
+  .poster h2 b { color: var(--ink); font-weight: 700; }
+  .poster p.copy { margin: 0; max-width: 54ch; color: var(--ink2); }
+  .go {
+    justify-self: start;
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 15px;
+    text-decoration: none;
+    border-bottom: 2px solid var(--acc);
+    padding-bottom: 2px;
+  }
+  .go:hover { color: var(--acc); }
+  .panel figure { margin: 0; display: grid; gap: 10px; align-content: start; }
+  .panel figure svg { width: 100%; height: auto; display: block; }
+  .panel figcaption { font-family: var(--display); font-size: 13px; color: var(--mute); }
+  .panel .legend { display: flex; gap: 18px; font-family: var(--display); font-size: 13px; color: var(--ink2); }
+  .panel .legend span { display: inline-flex; align-items: center; gap: 7px; }
+  .panel .legend i { width: 18px; height: 2px; background: var(--acc); display: inline-block; }
+  .panel .legend i.neutral { background: var(--ink); opacity: 0.55; }
+  .panel .legend i.dash { background: var(--acc); }
+
+  /* svg text tokens */
+  svg text { font-family: var(--display); fill: var(--mute); font-size: 12px; }
+  svg text.strong { fill: var(--ink); font-weight: 600; }
+  svg .grid { stroke: var(--line); stroke-width: 1; }
+  svg .axis { stroke: var(--line); stroke-width: 1; }
+  svg .series { stroke: var(--acc); stroke-width: 2; fill: none; stroke-linejoin: round; stroke-linecap: round; }
+  svg .neutral { stroke: var(--ink); stroke-opacity: 0.55; stroke-width: 2; fill: none; stroke-linejoin: round; stroke-linecap: round; }
+  svg .wedge { fill: var(--acc); fill-opacity: 0.12; }
+  svg .mark { fill: var(--acc); stroke: var(--bg); stroke-width: 2; }
+  svg .goldmark { fill: var(--gold); stroke: var(--bg); stroke-width: 2; }
+  svg .note { stroke: var(--ink); stroke-width: 1; stroke-opacity: 0.6; }
+
+  /* about */
+  .about .wrap {
+    display: grid;
+    grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+    gap: clamp(28px, 4vw, 64px);
+    padding-block: clamp(40px, 6vw, 88px);
+  }
+  .about h2 {
+    margin: 0;
+    font-family: var(--display);
+    font-stretch: 72%;
+    font-weight: 700;
+    font-size: clamp(40px, 5vw, 72px);
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+  }
+  .about .text { display: grid; gap: 20px; max-width: 58ch; color: var(--ink2); }
+  .about .text p { margin: 0; }
+  .themes {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 2px;
+    margin-top: 12px;
+  }
+  .themes div {
+    background: var(--tf);
+    color: var(--on-field);
+    padding: 14px 12px 34px;
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .themes div small { display: block; font-weight: 500; font-size: 12px; letter-spacing: 0.02em; text-transform: none; opacity: 0.85; margin-top: 4px; }
+  .themes .economy { --tf: var(--economy-field); }
+  .themes .technology { --tf: var(--technology-field); }
+  .themes .politics { --tf: var(--politics-field); }
+  .themes .culture { --tf: var(--culture-field); }
+  .themes .warfare { --tf: var(--warfare-field); }
+
+  footer { border-top: 1px solid var(--line); }
+  footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px 32px; padding-block: 24px; font-family: var(--display); font-size: 13px; color: var(--mute); }
+
+  @media (max-width: 900px) {
+    .mast .wrap { grid-template-columns: auto auto; }
+    .mast .tag { display: none; }
+    .panel .body { grid-template-columns: 1fr; }
+    .about .wrap { grid-template-columns: 1fr; }
+    .themes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .themes div:last-child { grid-column: 1 / -1; }
+  }
+  @media (max-width: 560px) {
+    body { font-size: 17px; }
+    .hero .intro { font-size: 18px; }
+    .band .wrap { grid-template-columns: auto 1fr; }
+    .band .updated { grid-column: 1 / -1; }
+    .mast nav a { display: none; }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .go, .toggle, .mast nav a { transition: color 120ms ease; }
+  }
+</style>
+</head>
+<body>
+
+<header class="mast">
+  <div class="wrap">
+    <a class="brand" href="#" aria-label="Plotline home">
+      <svg viewBox="0 0 30 30" aria-hidden="true">
+        <rect x="1" y="1" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2"/>
+        <polyline points="5,23 11,18 16,20 25,7" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+        <circle cx="25" cy="7" r="2.6" fill="currentColor"/>
+      </svg>
+      <span class="name">Plotline</span>
+    </a>
+    <span class="tag">Current events, drawn from the data.</span>
+    <nav>
+      <a href="#plots">Plots</a>
+      <a href="#about">About</a>
+      <button class="toggle" id="theme-toggle" type="button" aria-label="Switch theme">
+        <svg viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="6" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M7 1a6 6 0 0 1 0 12z" fill="currentColor"/></svg>
+        <span class="label t-light">Dark</span><span class="label t-dark">Light</span>
+      </button>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <h1>The numbers behind the news, in a form you can explore.</h1>
+    <p class="intro">Each plot here is a small interactive built directly from primary sources: Treasury, FRED, city records, the agencies themselves. No accounts, no tracking, and every figure cites where it came from.</p>
+    <div class="index label">
+      <span style="--sw: var(--economy)"><i></i>Economy</span>
+      <span style="--sw: var(--technology)"><i></i>Technology</span>
+      <span style="--sw: var(--politics)"><i></i>Politics</span>
+      <span style="--sw: var(--culture)"><i></i>Culture</span>
+      <span style="--sw: var(--warfare)"><i></i>Warfare</span>
+    </div>
+  </div>
+</section>
+
+<main id="plots">
+
+  <article class="panel economy">
+    <div class="band">
+      <div class="wrap">
+        <span class="theme">Economy</span>
+        <span class="which label">The National Debt</span>
+        <span class="updated">Updated Sep 17, 2026</span>
+      </div>
+    </div>
+    <div class="wrap body">
+      <div class="poster">
+        <p class="big">$40.09<small>T</small></p>
+        <p class="claim">Rising $102,386 every second, at the 90-day pace.</p>
+        <h2><b>The National Debt</b> · debt to GDP 123%</h2>
+        <p class="copy">Thirty-three years of Treasury's daily count, with GDP alongside it, the laws and shocks that bent the curve, and how long each trillion took.</p>
+        <a class="go" href="plot.html">Open the plot</a>
+      </div>
+      <figure>
+        <div class="legend"><span><i></i>Debt</span><span><i class="neutral"></i>GDP</span></div>
+        <svg viewBox="0 0 400 240" role="img" aria-label="Sketch: the national debt crossing above GDP in February 2013">
+          <line class="grid" x1="10" y1="220" x2="390" y2="220"/>
+          <line class="grid" x1="10" y1="131" x2="390" y2="131"/>
+          <line class="grid" x1="10" y1="42" x2="390" y2="42"/>
+          <text x="10" y="37">$40T</text>
+          <text x="10" y="126">$20T</text>
+          <text x="10" y="234">1993</text>
+          <text x="390" y="234" text-anchor="end">2026</text>
+          <polygon class="wedge" points="230,146 240,141 251,139 262,133 273,130 284,124 295,119 306,100 317,94 328,83 339,72 350,62 361,53 380,42 380,75 361,84 350,90 339,97 328,106 317,115 306,126 295,125 284,129 273,133 262,137 251,139 240,142"/>
+          <polyline class="neutral" points="10,190 32,186 54,182 87,174 98,173 120,169 142,162 163,156 174,155 185,156 196,153 207,151 218,148 230,146 240,142 251,139 262,137 273,133 284,129 295,125 306,126 317,115 328,106 339,97 350,90 361,84 380,75"/>
+          <polyline class="series" points="10,200 32,198 54,196 87,195 98,194 120,190 142,185 163,180 174,176 185,167 196,160 207,154 218,149 230,146 240,141 251,139 262,133 273,130 284,124 295,119 306,100 317,94 328,83 339,72 350,62 361,53 380,42"/>
+          <line class="note" x1="230" y1="60" x2="230" y2="146"/>
+          <circle class="mark" cx="230" cy="146" r="5"/>
+          <text class="strong" x="224" y="56" text-anchor="end">Debt passes GDP · Feb 2013</text>
+          <circle class="goldmark" cx="380" cy="42" r="5"/>
+        </svg>
+        <figcaption>Debt and GDP in trillions of dollars, 1993 to 2026. Gold marks a milestone.</figcaption>
+      </figure>
+    </div>
+  </article>
+
+  <article class="panel technology">
+    <div class="band">
+      <div class="wrap">
+        <span class="theme">Technology</span>
+        <span class="which label">The Curve</span>
+        <span class="updated">Updated Sep 20, 2026</span>
+      </div>
+    </div>
+    <div class="wrap body">
+      <div class="poster">
+        <p class="big">5.6<small>months</small></p>
+        <p class="claim">AI training compute doubles every 5.6 months. Chips took 25.5.</p>
+        <h2><b>The Curve</b> · four exponentials on one axis</h2>
+        <p class="copy">Chips have doubled every two years since 1971. The AI built on them doubles every six months. Four exponentials on one axis, and how fast the tests fall.</p>
+        <a class="go" href="plot.html">Open the plot</a>
+      </div>
+      <figure>
+        <div class="legend"><span><i></i>AI training compute</span><span><i class="neutral"></i>Transistors per chip</span></div>
+        <svg viewBox="0 0 400 240" role="img" aria-label="Sketch: AI training compute peeling away from Moore's Law after 2012, on a log axis">
+          <line class="grid" x1="10" y1="220" x2="390" y2="220"/>
+          <line class="grid" x1="10" y1="153" x2="390" y2="153"/>
+          <line class="grid" x1="10" y1="87" x2="390" y2="87"/>
+          <line class="grid" x1="10" y1="20" x2="390" y2="20"/>
+          <text x="10" y="15">×1,000,000,000</text>
+          <text x="10" y="82">×1,000,000</text>
+          <text x="10" y="148">×1,000</text>
+          <text x="10" y="234">2012</text>
+          <text x="390" y="234" text-anchor="end">2026 · log scale, indexed to 2012</text>
+          <polyline class="neutral" points="10,220 390,176"/>
+          <polyline class="series" points="10,220 390,19"/>
+          <circle class="mark" cx="10" cy="220" r="5"/>
+          <text x="330" y="170" text-anchor="end">×2 every 25.5 months</text>
+          <text class="strong" x="330" y="52" text-anchor="end">×2 every 5.6 months</text>
+        </svg>
+        <figcaption>Two doubling rates from the same starting point. One axis, log scale.</figcaption>
+      </figure>
+    </div>
+  </article>
+
+  <article class="panel politics">
+    <div class="band">
+      <div class="wrap">
+        <span class="theme">Politics</span>
+        <span class="which label">The Mamdani Scorecard</span>
+        <span class="updated">In progress</span>
+      </div>
+    </div>
+    <div class="wrap body">
+      <div class="poster">
+        <p class="big">Next</p>
+        <p class="claim">The Mamdani Scorecard is in progress.</p>
+        <h2><b>The Mamdani Scorecard</b> · in progress</h2>
+        <p class="copy">The third plot is being built now. It takes its place here when the numbers are ready and every figure has its source.</p>
+      </div>
+      <figure>
+        <svg viewBox="0 0 400 240" role="img" aria-label="Empty chart frame for a plot in progress">
+          <line class="grid" x1="10" y1="220" x2="390" y2="220"/>
+          <line class="grid" x1="10" y1="153" x2="390" y2="153"/>
+          <line class="grid" x1="10" y1="87" x2="390" y2="87"/>
+          <line class="grid" x1="10" y1="20" x2="390" y2="20"/>
+          <text x="10" y="234">Axes to come</text>
+        </svg>
+        <figcaption>No data drawn until it is sourced.</figcaption>
+      </figure>
+    </div>
+  </article>
+
+</main>
+
+<section class="about" id="about">
+  <div class="wrap">
+    <h2>About Plotline</h2>
+    <div class="text">
+      <p>Plotline is Luyen Chou's personal site of plots: small, self-contained interactive data visualizers about current events, each built from primary sources. No accounts, no tracking, static pages on GitHub Pages.</p>
+      <p>Each plot shows when it was last updated, and every figure cites where it came from.</p>
+      <div class="themes" aria-label="Themes">
+        <div class="economy">Economy<small>The National Debt</small></div>
+        <div class="technology">Technology<small>The Curve</small></div>
+        <div class="politics">Politics<small>The Mamdani Scorecard</small></div>
+        <div class="culture">Culture<small>Coming</small></div>
+        <div class="warfare">Warfare<small>Coming</small></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>Plotline · Current events, drawn from the data.</span>
+    <span>Sources: Treasury, FRED, Epoch AI, city records.</span>
+  </div>
+</footer>
+
+<script>
+  (function () {
+    var root = document.documentElement;
+    var key = 'plotline-theme';
+    try {
+      var saved = localStorage.getItem(key);
+      if (saved === 'light' || saved === 'dark') root.setAttribute('data-theme', saved);
+    } catch (e) {}
+    var btn = document.getElementById('theme-toggle');
+    if (!btn) return;
+    btn.addEventListener('click', function () {
+      var current = root.getAttribute('data-theme');
+      if (!current) {
+        current = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+      }
+      var next = current === 'dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', next);
+      try { localStorage.setItem(key, next); } catch (e) {}
+    });
+  })();
+</script>
+</body>
+</html>

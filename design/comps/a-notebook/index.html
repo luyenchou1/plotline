@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Plotline</title>
+<meta name="description" content="Current events, drawn from the data. A personal notebook of small interactive plots built from primary sources.">
+<script>(function(){try{var t=localStorage.getItem('plotline-theme');if(t==='dark'||t==='light'){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..600&family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap">
+<style>
+/* ==shared== */
+:root{
+  color-scheme:light;
+  --paper:#ECEDE8;
+  --paper-2:#F5F6F2;
+  --ink:#1E211F;
+  --ink-2:#5B615E;
+  --pencil:#7F8785;
+  --rule:rgba(30,33,31,.13);
+  --rule-soft:rgba(30,33,31,.06);
+  --dot:rgba(30,33,31,.18);
+  --ochre:#8A5A0A;
+  --ochre-wash:rgba(138,90,10,.10);
+  --lamp:none;
+  --display:"Bricolage Grotesque","Avenir Next Condensed","Helvetica Neue",Arial,sans-serif;
+  --body:"Newsreader","Iowan Old Style","Palatino Linotype",Georgia,serif;
+  --mono:"Courier Prime","Courier New",Courier,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --paper:#2A2722;
+    --paper-2:#332F29;
+    --ink:#E8E4DA;
+    --ink-2:#B3ADA0;
+    --pencil:#9A958A;
+    --rule:rgba(232,228,218,.14);
+    --rule-soft:rgba(232,228,218,.06);
+    --dot:rgba(232,228,218,.16);
+    --ochre:#EBBD4A;
+    --ochre-wash:rgba(235,189,74,.12);
+    --lamp:radial-gradient(120% 70% at 18% -10%,rgba(255,214,140,.11),rgba(255,214,140,0) 60%);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --paper:#2A2722;
+  --paper-2:#332F29;
+  --ink:#E8E4DA;
+  --ink-2:#B3ADA0;
+  --pencil:#9A958A;
+  --rule:rgba(232,228,218,.14);
+  --rule-soft:rgba(232,228,218,.06);
+  --dot:rgba(232,228,218,.16);
+  --ochre:#EBBD4A;
+  --ochre-wash:rgba(235,189,74,.12);
+  --lamp:radial-gradient(120% 70% at 18% -10%,rgba(255,214,140,.11),rgba(255,214,140,0) 60%);
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  color:var(--ink);
+  background:var(--lamp),repeating-linear-gradient(to bottom,transparent 0 27px,var(--rule-soft) 27px 28px),var(--paper);
+  background-attachment:scroll;
+  font-family:var(--body);
+  font-size:18px;
+  line-height:28px;
+  font-feature-settings:"onum" 0;
+}
+a{color:inherit;text-decoration-color:var(--rule);text-underline-offset:3px}
+a:hover{text-decoration-color:var(--ink)}
+:focus-visible{outline:2px solid var(--ochre);outline-offset:3px}
+.sheet{max-width:1100px;margin:0 auto;padding-inline:16px}
+@media (min-width:720px){.sheet{padding-inline:32px}}
+
+/* masthead */
+.masthead{display:flex;flex-wrap:wrap;align-items:center;gap:12px 28px;padding-block:22px 18px;border-bottom:1px solid var(--rule)}
+.wordmark{display:inline-flex;align-items:center;gap:10px;font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:-.01em;text-decoration:none;font-variation-settings:"opsz" 24}
+.wordmark .mark{display:block;flex:none;color:var(--ink)}
+.nav{display:flex;align-items:center;gap:22px;margin-left:auto;font-family:var(--display);font-weight:500;font-size:13px;letter-spacing:.07em;text-transform:uppercase;line-height:1}
+.nav a{text-decoration:none;padding-block:6px;border-bottom:1px solid transparent}
+.nav a:hover,.nav a[aria-current]{border-bottom-color:var(--ink)}
+.updated{font-family:var(--mono);font-size:13px;letter-spacing:0;text-transform:none;color:var(--ink-2);white-space:nowrap}
+.lamp{display:inline-flex;align-items:center;gap:7px;padding:6px 10px;border:1px solid var(--rule);border-radius:2px;background:transparent;color:var(--ink);font:inherit;cursor:pointer}
+.lamp:hover{border-color:var(--ink)}
+.lamp .glow{stroke:var(--ochre);opacity:0}
+:root[data-theme="dark"] .lamp .glow{opacity:1}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .lamp .glow{opacity:1}}
+
+/* notebook spread: main column + margin column */
+.spread{display:grid;grid-template-columns:minmax(0,1fr);gap:20px 48px;padding-block:40px}
+.margin{font-style:italic;font-size:16px;line-height:24px;color:var(--ink-2);display:flex;flex-direction:column;gap:18px}
+.margin p{margin:0}
+.note{position:relative;padding-left:34px}
+.note::before{content:"n.b.";position:absolute;left:0;top:0;font-family:var(--mono);font-style:normal;font-size:12px;letter-spacing:.02em;color:var(--ink-2)}
+.note.aha{color:var(--ink)}
+.note.aha::before{content:"aha";color:var(--ochre)}
+@media (min-width:900px){
+  .spread{grid-template-columns:minmax(0,1fr) 250px;gap:0 48px}
+  .margin{border-left:1px solid var(--rule);padding-left:24px;padding-top:6px}
+}
+
+/* type */
+.eyebrow{font-family:var(--mono);font-size:13px;line-height:20px;color:var(--ink-2);margin:0 0 14px}
+h1{font-family:var(--display);font-weight:700;font-size:clamp(34px,5.2vw,58px);line-height:1.04;letter-spacing:-.022em;margin:0 0 22px;max-width:16ch;text-wrap:balance;font-variation-settings:"opsz" 96}
+h2{font-family:var(--display);font-weight:600;font-size:26px;line-height:1.15;letter-spacing:-.01em;margin:0;text-wrap:balance}
+h3{font-family:var(--display);font-weight:600;font-size:24px;line-height:1.15;letter-spacing:-.012em;margin:0}
+.lede{font-size:21px;line-height:32px;max-width:62ch;margin:0}
+p{max-width:65ch}
+.label{font-family:var(--display);font-weight:600;font-size:12px;letter-spacing:.09em;text-transform:uppercase;line-height:1;color:var(--ink-2)}
+.mono{font-family:var(--mono)}
+.num{font-variant-numeric:tabular-nums}
+.stamp{display:inline-block;font-family:var(--mono);font-weight:700;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2);border:1.5px solid currentColor;border-radius:2px;padding:3px 8px 2px;line-height:1;transform:rotate(-2deg)}
+
+/* section head: a ruled line with a running head */
+.sec-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 16px;border-top:1px solid var(--ink);padding-top:12px;margin-top:8px}
+.sec-head .count{margin-left:auto;font-family:var(--mono);font-size:13px;color:var(--ink-2);white-space:nowrap}
+@media (max-width:719px){.sec-head .count{flex-basis:100%;margin-left:0;white-space:normal}}
+
+/* table of contents with dot leaders */
+.toc{list-style:none;margin:0;padding:0;font-size:17px}
+.toc li{display:flex;align-items:baseline;gap:10px;padding-block:6px}
+.toc .leader{flex:1;border-bottom:1px dotted var(--rule);transform:translateY(-6px)}
+.toc .val{font-family:var(--mono);font-size:14px;color:var(--ink-2);white-space:nowrap}
+
+footer{border-top:1px solid var(--rule);margin-top:48px;padding-block:22px 40px;font-size:15px;color:var(--ink-2);display:flex;flex-wrap:wrap;gap:8px 24px}
+footer .mono{font-size:13px}
+@media (prefers-reduced-motion:no-preference){a,.lamp{transition:border-color .15s,text-decoration-color .15s}}
+/* ==/shared== */
+
+/* landing */
+.hero{padding-block:8px 14px}
+.entries{list-style:none;margin:0;padding:0}
+.entry{display:grid;grid-template-columns:minmax(0,1fr);gap:14px 28px;padding-block:26px 30px;border-top:1px solid var(--rule)}
+.entry:first-child{border-top:0}
+.entry-key{display:flex;gap:14px;align-items:baseline;font-family:var(--mono);font-size:13px;line-height:20px;color:var(--ink-2)}
+.entry-key .no{font-weight:700;color:var(--ink)}
+.entry-body{display:flex;flex-direction:column;gap:10px}
+.entry-body h3 a{text-decoration:none}
+.entry-body h3 a:hover{text-decoration:underline;text-decoration-color:var(--ink);text-underline-offset:5px}
+.entry-body p{margin:0;font-size:17.5px;line-height:27px}
+.entry .aha{font-style:italic;color:var(--ink);font-size:16px;line-height:24px;padding-left:34px;position:relative;margin-top:2px}
+.entry .aha::before{content:"aha";position:absolute;left:0;top:1px;font-family:var(--mono);font-style:normal;font-size:12px;color:var(--ochre)}
+.entry .aha em{font-style:normal;text-decoration:underline;text-decoration-color:var(--ochre);text-decoration-thickness:1.5px;text-underline-offset:4px}
+.thumb{width:100%;max-width:220px;display:block}
+.thumb svg{display:block;width:100%;height:auto;border:1px solid var(--rule);background:radial-gradient(var(--dot) .8px,transparent 1px) 0 0/12px 12px,var(--paper-2)}
+.thumb .cap{font-family:var(--mono);font-size:11.5px;line-height:16px;color:var(--ink-2);margin-top:6px}
+@media (min-width:720px){
+  .entry{grid-template-columns:118px minmax(0,1fr) 200px;align-items:start}
+  .entry-key{flex-direction:column;gap:4px}
+}
+.about{padding-top:34px}
+.about p{margin:0 0 16px}
+</style>
+</head>
+<body>
+<div class="sheet">
+  <header class="masthead">
+    <a class="wordmark" href="index.html" aria-label="Plotline home">
+      <svg class="mark" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
+        <rect x="1.5" y="1.5" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.2"/>
+        <g fill="currentColor" opacity=".35"><circle cx="7" cy="7" r=".9"/><circle cx="12" cy="7" r=".9"/><circle cx="17" cy="7" r=".9"/><circle cx="7" cy="12" r=".9"/><circle cx="12" cy="12" r=".9"/><circle cx="17" cy="12" r=".9"/><circle cx="7" cy="17" r=".9"/><circle cx="12" cy="17" r=".9"/><circle cx="17" cy="17" r=".9"/></g>
+        <path d="M4 18.5 L9.5 13.5 L13 15.5 L19.5 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="19.5" cy="6.5" r="2.3" fill="var(--ochre)" stroke="var(--paper)" stroke-width="1"/>
+      </svg>
+      Plotline
+    </a>
+    <nav class="nav" aria-label="Site">
+      <a href="#entries" aria-current="page">Plots</a>
+      <a href="#about">About</a>
+      <button class="lamp" id="theme-toggle" type="button" aria-label="Toggle desk lamp (dark theme)">
+        <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 3h8l3 7H3z"/><path d="M10 10v6"/><path d="M6 17h8"/>
+          <path class="glow" d="M4.5 12.5 3 15M15.5 12.5 17 15M10 12v2.5"/>
+        </svg>
+        <span>Lamp</span>
+      </button>
+    </nav>
+  </header>
+
+  <main>
+    <section class="spread hero">
+      <div>
+        <p class="eyebrow">Current events, drawn from the data.</p>
+        <h1>The numbers behind the news, in a form you can explore.</h1>
+        <p class="lede">Each plot here is a small interactive built directly from primary sources: Treasury, FRED, city records, the agencies themselves. No accounts, no tracking, and every figure cites where it came from.</p>
+      </div>
+      <aside class="margin" aria-label="Margin notes">
+        <p class="note">Two plots are live and one is in progress. Each entry carries the date it was last updated.</p>
+        <p class="note">Themes so far: Economy, Technology, Politics. Culture and Warfare are waiting for their first entry.</p>
+      </aside>
+    </section>
+
+    <section class="spread" id="entries" style="padding-top:8px">
+      <div>
+        <div class="sec-head">
+          <h2>Entries</h2>
+          <span class="count">3 entries · 2 live · 1 in progress</span>
+        </div>
+        <ol class="entries">
+          <li class="entry">
+            <div class="entry-key">
+              <span class="no">No. 1</span>
+              <span>Economy</span>
+              <span class="num">Updated Sep 20, 2026</span>
+            </div>
+            <div class="entry-body">
+              <h3><a href="plot.html">The National Debt</a></h3>
+              <p>Thirty-three years of Treasury's daily count, with GDP alongside it, the laws and shocks that bent the curve, and how long each trillion took.</p>
+              <p class="aha">The debt line crossing above GDP in <em>Feb 2013</em>. Today it stands at 123% of GDP.</p>
+            </div>
+            <a class="thumb" href="plot.html" aria-label="Open The National Debt">
+              <svg viewBox="0 0 160 90" role="img" aria-label="Debt and GDP, 1993 to 2026, with the 2013 crossover marked">
+                <path d="M4.0 71.7 L5.6 71.4 L7.9 70.9 L10.5 70.4 L12.9 69.9 L15.2 69.4 L17.4 69.0 L19.6 68.5 L21.9 68.0 L24.1 67.6 L26.4 67.1 L28.6 66.6 L30.8 66.2 L33.1 65.7 L35.3 65.2 L37.5 64.8 L39.8 64.3 L42.0 63.9 L44.2 63.5 L46.5 63.1 L48.7 62.6 L50.9 62.0 L53.2 61.3 L55.4 60.6 L57.6 59.9 L59.9 59.1 L62.3 58.3 L64.5 57.6 L66.6 57.1 L68.5 56.8 L70.2 56.7 L71.8 56.7 L73.3 56.7 L74.6 56.8 L75.8 57.0 L76.9 57.2 L77.8 57.3 L78.4 57.1 L78.9 56.8 L79.3 56.5 L80.0 56.1 L81.0 55.9 L82.1 55.6 L83.3 55.3 L84.5 55.0 L85.6 54.7 L86.7 54.4 L87.8 54.2 L88.9 53.9 L90.2 53.8 L91.4 53.7 L92.7 53.6 L93.9 53.4 L94.9 53.0 L95.9 52.5 L96.9 52.0 L97.9 51.5 L99.0 51.1 L100.1 50.8 L101.2 50.5 L102.4 50.2 L103.5 50.0 L104.6 49.7 L105.7 49.5 L106.8 49.3 L107.9 48.9 L109.1 48.6 L110.2 48.2 L111.3 47.8 L112.4 47.3 L113.5 46.9 L114.6 46.4 L115.8 45.9 L116.9 45.4 L117.9 44.8 L119.0 44.3 L120.2 44.3 L121.7 45.0 L123.2 46.3 L124.8 47.4 L126.0 47.6 L127.0 46.4 L127.7 44.3 L128.4 42.0 L129.2 40.2 L130.2 38.9 L131.3 38.0 L132.5 37.1 L133.6 36.3 L134.8 35.4 L135.9 34.7 L137.0 33.9 L138.1 33.1 L139.2 32.3 L140.4 31.4 L141.5 30.6 L142.6 29.8 L143.6 29.0 L144.6 28.2 L145.7 27.4 L147.1 26.6 L148.9 25.8 L151.2 24.8 L153.3 24.0 L154.7 23.5" fill="none" stroke="var(--pencil)" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>
+                <path d="M4.0 75.8 L5.6 75.6 L7.9 75.3 L10.5 75.0 L12.9 74.8 L15.2 74.5 L17.4 74.3 L19.6 74.1 L21.9 74.0 L24.1 73.8 L26.4 73.7 L28.6 73.6 L30.8 73.5 L33.1 73.5 L35.3 73.5 L37.5 73.4 L39.8 73.2 L42.0 72.9 L44.2 72.4 L46.5 71.9 L48.7 71.4 L50.9 70.9 L53.2 70.4 L55.4 69.8 L57.6 69.3 L60.0 68.8 L62.4 68.3 L64.7 67.8 L66.6 67.3 L68.0 66.8 L69.1 66.4 L70.0 66.0 L71.1 65.4 L72.2 64.7 L73.3 63.7 L74.4 62.8 L75.5 61.9 L76.6 61.0 L77.7 60.2 L78.8 59.4 L80.0 58.7 L81.6 58.3 L83.3 58.0 L85.0 57.7 L86.3 57.4 L86.9 57.2 L87.2 57.0 L87.4 56.8 L87.6 56.5 L87.9 56.0 L88.0 55.3 L88.4 54.6 L88.9 54.1 L90.0 53.7 L91.3 53.4 L92.7 53.2 L93.9 53.0 L94.7 52.9 L95.4 53.0 L96.0 53.0 L96.5 52.9 L96.9 52.5 L97.1 52.0 L97.4 51.4 L97.9 50.9 L98.8 50.7 L99.9 50.7 L101.2 50.6 L102.4 50.3 L103.5 49.7 L104.6 49.0 L105.7 48.2 L106.8 47.6 L107.9 47.2 L109.1 47.0 L110.2 46.8 L111.3 46.5 L112.4 46.0 L113.5 45.3 L114.6 44.7 L115.8 44.1 L116.9 43.5 L117.9 42.9 L119.1 42.3 L120.2 41.8 L121.6 41.5 L123.1 41.3 L124.5 41.0 L125.6 40.4 L126.3 39.2 L126.7 37.6 L127.0 36.0 L127.4 34.6 L127.8 33.6 L128.1 32.9 L128.5 32.1 L129.2 31.3 L130.1 30.1 L131.1 28.8 L132.3 27.6 L133.6 26.6 L135.2 26.1 L136.9 26.0 L138.6 25.8 L139.9 25.5 L140.7 24.9 L141.1 24.2 L141.5 23.3 L142.1 22.3 L143.1 21.2 L144.2 19.8 L145.4 18.4 L146.6 17.1 L147.7 16.1 L148.9 15.2 L150.0 14.3 L151.1 13.4 L152.1 12.4 L153.2 11.3 L154.1 10.2 L154.7 9.5" fill="none" stroke="var(--ink)" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>
+                <circle cx="93.9" cy="53.0" r="3.2" fill="var(--ochre)" stroke="var(--paper-2)" stroke-width="1.5"/>
+                <circle cx="154.7" cy="9.5" r="3.2" fill="var(--ochre)" stroke="var(--paper-2)" stroke-width="1.5"/>
+              </svg>
+              <span class="cap">Debt and GDP, $T, 1993 to 2026</span>
+            </a>
+          </li>
+
+          <li class="entry">
+            <div class="entry-key">
+              <span class="no">No. 2</span>
+              <span>Technology</span>
+              <span class="num">Updated Sep 20, 2026</span>
+            </div>
+            <div class="entry-body">
+              <h3><a href="#">The Curve</a></h3>
+              <p>Chips have doubled every two years since 1971. The AI built on them doubles every six months. Four exponentials on one axis, and how fast the tests fall.</p>
+              <p class="aha">After 2012 the AI lines peel away from Moore's Law, from two years per doubling to <em>about six months</em>.</p>
+            </div>
+            <a class="thumb" href="#" aria-label="Open The Curve">
+              <svg viewBox="0 0 160 90" role="img" aria-label="Four exponentials on one log axis, indexed to 2012; the AI lines peel away from the transistor line">
+                <path d="M4.0 81.5 L115.3 53.1 L153.3 43.4" fill="none" stroke="var(--ink)" stroke-width="1.6" stroke-linecap="round"/>
+                <path d="M115.3 53.1 L153.3 35.4" fill="none" stroke="var(--pencil)" stroke-width="1.6" stroke-linecap="round"/>
+                <path d="M115.3 53.1 L153.3 20.7" fill="none" stroke="var(--pencil)" stroke-width="1.6" stroke-linecap="round"/>
+                <path d="M115.3 53.1 L153.3 8.9" fill="none" stroke="var(--ink)" stroke-width="1.6" stroke-linecap="round"/>
+                <circle cx="115.3" cy="53.1" r="3.2" fill="var(--ochre)" stroke="var(--paper-2)" stroke-width="1.5"/>
+                <text x="7" y="12" font-family="Courier Prime, Courier New, monospace" font-size="8" fill="var(--ink-2)">log₂ · 2012 = 1</text>
+              </svg>
+              <span class="cap">Four exponentials, log axis, 1971 to 2026</span>
+            </a>
+          </li>
+
+          <li class="entry">
+            <div class="entry-key">
+              <span class="no">No. 3</span>
+              <span>Politics</span>
+              <span class="stamp">In progress</span>
+            </div>
+            <div class="entry-body">
+              <h3>The Mamdani Scorecard</h3>
+              <p>This entry is still being drawn.</p>
+            </div>
+            <div class="thumb" aria-hidden="true">
+              <svg viewBox="0 0 160 90">
+                <g stroke="var(--rule)" stroke-width="1"><line x1="10" y1="22" x2="150" y2="22"/><line x1="10" y1="38" x2="150" y2="38"/><line x1="10" y1="54" x2="150" y2="54"/><line x1="10" y1="70" x2="150" y2="70"/></g>
+                <text x="12" y="18" font-family="Courier Prime, Courier New, monospace" font-size="9" fill="var(--pencil)">in progress</text>
+              </svg>
+              <span class="cap">Nothing drawn yet</span>
+            </div>
+          </li>
+        </ol>
+      </div>
+      <aside class="margin" aria-label="Margin notes">
+        <p class="note">Entries are numbered in the order they were started. There will eventually be ten to twenty of them.</p>
+        <p class="note">Gold marks a milestone or the moment the chart was made for. Ink is the line the entry is about; pencil is the line it is measured against.</p>
+      </aside>
+    </section>
+
+    <section class="spread" style="padding-top:8px">
+      <div>
+        <div class="sec-head">
+          <h2>Index by theme</h2>
+          <span class="count">5 themes</span>
+        </div>
+        <ul class="toc" style="margin-top:12px">
+          <li><span>Economy</span><span class="leader"></span><span class="val">1 entry</span></li>
+          <li><span>Technology</span><span class="leader"></span><span class="val">1 entry</span></li>
+          <li><span>Politics</span><span class="leader"></span><span class="val">1 in progress</span></li>
+          <li><span>Culture</span><span class="leader"></span><span class="val">none yet</span></li>
+          <li><span>Warfare</span><span class="leader"></span><span class="val">none yet</span></li>
+        </ul>
+      </div>
+      <aside class="margin" aria-label="Margin notes">
+        <p class="note">Sources so far: Treasury, FRED, Epoch AI and city records.</p>
+      </aside>
+    </section>
+
+    <section class="spread about" id="about" style="padding-top:8px">
+      <div>
+        <div class="sec-head">
+          <h2>About this notebook</h2>
+        </div>
+        <p style="margin-top:14px">Plotline is Luyen Chou's personal site of plots: small, self-contained interactive data visualizers about current events, each built from primary sources. It is a way of understanding the world through data, one entry at a time, and each plot opens with a short note on why it was made.</p>
+        <p>There are no accounts and no tracking. The pages are static, hosted on GitHub Pages, and every figure cites where it came from.</p>
+      </div>
+      <aside class="margin" aria-label="Margin notes">
+        <p class="note">Each plot shows an "Updated" date, and the numbers on it refresh with their sources.</p>
+      </aside>
+    </section>
+  </main>
+
+  <footer>
+    <span>Plotline</span>
+    <span>Current events, drawn from the data.</span>
+    <span class="mono">Sep 20, 2026</span>
+  </footer>
+</div>
+
+<script>
+(function(){
+  var btn=document.getElementById('theme-toggle');
+  var root=document.documentElement;
+  function current(){
+    var t=root.getAttribute('data-theme');
+    if(t==='dark'||t==='light')return t;
+    return (window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light';
+  }
+  function paint(){btn.setAttribute('aria-pressed',current()==='dark'?'true':'false');}
+  btn.addEventListener('click',function(){
+    var next=current()==='dark'?'light':'dark';
+    root.setAttribute('data-theme',next);
+    try{localStorage.setItem('plotline-theme',next);}catch(e){}
+    paint();
+  });
+  paint();
+})();
+</script>
+</body>
+</html>

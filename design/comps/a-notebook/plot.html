@@ -1,0 +1,442 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The National Debt</title>
+<meta name="description" content="Thirty-three years of Treasury's daily count, with GDP alongside it.">
+<script>(function(){try{var t=localStorage.getItem('plotline-theme');if(t==='dark'||t==='light'){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..600&family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap">
+<style>
+/* ==shared== */
+:root{
+  color-scheme:light;
+  --paper:#ECEDE8;
+  --paper-2:#F5F6F2;
+  --ink:#1E211F;
+  --ink-2:#5B615E;
+  --pencil:#7F8785;
+  --rule:rgba(30,33,31,.13);
+  --rule-soft:rgba(30,33,31,.06);
+  --dot:rgba(30,33,31,.18);
+  --ochre:#8A5A0A;
+  --ochre-wash:rgba(138,90,10,.10);
+  --lamp:none;
+  --display:"Bricolage Grotesque","Avenir Next Condensed","Helvetica Neue",Arial,sans-serif;
+  --body:"Newsreader","Iowan Old Style","Palatino Linotype",Georgia,serif;
+  --mono:"Courier Prime","Courier New",Courier,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --paper:#2A2722;
+    --paper-2:#332F29;
+    --ink:#E8E4DA;
+    --ink-2:#B3ADA0;
+    --pencil:#9A958A;
+    --rule:rgba(232,228,218,.14);
+    --rule-soft:rgba(232,228,218,.06);
+    --dot:rgba(232,228,218,.16);
+    --ochre:#EBBD4A;
+    --ochre-wash:rgba(235,189,74,.12);
+    --lamp:radial-gradient(120% 70% at 18% -10%,rgba(255,214,140,.11),rgba(255,214,140,0) 60%);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --paper:#2A2722;
+  --paper-2:#332F29;
+  --ink:#E8E4DA;
+  --ink-2:#B3ADA0;
+  --pencil:#9A958A;
+  --rule:rgba(232,228,218,.14);
+  --rule-soft:rgba(232,228,218,.06);
+  --dot:rgba(232,228,218,.16);
+  --ochre:#EBBD4A;
+  --ochre-wash:rgba(235,189,74,.12);
+  --lamp:radial-gradient(120% 70% at 18% -10%,rgba(255,214,140,.11),rgba(255,214,140,0) 60%);
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  color:var(--ink);
+  background:var(--lamp),repeating-linear-gradient(to bottom,transparent 0 27px,var(--rule-soft) 27px 28px),var(--paper);
+  background-attachment:scroll;
+  font-family:var(--body);
+  font-size:18px;
+  line-height:28px;
+  font-feature-settings:"onum" 0;
+}
+a{color:inherit;text-decoration-color:var(--rule);text-underline-offset:3px}
+a:hover{text-decoration-color:var(--ink)}
+:focus-visible{outline:2px solid var(--ochre);outline-offset:3px}
+.sheet{max-width:1100px;margin:0 auto;padding-inline:16px}
+@media (min-width:720px){.sheet{padding-inline:32px}}
+
+/* masthead */
+.masthead{display:flex;flex-wrap:wrap;align-items:center;gap:12px 28px;padding-block:22px 18px;border-bottom:1px solid var(--rule)}
+.wordmark{display:inline-flex;align-items:center;gap:10px;font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:-.01em;text-decoration:none;font-variation-settings:"opsz" 24}
+.wordmark .mark{display:block;flex:none;color:var(--ink)}
+.nav{display:flex;align-items:center;gap:22px;margin-left:auto;font-family:var(--display);font-weight:500;font-size:13px;letter-spacing:.07em;text-transform:uppercase;line-height:1}
+.nav a{text-decoration:none;padding-block:6px;border-bottom:1px solid transparent}
+.nav a:hover,.nav a[aria-current]{border-bottom-color:var(--ink)}
+.updated{font-family:var(--mono);font-size:13px;letter-spacing:0;text-transform:none;color:var(--ink-2);white-space:nowrap}
+.lamp{display:inline-flex;align-items:center;gap:7px;padding:6px 10px;border:1px solid var(--rule);border-radius:2px;background:transparent;color:var(--ink);font:inherit;cursor:pointer}
+.lamp:hover{border-color:var(--ink)}
+.lamp .glow{stroke:var(--ochre);opacity:0}
+:root[data-theme="dark"] .lamp .glow{opacity:1}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .lamp .glow{opacity:1}}
+
+/* notebook spread: main column + margin column */
+.spread{display:grid;grid-template-columns:minmax(0,1fr);gap:20px 48px;padding-block:40px}
+.margin{font-style:italic;font-size:16px;line-height:24px;color:var(--ink-2);display:flex;flex-direction:column;gap:18px}
+.margin p{margin:0}
+.note{position:relative;padding-left:34px}
+.note::before{content:"n.b.";position:absolute;left:0;top:0;font-family:var(--mono);font-style:normal;font-size:12px;letter-spacing:.02em;color:var(--ink-2)}
+.note.aha{color:var(--ink)}
+.note.aha::before{content:"aha";color:var(--ochre)}
+@media (min-width:900px){
+  .spread{grid-template-columns:minmax(0,1fr) 250px;gap:0 48px}
+  .margin{border-left:1px solid var(--rule);padding-left:24px;padding-top:6px}
+}
+
+/* type */
+.eyebrow{font-family:var(--mono);font-size:13px;line-height:20px;color:var(--ink-2);margin:0 0 14px}
+h1{font-family:var(--display);font-weight:700;font-size:clamp(34px,5.2vw,58px);line-height:1.04;letter-spacing:-.022em;margin:0 0 22px;max-width:16ch;text-wrap:balance;font-variation-settings:"opsz" 96}
+h2{font-family:var(--display);font-weight:600;font-size:26px;line-height:1.15;letter-spacing:-.01em;margin:0;text-wrap:balance}
+h3{font-family:var(--display);font-weight:600;font-size:24px;line-height:1.15;letter-spacing:-.012em;margin:0}
+.lede{font-size:21px;line-height:32px;max-width:62ch;margin:0}
+p{max-width:65ch}
+.label{font-family:var(--display);font-weight:600;font-size:12px;letter-spacing:.09em;text-transform:uppercase;line-height:1;color:var(--ink-2)}
+.mono{font-family:var(--mono)}
+.num{font-variant-numeric:tabular-nums}
+.stamp{display:inline-block;font-family:var(--mono);font-weight:700;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2);border:1.5px solid currentColor;border-radius:2px;padding:3px 8px 2px;line-height:1;transform:rotate(-2deg)}
+
+/* section head: a ruled line with a running head */
+.sec-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 16px;border-top:1px solid var(--ink);padding-top:12px;margin-top:8px}
+.sec-head .count{margin-left:auto;font-family:var(--mono);font-size:13px;color:var(--ink-2);white-space:nowrap}
+@media (max-width:719px){.sec-head .count{flex-basis:100%;margin-left:0;white-space:normal}}
+
+/* table of contents with dot leaders */
+.toc{list-style:none;margin:0;padding:0;font-size:17px}
+.toc li{display:flex;align-items:baseline;gap:10px;padding-block:6px}
+.toc .leader{flex:1;border-bottom:1px dotted var(--rule);transform:translateY(-6px)}
+.toc .val{font-family:var(--mono);font-size:14px;color:var(--ink-2);white-space:nowrap}
+
+footer{border-top:1px solid var(--rule);margin-top:48px;padding-block:22px 40px;font-size:15px;color:var(--ink-2);display:flex;flex-wrap:wrap;gap:8px 24px}
+footer .mono{font-size:13px}
+@media (prefers-reduced-motion:no-preference){a,.lamp{transition:border-color .15s,text-decoration-color .15s}}
+/* ==/shared== */
+
+/* plot page */
+.crumbs{display:flex;flex-wrap:wrap;gap:6px 14px;font-family:var(--mono);font-size:13px;line-height:20px;color:var(--ink-2);margin:0 0 16px}
+.crumbs a{text-decoration:none}
+.crumbs a:hover{text-decoration:underline}
+.plot-head h1{max-width:14ch;margin-bottom:20px}
+
+/* pinned note */
+.pinned{position:relative;background:var(--paper-2);border:1px solid var(--rule);padding:22px 24px 20px 26px;max-width:66ch;box-shadow:0 1px 0 var(--rule)}
+.pinned::before{content:"";position:absolute;left:11px;top:14px;width:7px;height:7px;border-radius:50%;background:var(--ink-2);box-shadow:inset 0 0 0 1.5px var(--paper-2),0 0 0 1px var(--ink-2)}
+.pinned .label{display:block;margin-bottom:8px}
+.pinned p{margin:0;font-size:19px;line-height:30px}
+
+/* ledger of figures */
+.ledger{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0;margin:34px 0 8px;border-top:1px solid var(--ink);border-bottom:1px solid var(--rule)}
+.fig{padding:16px 18px 16px 0;border-left:1px solid var(--rule);padding-left:16px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.fig:first-child{border-left:0;padding-left:0}
+.fig .v{font-family:var(--mono);font-weight:700;font-size:clamp(24px,4.2vw,36px);line-height:1.05;letter-spacing:-.01em;white-space:nowrap}
+.fig .v.aha{color:var(--ochre)}
+.fig .l{font-family:var(--display);font-weight:600;font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-2)}
+.fig .s{font-size:14.5px;line-height:20px;color:var(--ink-2);font-style:italic}
+@media (max-width:719px){
+  .fig:nth-child(3){border-left:0;padding-left:0}
+  .fig:nth-child(-n+2){border-bottom:1px solid var(--rule)}
+}
+@media (min-width:720px){.ledger{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.ticker{font-family:var(--mono);font-size:14px;line-height:22px;color:var(--ink-2);margin:10px 0 0;font-variant-numeric:tabular-nums}
+.ticker b{color:var(--ink);font-weight:700}
+
+/* figure block */
+.figure{margin-top:34px}
+.fig-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 18px;margin-bottom:6px}
+.fig-head .no{font-family:var(--mono);font-size:13px;color:var(--ink-2)}
+.fig-head h2{font-size:22px}
+.fig-sub{margin:0 0 14px;font-size:16px;line-height:24px;color:var(--ink-2);font-style:italic}
+.legend{display:flex;flex-wrap:wrap;gap:8px 22px;margin:0 0 10px;padding:0;list-style:none;font-family:var(--display);font-weight:500;font-size:13px;letter-spacing:.03em;color:var(--ink-2)}
+.legend li{display:inline-flex;align-items:center;gap:8px}
+.legend .k{display:inline-block;width:22px;height:0;border-top:2px solid var(--ink);border-radius:2px}
+.legend .k.gdp{border-top-color:var(--pencil)}
+.legend .k.ms{width:9px;height:9px;border:0;border-radius:50%;background:var(--ochre)}
+.chart{position:relative;border:1px solid var(--rule);background:radial-gradient(var(--dot) .9px,transparent 1.1px) 0 0/16px 16px,var(--paper-2);overflow:hidden}
+.chart svg{display:block;width:100%;height:auto;font-family:var(--mono);touch-action:pan-y}
+.chart .tick{font-size:11.5px;fill:var(--ink-2)}
+.chart .grid{stroke:var(--rule);stroke-width:1}
+.chart .axis{stroke:var(--ink-2);stroke-width:1}
+.chart .ann{font-family:var(--body);font-style:italic;font-size:15.5px;fill:var(--ochre)}
+.chart .ann-sub{font-size:11px;fill:var(--ink-2)}
+.chart .ms-v{font-weight:700;font-size:13px;fill:var(--ink)}
+.chart .ms-d{font-size:11px;fill:var(--ink-2)}
+.chart .end{font-size:12px;fill:var(--ink-2)}
+.chart #hover{pointer-events:none}
+.chart #hover text{font-size:11.5px;fill:var(--ink)}
+.chart #hover rect{fill:var(--paper-2);stroke:var(--rule)}
+.chart-foot{display:flex;flex-wrap:wrap;gap:6px 18px;justify-content:space-between;font-family:var(--mono);font-size:12.5px;line-height:18px;color:var(--ink-2);margin-top:8px}
+
+.also{margin-top:36px}
+.also .toc{margin-top:12px}
+</style>
+</head>
+<body>
+<div class="sheet">
+  <header class="masthead">
+    <a class="wordmark" href="index.html" aria-label="Plotline home">
+      <svg class="mark" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
+        <rect x="1.5" y="1.5" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.2"/>
+        <g fill="currentColor" opacity=".35"><circle cx="7" cy="7" r=".9"/><circle cx="12" cy="7" r=".9"/><circle cx="17" cy="7" r=".9"/><circle cx="7" cy="12" r=".9"/><circle cx="12" cy="12" r=".9"/><circle cx="17" cy="12" r=".9"/><circle cx="7" cy="17" r=".9"/><circle cx="12" cy="17" r=".9"/><circle cx="17" cy="17" r=".9"/></g>
+        <path d="M4 18.5 L9.5 13.5 L13 15.5 L19.5 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="19.5" cy="6.5" r="2.3" fill="var(--ochre)" stroke="var(--paper)" stroke-width="1"/>
+      </svg>
+      Plotline
+    </a>
+    <nav class="nav" aria-label="Site">
+      <a href="index.html#entries">Plots</a>
+      <a href="index.html#about">About</a>
+      <span class="updated num">Updated Sep 20, 2026</span>
+      <button class="lamp" id="theme-toggle" type="button" aria-label="Toggle desk lamp (dark theme)">
+        <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 3h8l3 7H3z"/><path d="M10 10v6"/><path d="M6 17h8"/>
+          <path class="glow" d="M4.5 12.5 3 15M15.5 12.5 17 15M10 12v2.5"/>
+        </svg>
+        <span>Lamp</span>
+      </button>
+    </nav>
+  </header>
+
+  <main>
+    <section class="spread plot-head">
+      <div>
+        <p class="crumbs"><a href="index.html#entries">Entries</a><span>No. 1</span><span>Economy</span><span class="num">Updated Sep 20, 2026</span></p>
+        <h1>The National Debt</h1>
+
+        <div class="pinned">
+          <span class="label">Pinned note</span>
+          <p>Thirty-three years of Treasury's daily count, with GDP alongside it, the laws and shocks that bent the curve, and how long each trillion took.</p>
+        </div>
+
+        <div class="ledger" role="list" aria-label="Headline figures">
+          <div class="fig" role="listitem">
+            <span class="l">Total debt</span>
+            <span class="v">$40.09T</span>
+            <span class="s">Treasury count, Sep 17, 2026</span>
+          </div>
+          <div class="fig" role="listitem">
+            <span class="l">Per second</span>
+            <span class="v">+$102,386</span>
+            <span class="s">90-day pace</span>
+          </div>
+          <div class="fig" role="listitem">
+            <span class="l">Debt to GDP</span>
+            <span class="v">123%</span>
+            <span class="s">latest quarter</span>
+          </div>
+          <div class="fig" role="listitem">
+            <span class="l">Debt passed GDP</span>
+            <span class="v aha">Feb 2013</span>
+            <span class="s">the crossing, marked below</span>
+          </div>
+        </div>
+        <p class="ticker" id="ticker" aria-live="off">Running count since you opened this page: <b id="ticker-v">$40,090,000,000,000</b> <span>at the 90-day pace</span></p>
+      </div>
+      <aside class="margin" aria-label="Margin notes">
+        <p class="note">Debt is the total public debt outstanding, Treasury's daily count. GDP is nominal, quarterly, from FRED.</p>
+        <p class="note">Both figures are in trillions of nominal dollars, which is why they can share one axis.</p>
+      </aside>
+    </section>
+
+    <section class="spread figure" style="padding-top:0">
+      <div>
+        <div class="fig-head">
+          <span class="no">Fig. 1</span>
+          <h2>Debt and GDP, 1993 to 2026</h2>
+        </div>
+        <p class="fig-sub">Trillions of nominal dollars, one axis. Hover or touch to read a point.</p>
+        <ul class="legend" aria-label="Legend">
+          <li><span class="k"></span>Debt, Treasury daily</li>
+          <li><span class="k gdp"></span>GDP, FRED quarterly</li>
+          <li><span class="k ms"></span>Milestone</li>
+        </ul>
+
+        <div class="chart">
+          <svg id="debt-chart" viewBox="0 0 730 400" role="img" aria-labelledby="chart-title chart-desc">
+            <title id="chart-title">Debt and GDP, 1993 to 2026, in trillions of dollars</title>
+            <desc id="chart-desc">Two lines on one axis. The debt line rises from about four trillion dollars in 1993 and crosses above GDP in February 2013, marked in gold. The latest count, 40.09 trillion on September 17, 2026, is marked at the end of the line.</desc>
+
+            <!-- gridlines and y ticks -->
+            <g class="grid">
+              <line x1="46" x2="626" y1="282" y2="282"/>
+              <line x1="46" x2="626" y1="202" y2="202"/>
+              <line x1="46" x2="626" y1="122" y2="122"/>
+              <line x1="46" x2="626" y1="42" y2="42"/>
+            </g>
+            <g class="tick" text-anchor="end">
+              <text x="38" y="366">$0</text>
+              <text x="38" y="286">$10T</text>
+              <text x="38" y="206">$20T</text>
+              <text x="38" y="126">$30T</text>
+              <text x="38" y="46">$40T</text>
+            </g>
+            <line class="axis" x1="46" x2="626" y1="362" y2="362"/>
+            <g class="tick" text-anchor="middle">
+              <text x="80.1" y="382">1995</text>
+              <text x="165.4" y="382">2000</text>
+              <text x="250.7" y="382">2005</text>
+              <text x="336" y="382">2010</text>
+              <text x="421.3" y="382">2015</text>
+              <text x="506.6" y="382">2020</text>
+              <text x="591.9" y="382">2025</text>
+            </g>
+
+            <!-- the gap since the crossing -->
+            <path fill="var(--ochre-wash)" stroke="none" d="M388.9 228.4 L391.1 228.2 L393.1 228.2 L394.9 228.4 L396.4 228.6 L397.8 228.5 L399.1 228.0 L400.1 227.0 L400.8 225.6 L401.3 224.0 L401.8 222.3 L402.8 220.8 L404.2 219.6 L406.4 218.9 L409.0 218.6 L412.0 218.4 L415.2 218.2 L418.3 217.7 L421.3 216.8 L424.1 215.3 L427.0 213.3 L429.8 211.1 L432.7 208.9 L435.5 206.8 L438.4 205.2 L441.2 204.1 L444.0 203.3 L446.9 202.7 L449.7 202.2 L452.6 201.4 L455.4 200.4 L458.3 199.0 L461.1 197.3 L463.9 195.5 L466.8 193.6 L469.6 191.8 L472.5 190.0 L475.3 188.3 L478.0 186.6 L480.8 185.0 L483.6 183.3 L486.5 181.8 L489.5 180.4 L492.9 179.4 L496.6 178.7 L500.4 178.2 L504.1 177.4 L507.3 176.1 L510.0 174.0 L511.9 170.8 L513.3 166.7 L514.3 162.1 L515.1 157.4 L515.8 152.9 L516.8 149.2 L517.8 146.3 L518.7 143.8 L519.6 141.7 L520.6 139.6 L521.9 137.4 L523.6 134.8 L525.8 131.6 L528.3 128.0 L531.1 124.2 L534.1 120.5 L537.3 117.3 L540.7 114.8 L544.5 113.2 L548.7 112.4 L553.2 112.0 L557.5 111.7 L561.4 111.1 L564.6 110.0 L566.8 108.3 L568.3 106.4 L569.3 104.3 L570.2 101.9 L571.4 99.3 L573.1 96.4 L575.5 93.1 L578.2 89.3 L581.1 85.3 L584.2 81.3 L587.2 77.5 L590.2 74.0 L593.1 71.0 L596.0 68.2 L598.9 65.6 L601.8 63.1 L604.6 60.6 L607.2 58.0 L609.9 55.1 L612.6 51.9 L615.2 48.6 L617.6 45.6 L619.6 43.1 L621.1 41.3 L621.1 101.2 L617.7 102.7 L613.0 104.7 L607.5 107.1 L601.8 109.8 L596.4 112.4 L591.9 114.8 L588.3 117.1 L585.3 119.3 L582.6 121.6 L580.1 123.8 L577.5 126.1 L574.8 128.4 L572.0 130.8 L569.1 133.2 L566.3 135.6 L563.5 138.0 L560.6 140.4 L557.8 142.8 L554.9 145.1 L552.1 147.3 L549.2 149.5 L546.4 151.7 L543.5 154.0 L540.7 156.4 L537.8 158.8 L534.8 161.2 L531.9 163.7 L529.0 166.4 L526.2 169.5 L523.6 173.2 L521.5 178.2 L519.7 184.5 L518.0 191.1 L516.3 197.4 L514.2 202.4 L511.7 205.2 L508.5 205.2 L504.9 203.0 L500.9 199.6 L496.9 195.7 L493.0 192.5 L489.5 190.8 L486.4 190.7 L483.5 191.6 L480.7 193.0 L478.0 194.7 L475.3 196.5 L472.5 198.0 L469.6 199.3 L466.8 200.7 L463.9 202.1 L461.1 203.4 L458.3 204.8 L455.4 206.0 L452.6 207.2 L449.7 208.3 L446.9 209.5 L444.0 210.5 L441.2 211.5 L438.4 212.4 L435.5 213.2 L432.7 213.9 L429.8 214.4 L427.0 215.0 L424.1 215.7 L421.3 216.4 L418.4 217.2 L415.5 218.1 L412.7 218.9 L409.8 219.9 L407.0 220.9 L404.2 222.0 L401.6 223.3 L399.1 224.7 L396.7 226.2 L394.2 227.7 L391.6 229.0 L388.9 230.0 Z"/>
+
+            <!-- GDP (pencil) -->
+            <path id="gdp-line" fill="none" stroke="var(--pencil)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" d="M46.0 309.2 L49.7 308.3 L54.8 307.1 L60.9 305.7 L67.5 304.2 L74.0 302.6 L80.1 301.2 L85.8 299.9 L91.5 298.5 L97.2 297.2 L102.9 295.9 L108.5 294.5 L114.2 293.2 L119.9 291.9 L125.6 290.5 L131.3 289.2 L137.0 287.9 L142.7 286.5 L148.4 285.2 L154.0 283.9 L159.7 282.5 L165.4 281.1 L171.1 279.8 L176.8 278.5 L182.5 277.2 L188.2 276.0 L193.8 274.9 L199.5 273.9 L205.2 272.7 L210.9 271.5 L216.6 270.0 L222.3 268.3 L228.0 266.4 L233.6 264.3 L239.3 262.2 L245.0 260.1 L250.7 258.0 L256.5 255.9 L262.4 253.6 L268.3 251.3 L274.1 249.2 L279.6 247.4 L284.8 246.0 L289.7 245.1 L294.3 244.5 L298.7 244.3 L302.8 244.3 L306.7 244.3 L310.4 244.4 L313.8 244.7 L317.0 245.2 L320.0 245.8 L322.7 246.4 L325.2 246.8 L327.5 246.8 L329.3 246.4 L330.6 245.7 L331.7 244.8 L332.8 243.9 L334.2 242.9 L336.0 242.0 L338.3 241.2 L341.1 240.4 L344.0 239.6 L347.1 238.8 L350.1 238.0 L353.1 237.2 L355.9 236.4 L358.7 235.5 L361.5 234.7 L364.3 233.8 L367.2 233.1 L370.1 232.4 L373.2 231.9 L376.4 231.6 L379.6 231.4 L382.8 231.1 L385.9 230.7 L388.9 230.0 L391.6 229.0 L394.2 227.7 L396.7 226.2 L399.1 224.7 L401.6 223.3 L404.2 222.0 L407.0 220.9 L409.8 219.9 L412.7 218.9 L415.5 218.1 L418.4 217.2 L421.3 216.4 L424.1 215.7 L427.0 215.0 L429.8 214.4 L432.7 213.9 L435.5 213.2 L438.4 212.4 L441.2 211.5 L444.0 210.5 L446.9 209.5 L449.7 208.3 L452.6 207.2 L455.4 206.0 L458.3 204.8 L461.1 203.4 L463.9 202.1 L466.8 200.7 L469.6 199.3 L472.5 198.0 L475.3 196.5 L478.0 194.7 L480.7 193.0 L483.5 191.6 L486.4 190.7 L489.5 190.8 L493.0 192.5 L496.9 195.7 L500.9 199.6 L504.9 203.0 L508.5 205.2 L511.7 205.2 L514.2 202.4 L516.3 197.4 L518.0 191.1 L519.7 184.5 L521.5 178.2 L523.6 173.2 L526.2 169.5 L529.0 166.4 L531.9 163.7 L534.8 161.2 L537.8 158.8 L540.7 156.4 L543.5 154.0 L546.4 151.7 L549.2 149.5 L552.1 147.3 L554.9 145.1 L557.8 142.8 L560.6 140.4 L563.5 138.0 L566.3 135.6 L569.1 133.2 L572.0 130.8 L574.8 128.4 L577.5 126.1 L580.1 123.8 L582.6 121.6 L585.3 119.3 L588.3 117.1 L591.9 114.8 L596.4 112.4 L601.8 109.8 L607.5 107.1 L613.0 104.7 L617.7 102.7 L621.1 101.2"/>
+            <text class="end" x="630" y="105">GDP</text>
+
+            <!-- Debt (ink) -->
+            <path id="debt-line" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" d="M46.0 326.8 L49.7 326.3 L54.8 325.6 L60.9 324.7 L67.5 323.8 L74.0 323.0 L80.1 322.2 L85.8 321.6 L91.5 321.0 L97.2 320.4 L102.9 319.8 L108.5 319.3 L114.2 318.8 L119.9 318.4 L125.6 318.0 L131.3 317.7 L137.0 317.4 L142.7 317.1 L148.4 316.8 L154.0 316.6 L159.7 316.6 L165.4 316.6 L171.1 316.5 L176.8 316.2 L182.5 315.6 L188.2 314.7 L193.8 313.5 L199.5 312.1 L205.2 310.6 L210.9 309.1 L216.6 307.6 L222.3 306.2 L228.0 304.7 L233.6 303.2 L239.3 301.8 L245.0 300.3 L250.7 298.8 L256.6 297.3 L262.7 295.8 L268.8 294.3 L274.7 292.9 L280.1 291.4 L284.8 290.0 L288.7 288.7 L291.8 287.5 L294.4 286.4 L296.8 285.2 L299.2 283.7 L301.9 282.0 L304.7 279.9 L307.6 277.4 L310.4 274.8 L313.3 272.0 L316.1 269.3 L318.9 266.8 L321.7 264.3 L324.4 261.9 L327.0 259.4 L329.8 257.1 L332.8 255.0 L336.0 253.2 L339.8 251.8 L344.2 250.7 L348.7 249.8 L353.1 249.1 L356.9 248.3 L359.9 247.6 L361.8 246.9 L363.0 246.4 L363.6 245.9 L364.0 245.3 L364.4 244.6 L365.0 243.6 L365.7 242.2 L366.2 240.4 L366.7 238.4 L367.4 236.5 L368.5 234.7 L370.1 233.2 L372.6 232.0 L375.7 231.0 L379.2 230.2 L382.8 229.5 L386.1 228.9 L388.9 228.4 L391.1 228.2 L393.1 228.2 L394.9 228.4 L396.4 228.6 L397.8 228.5 L399.1 228.0 L400.1 227.0 L400.8 225.6 L401.3 224.0 L401.8 222.3 L402.8 220.8 L404.2 219.6 L406.4 218.9 L409.0 218.6 L412.0 218.4 L415.2 218.2 L418.3 217.7 L421.3 216.8 L424.1 215.3 L427.0 213.3 L429.8 211.1 L432.7 208.9 L435.5 206.8 L438.4 205.2 L441.2 204.1 L444.0 203.3 L446.9 202.7 L449.7 202.2 L452.6 201.4 L455.4 200.4 L458.3 199.0 L461.1 197.3 L463.9 195.5 L466.8 193.6 L469.6 191.8 L472.5 190.0 L475.3 188.3 L478.0 186.6 L480.8 185.0 L483.6 183.3 L486.5 181.8 L489.5 180.4 L492.9 179.4 L496.6 178.7 L500.4 178.2 L504.1 177.4 L507.3 176.1 L510.0 174.0 L511.9 170.8 L513.3 166.7 L514.3 162.1 L515.1 157.4 L515.8 152.9 L516.8 149.2 L517.8 146.3 L518.7 143.8 L519.6 141.7 L520.6 139.6 L521.9 137.4 L523.6 134.8 L525.8 131.6 L528.3 128.0 L531.1 124.2 L534.1 120.5 L537.3 117.3 L540.7 114.8 L544.5 113.2 L548.7 112.4 L553.2 112.0 L557.5 111.7 L561.4 111.1 L564.6 110.0 L566.8 108.3 L568.3 106.4 L569.3 104.3 L570.2 101.9 L571.4 99.3 L573.1 96.4 L575.5 93.1 L578.2 89.3 L581.1 85.3 L584.2 81.3 L587.2 77.5 L590.2 74.0 L593.1 71.0 L596.0 68.2 L598.9 65.6 L601.8 63.1 L604.6 60.6 L607.2 58.0 L609.9 55.1 L612.6 51.9 L615.2 48.6 L617.6 45.6 L619.6 43.1 L621.1 41.3"/>
+
+            <!-- the crossing: Feb 2013 -->
+            <line x1="388.9" x2="388.9" y1="234" y2="362" stroke="var(--ochre)" stroke-width="1" opacity=".55"/>
+            <line x1="386" x2="373" y1="222" y2="164" stroke="var(--ochre)" stroke-width="1"/>
+            <circle cx="388.9" cy="228.4" r="5" fill="var(--ochre)" stroke="var(--paper-2)" stroke-width="2"/>
+            <text class="ann" x="368" y="158" text-anchor="end">Debt passes GDP · Feb 2013</text>
+            <text class="ann-sub" x="368" y="174" text-anchor="end">the gap since then is shaded</text>
+
+            <!-- milestone: the latest count -->
+            <circle cx="621.1" cy="41.3" r="5" fill="var(--ochre)" stroke="var(--paper-2)" stroke-width="2"/>
+            <text class="ms-v" x="632" y="40">$40.09T</text>
+            <text class="ms-d" x="632" y="54">Sep 17, 2026</text>
+
+            <!-- hover layer -->
+            <g id="hover" visibility="hidden">
+              <line id="hv-line" x1="0" x2="0" y1="26" y2="362" stroke="var(--ink-2)" stroke-width="1"/>
+              <circle id="hv-debt" r="4" fill="var(--ink)" stroke="var(--paper-2)" stroke-width="2"/>
+              <circle id="hv-gdp" r="4" fill="var(--pencil)" stroke="var(--paper-2)" stroke-width="2"/>
+              <rect id="hv-box" x="0" y="0" width="128" height="52" rx="2"/>
+              <text id="hv-year" x="0" y="0" font-weight="700"></text>
+              <text id="hv-d" x="0" y="0"></text>
+              <text id="hv-g" x="0" y="0"></text>
+            </g>
+          </svg>
+        </div>
+        <div class="chart-foot">
+          <span>Sources: U.S. Treasury (debt to the penny), FRED (nominal GDP)</span>
+          <span>Milestones in gold</span>
+        </div>
+      </div>
+      <aside class="margin" aria-label="Margin notes">
+        <p class="note aha">The crossing is the reason this plot exists. From Feb 2013 the debt line sits above GDP, and the shaded gap is the ratio: 123% today.</p>
+        <p class="note">The live plot zooms across all thirty-three years; the milestones along the line are the laws and shocks that bent the curve.</p>
+        <p class="note">Every point on the line is a day in Treasury's count.</p>
+      </aside>
+    </section>
+
+    <section class="spread also" style="padding-top:0">
+      <div>
+        <div class="sec-head">
+          <h2>Also in this entry</h2>
+        </div>
+        <ul class="toc">
+          <li><span>Milestones along the curve</span><span class="leader"></span><span class="val">Fig. 1</span></li>
+          <li><span>Debt to GDP</span><span class="leader"></span><span class="val">Fig. 2</span></li>
+          <li><span>By presidential term</span><span class="leader"></span><span class="val">Table</span></li>
+          <li><span>How long each trillion took</span><span class="leader"></span><span class="val">Table</span></li>
+        </ul>
+      </div>
+      <aside class="margin" aria-label="Margin notes">
+        <p class="note">The rest of the entry continues below the fold on the live page.</p>
+      </aside>
+    </section>
+  </main>
+
+  <footer>
+    <span>Plotline</span>
+    <span>Current events, drawn from the data.</span>
+    <span class="mono num">Updated Sep 20, 2026</span>
+  </footer>
+</div>
+
+<script>
+(function(){
+  /* theme toggle */
+  var btn=document.getElementById('theme-toggle');
+  var root=document.documentElement;
+  function current(){
+    var t=root.getAttribute('data-theme');
+    if(t==='dark'||t==='light')return t;
+    return (window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light';
+  }
+  function paint(){btn.setAttribute('aria-pressed',current()==='dark'?'true':'false');}
+  btn.addEventListener('click',function(){
+    var next=current()==='dark'?'light':'dark';
+    root.setAttribute('data-theme',next);
+    try{localStorage.setItem('plotline-theme',next);}catch(e){}
+    paint();
+  });
+  paint();
+
+  /* running count: $40.09T on Sep 17, 2026, growing at the 90-day pace */
+  var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var tv=document.getElementById('ticker-v');
+  var base=40090000000000, rate=102386, t0=Date.now();
+  function fmt(n){return '$'+Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g,',');}
+  if(!reduce&&tv){
+    setInterval(function(){tv.textContent=fmt(base+(Date.now()-t0)/1000*rate);},250);
+  }
+
+  /* hover readout: linear interpolation between yearly sketch points */
+  var svg=document.getElementById('debt-chart');
+  if(!svg)return;
+  var L=46,R=626,T=26,B=362,X0=1993,X1=2027,Y1=42;
+  var debt=[[1993,4.4],[1995,4.97],[1997,5.4],[1999,5.65],[2001,5.8],[2003,6.8],[2005,7.9],[2007,9.0],[2008,10.0],[2009,11.9],[2010,13.6],[2011.4,14.3],[2011.7,14.8],[2012,16.1],[2013.1,16.7],[2013.7,16.75],[2014,17.8],[2015,18.15],[2016,19.6],[2017,20.2],[2018,21.5],[2019,22.7],[2020.2,23.5],[2020.6,26.6],[2021,28.4],[2022,30.9],[2023.4,31.5],[2023.9,33.2],[2024.9,36.0],[2025.9,38.0],[2026.71,40.09]];
+  var gdp=[[1993,6.6],[1995,7.6],[1997,8.6],[1999,9.6],[2001,10.6],[2003,11.5],[2005,13.0],[2007,14.5],[2008.5,14.7],[2009.5,14.4],[2010,15.0],[2011,15.6],[2012,16.2],[2013.1,16.5],[2014,17.5],[2015,18.2],[2016,18.7],[2017,19.5],[2018,20.5],[2019,21.4],[2020.3,19.6],[2021,23.6],[2022,25.7],[2023,27.4],[2024,29.2],[2025,30.9],[2026.71,32.6]];
+  function at(series,t){
+    if(t<=series[0][0])return series[0][1];
+    for(var i=1;i<series.length;i++){
+      if(t<=series[i][0]){var a=series[i-1],b=series[i];return a[1]+(b[1]-a[1])*(t-a[0])/(b[0]-a[0]);}
+    }
+    return series[series.length-1][1];
+  }
+  function X(t){return L+(t-X0)/(X1-X0)*(R-L);}
+  function Y(v){return B-v/Y1*(B-T);}
+  var g=document.getElementById('hover'),ln=document.getElementById('hv-line'),cd=document.getElementById('hv-debt'),cg=document.getElementById('hv-gdp'),bx=document.getElementById('hv-box'),ty=document.getElementById('hv-year'),td=document.getElementById('hv-d'),tg=document.getElementById('hv-g');
+  var months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  function move(ev){
+    var pt=svg.createSVGPoint();pt.x=ev.clientX;pt.y=ev.clientY;
+    var p=pt.matrixTransform(svg.getScreenCTM().inverse());
+    if(p.x<L||p.x>R){g.setAttribute('visibility','hidden');return;}
+    var t=X0+(p.x-L)/(R-L)*(X1-X0);
+    if(t>2026.71)t=2026.71;
+    var x=X(t),d=at(debt,t),q=at(gdp,t);
+    ln.setAttribute('x1',x);ln.setAttribute('x2',x);
+    cd.setAttribute('cx',x);cd.setAttribute('cy',Y(d));
+    cg.setAttribute('cx',x);cg.setAttribute('cy',Y(q));
+    var bxX=x+12; if(bxX+128>R)bxX=x-140;
+    var bxY=Math.max(T,Math.min(Y(d)-60,B-60));
+    bx.setAttribute('x',bxX);bx.setAttribute('y',bxY);
+    var yr=Math.floor(t),mo=months[Math.min(11,Math.floor((t-yr)*12))];
+    ty.setAttribute('x',bxX+8);ty.setAttribute('y',bxY+16);ty.textContent=mo+' '+yr;
+    td.setAttribute('x',bxX+8);td.setAttribute('y',bxY+31);td.textContent='Debt  $'+d.toFixed(1)+'T';
+    tg.setAttribute('x',bxX+8);tg.setAttribute('y',bxY+45);tg.textContent='GDP   $'+q.toFixed(1)+'T';
+    g.setAttribute('visibility','visible');
+  }
+  svg.addEventListener('pointermove',move);
+  svg.addEventListener('pointerleave',function(){g.setAttribute('visibility','hidden');});
+})();
+</script>
+</body>
+</html>

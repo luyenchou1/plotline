@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Curve &middot; Plotline</title>
+<meta name="description" content="Four exponentials on one log axis, indexed to 2012.">
+<script>try{var t=localStorage.getItem("plotline-theme");if(t==="dark"||t==="light"){document.documentElement.setAttribute("data-theme",t)}}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#F2F3EF; --panel:#FBFBF8; --grid:#E1E4DD; --line:#CBD0C9; --line-2:#8F9891;
+  --ink:#14181C; --ink-2:#48525B; --ink-3:#77818A;
+  --signal:#A85F06; --signal-wash:rgba(168,95,6,.10);
+  --cool:#2A73B0; --cool-wash:rgba(42,115,176,.10);
+  --s-transistors:#2A73B0; --s-compute:#B5720A; --s-accel:#1F8F62; --s-params:#C4482A;
+  --gold:#A85F06;
+  --focus:#2A73B0;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0B0F14; --panel:#10151C; --grid:#151C25; --line:#222B36; --line-2:#465361;
+    --ink:#E4E9EE; --ink-2:#9BA7B3; --ink-3:#6B7784;
+    --signal:#F0A63A; --signal-wash:rgba(240,166,58,.10);
+    --cool:#5AA3D6; --cool-wash:rgba(90,163,214,.12);
+    --s-transistors:#3D8FC4; --s-compute:#C08118; --s-accel:#35A87A; --s-params:#D6633F;
+    --gold:#F0A63A;
+    --focus:#5AA3D6;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0B0F14; --panel:#10151C; --grid:#151C25; --line:#222B36; --line-2:#465361;
+  --ink:#E4E9EE; --ink-2:#9BA7B3; --ink-3:#6B7784;
+  --signal:#F0A63A; --signal-wash:rgba(240,166,58,.10);
+  --cool:#5AA3D6; --cool-wash:rgba(90,163,214,.12);
+  --s-transistors:#3D8FC4; --s-compute:#C08118; --s-accel:#35A87A; --s-params:#D6633F;
+  --gold:#F0A63A;
+  --focus:#5AA3D6;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; color:var(--ink);
+  background-color:var(--bg);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:32px 32px; background-position:-1px -1px;
+  font-family:'Instrument Sans',ui-sans-serif,system-ui,'Helvetica Neue',Arial,sans-serif;
+  font-size:15px; line-height:1.5; padding-block:0 56px;
+}
+a{color:inherit}
+.mono,.fig,.lbl,.kv dd,.stamp,.btn,.tick,.rail-n,.tt{font-family:'Geist Mono',ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-variant-numeric:tabular-nums}
+.lbl{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);line-height:1.4}
+.stamp{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);white-space:nowrap}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:16px}
+@media (min-width:760px){.wrap{padding-inline:32px}}
+
+/* top bar */
+.top{display:flex;align-items:center;gap:12px 28px;flex-wrap:wrap;padding-block:14px;border-bottom:1px solid var(--line);background:var(--bg)}
+.brand{display:inline-flex;align-items:center;gap:9px;text-decoration:none;font-weight:600;font-size:17px;letter-spacing:-.01em}
+.brand svg{display:block}
+.tag{color:var(--ink-2);font-size:13px}
+.top .right{margin-left:auto;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.crumb{display:flex;gap:8px;align-items:center;color:var(--ink-2);font-size:13px}
+.crumb .sep{color:var(--ink-3)}
+.btn{appearance:none;border:1px solid var(--line-2);background:var(--panel);color:var(--ink);font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding:6px 10px;display:inline-flex;align-items:center;gap:8px;cursor:pointer;border-radius:2px}
+.btn:hover{border-color:var(--ink-2)}
+.btn:focus-visible,a:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.btn .sw{width:10px;height:10px;border:1px solid var(--ink);border-radius:50%;background:linear-gradient(90deg,var(--ink) 50%,transparent 50%)}
+@media (max-width:759px){.top{gap:10px 16px}.tag{display:none}}
+
+/* lede */
+.lede{padding-block:44px 28px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px 48px;align-items:end}
+.lede h1{font-size:clamp(28px,4vw,44px);line-height:1.08;letter-spacing:-.02em;font-weight:500;margin:0;text-wrap:balance;max-width:16ch}
+.lede p{margin:0;color:var(--ink-2);max-width:56ch;font-size:16px}
+@media (max-width:759px){.lede{grid-template-columns:1fr;padding-block:32px 20px;gap:14px}}
+
+/* rails */
+.rail{display:grid;grid-template-columns:148px minmax(0,1fr);gap:20px 28px;padding-block:24px 32px;border-top:1px solid var(--line)}
+.rail-head{display:flex;flex-direction:column;gap:6px}
+.rail-head .name{font-size:12px;letter-spacing:.14em;text-transform:uppercase;font-weight:600}
+.rail-n{font-size:11px;color:var(--ink-3);letter-spacing:.06em}
+.rail.dim .name,.rail.dim .rail-n{color:var(--ink-3)}
+.slot{border:1px dashed var(--line);min-height:84px;display:flex;align-items:center;padding:16px;color:var(--ink-3);font-size:13px}
+@media (max-width:759px){.rail{grid-template-columns:1fr;gap:12px;padding-block:20px 24px}.rail-head{flex-direction:row;align-items:baseline;gap:14px}}
+
+/* panel */
+.panel{background:var(--panel);border:1px solid var(--line);position:relative;border-radius:2px}
+.panel::before,.panel::after{content:"";position:absolute;width:8px;height:8px;border-color:var(--line-2);border-style:solid;pointer-events:none}
+.panel::before{top:-1px;left:-1px;border-width:2px 0 0 2px}
+.panel::after{bottom:-1px;right:-1px;border-width:0 2px 2px 0}
+.panel-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.panel-head h2{margin:0;font-size:18px;font-weight:600;letter-spacing:-.01em}
+.panel-head h2 a{text-decoration:none}
+.panel-head h2 a:hover{text-decoration:underline;text-underline-offset:3px}
+.status{display:inline-flex;align-items:center;gap:8px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.status .dot{width:7px;height:7px;border-radius:50%;background:var(--line-2)}
+.status.live .dot{background:var(--signal);animation:pulse 2.2s ease-in-out infinite}
+.status.live{color:var(--signal)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+@media (prefers-reduced-motion:reduce){.status.live .dot{animation:none}}
+.panel-body{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr)}
+.readout{padding:18px 16px 16px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:14px;min-width:0}
+.fig{font-size:clamp(24px,5.2vw,44px);line-height:1;font-weight:500;letter-spacing:-.015em;color:var(--ink);word-break:keep-all;white-space:nowrap}
+.fig.hot{color:var(--signal)}
+.fig small{font-size:.5em;color:var(--ink-3);font-weight:400;letter-spacing:0}
+.fig-lbl{margin-top:8px}
+.kv{display:grid;grid-template-columns:auto minmax(0,1fr);gap:5px 14px;margin:0;font-size:13px;align-items:baseline}
+.kv dt{color:var(--ink-3);font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-family:'Geist Mono',ui-monospace,Menlo,monospace}
+.kv dd{margin:0;color:var(--ink)}
+.kv dd .u{color:var(--ink-3)}
+.spark{padding:14px 16px 10px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.spark svg{width:100%;height:auto;display:block}
+.key{display:flex;gap:14px;flex-wrap:wrap;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);font-family:'Geist Mono',ui-monospace,Menlo,monospace}
+.key span{display:inline-flex;align-items:center;gap:6px}
+.key i{width:14px;height:0;border-top:2px solid var(--c);display:inline-block}
+.key i.gold{width:8px;height:8px;border:0;background:var(--gold);transform:rotate(45deg)}
+.panel-copy{grid-column:1/-1;border-top:1px solid var(--line);padding:14px 16px;display:flex;gap:12px 24px;justify-content:space-between;align-items:flex-end;flex-wrap:wrap}
+.panel-copy p{margin:0;max-width:62ch;color:var(--ink-2);font-size:14px}
+.panel-copy .src{display:flex;gap:16px;align-items:center}
+.open{font-size:12px;letter-spacing:.08em;text-transform:uppercase;text-decoration:none;font-family:'Geist Mono',ui-monospace,Menlo,monospace;border-bottom:1px solid var(--ink);padding-bottom:1px;white-space:nowrap}
+.open:hover{color:var(--signal);border-color:var(--signal)}
+.face{padding:24px 16px;display:flex;flex-direction:column;gap:10px;color:var(--ink-3)}
+.face .fig{color:var(--ink-3);letter-spacing:.1em;font-size:clamp(22px,4vw,34px)}
+@media (max-width:759px){.panel-body{grid-template-columns:1fr}.readout{border-right:0;border-bottom:1px solid var(--line)}}
+
+/* about + footer */
+.about{padding-block:36px 8px;border-top:1px solid var(--line);display:grid;grid-template-columns:148px minmax(0,1fr);gap:16px 28px}
+.about p{margin:0;max-width:60ch;color:var(--ink-2)}
+.about .lbl{padding-top:3px}
+@media (max-width:759px){.about{grid-template-columns:1fr}}
+.foot{margin-top:40px;padding-top:14px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:10px 24px;flex-wrap:wrap}
+
+/* plot page */
+.plot-head{padding-block:36px 24px;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:20px 48px;align-items:start}
+.plot-head h1{font-size:clamp(34px,5vw,58px);line-height:1;letter-spacing:-.025em;font-weight:500;margin:0 0 14px}
+.plot-head .meta{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:8px}
+.lede-p{margin:0;font-size:17px;line-height:1.55;color:var(--ink);max-width:60ch}
+.lede-p::first-letter{color:var(--signal)}
+@media (max-width:759px){.plot-head{grid-template-columns:1fr;padding-block:28px 18px}.lede-p{font-size:16px}}
+.instruments{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:1px solid var(--line);background:var(--panel);margin-bottom:24px;border-radius:2px}
+.inst{padding:16px 18px 14px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:10px;min-width:0}
+.inst:last-child{border-right:0}
+.inst .fig{font-size:clamp(26px,3.6vw,40px)}
+.inst .lbl{display:flex;justify-content:space-between;gap:8px}
+.inst .lbl b{font-weight:500;color:var(--ink-2)}
+.inst p{margin:0;font-size:13px;color:var(--ink-2)}
+@media (max-width:759px){.instruments{grid-template-columns:1fr}.inst{border-right:0;border-bottom:1px solid var(--line)}.inst:last-child{border-bottom:0}}
+.sections{display:flex;gap:0;border-bottom:1px solid var(--line);margin-bottom:20px;overflow-x:auto}
+.sections a{font-family:'Geist Mono',ui-monospace,Menlo,monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;text-decoration:none;color:var(--ink-3);padding:10px 14px 10px 0;margin-right:14px;white-space:nowrap;border-bottom:2px solid transparent;margin-bottom:-1px}
+.sections a[aria-current]{color:var(--ink);border-color:var(--signal)}
+.chart-panel{background:var(--panel);border:1px solid var(--line);border-radius:2px;position:relative}
+.chart-panel::before,.chart-panel::after{content:"";position:absolute;width:8px;height:8px;border-color:var(--line-2);border-style:solid;pointer-events:none}
+.chart-panel::before{top:-1px;left:-1px;border-width:2px 0 0 2px}
+.chart-panel::after{bottom:-1px;right:-1px;border-width:0 2px 2px 0}
+.chart-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;padding:12px 16px;border-bottom:1px solid var(--line)}
+.chart-head h2{margin:0;font-size:16px;font-weight:600}
+.chart-head .sub{color:var(--ink-2);font-size:13px}
+.chart{position:relative;padding:12px 8px 4px}
+.chart svg{width:100%;height:auto;display:block;font-family:'Geist Mono',ui-monospace,Menlo,monospace}
+.chart .ax{fill:var(--ink-3);font-size:11px;letter-spacing:.04em}
+.chart .axt{fill:var(--ink-3);font-size:11px;letter-spacing:.1em;text-transform:uppercase}
+.chart .grid{stroke:var(--grid);stroke-width:1}
+.chart .axis{stroke:var(--line-2);stroke-width:1}
+.chart .ref{stroke:var(--cool);stroke-width:1}
+.chart .reflbl{fill:var(--cool);font-size:11px;letter-spacing:.1em}
+.chart .ln{fill:none;stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.chart .ln.transistors{stroke:var(--s-transistors)}
+.chart .ln.compute{stroke:var(--s-compute)}
+.chart .ln.accel{stroke:var(--s-accel)}
+.chart .ln.params{stroke:var(--s-params)}
+.chart .pt{fill:var(--s-compute);stroke:var(--panel);stroke-width:2}
+.chart .endl{fill:var(--ink);font-size:12px}
+.chart .endl.dim{fill:var(--ink-2)}
+.chart .ms{fill:var(--gold);stroke:var(--panel);stroke-width:2}
+.chart .callout rect{fill:var(--panel);stroke:var(--gold);stroke-width:1}
+.chart .callout text{fill:var(--ink);font-size:11px;letter-spacing:.06em}
+.chart .callout text.k{fill:var(--gold);letter-spacing:.12em}
+.chart .callout line{stroke:var(--gold);stroke-width:1}
+.chart .xh{stroke:var(--ink-3);stroke-width:1;opacity:0;pointer-events:none}
+.chart .hit{fill:transparent}
+.tt{position:absolute;pointer-events:none;background:var(--panel);border:1px solid var(--line-2);padding:8px 10px;font-size:11px;letter-spacing:.04em;line-height:1.6;color:var(--ink);display:none;min-width:190px;border-radius:2px;z-index:2}
+.tt b{font-weight:500;color:var(--ink-3);display:block;letter-spacing:.1em;margin-bottom:2px}
+.tt .row{display:flex;justify-content:space-between;gap:12px}
+.tt .row i{width:8px;height:8px;display:inline-block;margin-right:6px;background:var(--c);vertical-align:middle}
+.chart-foot{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px 24px;align-items:center;padding:12px 16px;border-top:1px solid var(--line)}
+@media (max-width:759px){.chart-foot{grid-template-columns:1fr}}
+.readouts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:1px solid var(--line)}
+.ro{padding:12px 16px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:4px;min-width:0}
+.ro:last-child{border-right:0}
+.ro .v{font-family:'Geist Mono',ui-monospace,Menlo,monospace;font-size:18px;font-variant-numeric:tabular-nums}
+.ro .v .u{color:var(--ink-3);font-size:12px}
+.ro .lbl{display:flex;align-items:center;gap:7px}
+.ro .lbl i{width:12px;border-top:2px solid var(--c);display:inline-block}
+@media (max-width:759px){.readouts{grid-template-columns:1fr 1fr}.ro:nth-child(2){border-right:0}.ro{border-bottom:1px solid var(--line)}.ro:nth-child(3),.ro:nth-child(4){border-bottom:0}}
+details.tbl{margin-top:16px;font-size:13px}
+details.tbl summary{cursor:pointer;font-family:'Geist Mono',ui-monospace,Menlo,monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+details.tbl .scroll{overflow-x:auto;margin-top:10px}
+table{border-collapse:collapse;min-width:420px;width:100%}
+th,td{text-align:left;padding:6px 10px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+th{font-family:'Geist Mono',ui-monospace,Menlo,monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);font-weight:500}
+td.n{font-family:'Geist Mono',ui-monospace,Menlo,monospace}
+</style>
+</head>
+<body>
+<header class="top wrap">
+  <a class="brand" href="index.html" aria-label="Plotline home"><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M1 5V1h4M13 1h4v4M1 13v4h4M13 17h4v-4" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 12.5l3.5-3 2.5 1.5L14 5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="14" cy="5" r="1.8" fill="var(--signal)"/></svg><span>Plotline</span></a>
+  <nav class="crumb" aria-label="Breadcrumb"><a href="index.html">Technology</a><span class="sep">/</span><span>The Curve</span></nav>
+  <div class="right">
+    <span class="stamp">Updated Sep 20, 2026</span>
+    <button class="btn" id="theme-toggle" type="button" aria-label="Toggle light or dark theme"><span class="sw" aria-hidden="true"></span><span id="theme-name">Theme</span></button>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="plot-head">
+    <div>
+      <div class="meta"><span class="lbl">Technology</span><span class="lbl">Src: Epoch AI &middot; chip and model records</span></div>
+      <h1>The Curve</h1>
+      <div class="lbl">Four exponentials on one axis, and how fast the tests fall</div>
+    </div>
+    <p class="lede-p">I&rsquo;ve shown a version of this chart to rooms full of educators two years running, because most people have heard of Moore&rsquo;s Law but have never seen what sits on top of it. Chips have doubled their transistor count roughly every two years for fifty-five years, which is astonishing on its own. The AI curves stacked on that foundation double every five or six months. That gap is the thing I most wanted to see for myself, so this page starts there - every line is a real chip, model or test run, and every point has a source.</p>
+  </section>
+
+  <section class="instruments" aria-label="Headline figures">
+    <div class="inst">
+      <span class="lbl"><span>AI training compute</span><b>since 2012</b></span>
+      <div class="fig hot">&times;2 <small>/</small> 5.6 <small>mo</small></div>
+      <p>Doubling time of the compute behind the largest training runs.</p>
+    </div>
+    <div class="inst">
+      <span class="lbl"><span>Transistors per chip</span><b>since 1971</b></span>
+      <div class="fig">&times;2 <small>/</small> 25.5 <small>mo</small></div>
+      <p>Moore&rsquo;s Law, measured: roughly two years per doubling for fifty-five years.</p>
+    </div>
+    <div class="inst">
+      <span class="lbl"><span>Pace gap</span><b>25.5 &divide; 5.6</b></span>
+      <div class="fig">4.6<small>&times;</small></div>
+      <p>How much faster the AI curve doubles than the chips it runs on.</p>
+    </div>
+  </section>
+
+  <nav class="sections" aria-label="Sections of this plot">
+    <a href="#four" aria-current="true">Four exponentials</a>
+    <a href="#benchmarks">Benchmark saturation</a>
+    <a href="#runs">Largest training runs</a>
+  </nav>
+
+  <section class="chart-panel" id="four">
+    <div class="chart-head">
+      <h2>Four exponentials, indexed to 2012</h2>
+      <span class="sub">Each series divided by its own 2012 value, so every line passes through 1 and the slope is the story.</span>
+    </div>
+    <div class="chart">
+      <svg viewBox="0 0 920 500" role="img" aria-labelledby="ct" id="curve-chart">
+  <title id="ct">Four exponentials indexed to 2012 on a log axis: transistors per chip, accelerator throughput, model parameters and AI training compute, 2000 to 2026</title>
+  <line class="grid" x1="62" y1="449.2" x2="762" y2="449.2"/><text class="ax" x="54" y="453.2" text-anchor="end">&times;10<tspan baseline-shift="super" font-size="8">-2</tspan></text>
+<line class="grid" x1="62" y1="381.1" x2="762" y2="381.1"/><text class="ax" x="54" y="385.1" text-anchor="end">&times;1</text>
+<line class="grid" x1="62" y1="313.1" x2="762" y2="313.1"/><text class="ax" x="54" y="317.1" text-anchor="end">&times;10<tspan baseline-shift="super" font-size="8">2</tspan></text>
+<line class="grid" x1="62" y1="245.0" x2="762" y2="245.0"/><text class="ax" x="54" y="249.0" text-anchor="end">&times;10<tspan baseline-shift="super" font-size="8">4</tspan></text>
+<line class="grid" x1="62" y1="176.9" x2="762" y2="176.9"/><text class="ax" x="54" y="180.9" text-anchor="end">&times;10<tspan baseline-shift="super" font-size="8">6</tspan></text>
+<line class="grid" x1="62" y1="108.9" x2="762" y2="108.9"/><text class="ax" x="54" y="112.9" text-anchor="end">&times;10<tspan baseline-shift="super" font-size="8">8</tspan></text>
+<line class="grid" x1="62" y1="40.8" x2="762" y2="40.8"/><text class="ax" x="54" y="44.8" text-anchor="end">&times;10<tspan baseline-shift="super" font-size="8">10</tspan></text>
+
+  <line class="axis" x1="62" y1="456" x2="762" y2="456"/>
+  <line class="axis" x1="62.0" y1="456" x2="62.0" y2="461"/><text class="ax" x="62.0" y="474" text-anchor="middle">2000</text>
+<line class="axis" x1="194.6" y1="456" x2="194.6" y2="461"/><text class="ax" x="194.6" y="474" text-anchor="middle">2005</text>
+<line class="axis" x1="327.2" y1="456" x2="327.2" y2="461"/><text class="ax" x="327.2" y="474" text-anchor="middle">2010</text>
+<line class="axis" x1="459.7" y1="456" x2="459.7" y2="461"/><text class="ax" x="459.7" y="474" text-anchor="middle">2015</text>
+<line class="axis" x1="592.3" y1="456" x2="592.3" y2="461"/><text class="ax" x="592.3" y="474" text-anchor="middle">2020</text>
+<line class="axis" x1="724.9" y1="456" x2="724.9" y2="461"/><text class="ax" x="724.9" y="474" text-anchor="middle">2025</text>
+
+  <text class="axt" x="62" y="20">Multiple of 2012 level &middot; log scale</text>
+  <line class="ref" x1="380.2" y1="34" x2="380.2" y2="456"/>
+  <text class="reflbl" x="386.2" y="46">2012 &middot; INDEX = 1</text>
+  <path class="ln transistors" d="M62.0,438.8 L75.3,437.0 L88.5,434.5 L101.8,431.4 L115.0,428.3 L128.3,427.7 L141.5,423.5 L154.8,421.1 L168.1,420.2 L181.3,417.6 L194.6,415.2 L207.8,411.9 L221.1,409.2 L234.3,407.1 L247.6,406.2 L260.9,403.8 L274.1,400.6 L287.4,397.5 L300.6,395.4 L313.9,393.7 L327.2,391.8 L340.4,388.3 L353.7,386.3 L366.9,383.3 L380.2,381.1 L393.4,378.7 L406.7,376.4 L420.0,373.2 L433.2,371.4 L446.5,368.4 L459.7,366.7 L473.0,364.4 L486.2,362.1 L499.5,358.8 L512.8,357.8 L526.0,353.9 L539.3,351.7 L552.5,349.5 L565.8,348.2 L579.0,345.4 L592.3,341.7 L605.6,339.9 L618.8,337.9 L632.1,336.3 L645.3,332.1 L658.6,331.2 L671.8,328.1 L685.1,325.9 L698.4,323.9 L711.6,321.5 L724.9,319.3 L738.1,316.5 L751.4,313.0"/>
+  <path class="ln accel" d="M62.0,440.6 L75.3,436.0 L88.5,433.5 L101.8,429.4 L115.0,428.4 L128.3,428.0 L141.5,427.5 L154.8,422.0 L168.1,421.1 L181.3,414.4 L194.6,414.9 L207.8,411.5 L221.1,409.5 L234.3,407.8 L247.6,405.0 L260.9,403.4 L274.1,398.9 L287.4,400.3 L300.6,397.1 L313.9,391.8 L327.2,389.1 L340.4,390.7 L353.7,385.8 L366.9,383.5 L380.2,381.1 L393.4,378.3 L406.7,373.9 L420.0,369.5 L433.2,366.1 L446.5,366.1 L459.7,363.4 L473.0,361.1 L486.2,354.5 L499.5,349.0 L512.8,346.1 L526.0,343.1 L539.3,343.5 L552.5,339.9 L565.8,333.9 L579.0,331.0 L592.3,332.0 L605.6,327.2 L618.8,324.9 L632.1,322.6 L645.3,314.5 L658.6,310.2 L671.8,310.7 L685.1,306.5 L698.4,302.5 L711.6,302.6 L724.9,298.5 L738.1,291.2 L751.4,292.0"/>
+  <path class="ln params" d="M62.0,439.1 L75.3,434.9 L88.5,432.5 L101.8,433.1 L115.0,432.6 L128.3,430.9 L141.5,423.0 L154.8,423.8 L168.1,423.3 L181.3,413.5 L194.6,418.2 L207.8,410.3 L221.1,405.3 L234.3,410.3 L247.6,401.3 L260.9,398.8 L274.1,403.5 L287.4,395.6 L300.6,395.3 L313.9,393.3 L327.2,392.6 L340.4,387.9 L353.7,386.1 L366.9,383.1 L380.2,381.1 L393.4,372.8 L406.7,364.3 L420.0,358.8 L433.2,344.5 L446.5,338.8 L459.7,328.7 L473.0,317.0 L486.2,316.7 L499.5,300.9 L512.8,296.1 L526.0,290.1 L539.3,280.9 L552.5,269.7 L565.8,257.8 L579.0,255.1 L592.3,242.5 L605.6,239.8 L618.8,228.7 L632.1,217.3 L645.3,211.2 L658.6,199.0 L671.8,198.6 L685.1,188.9 L698.4,180.3 L711.6,165.1 L724.9,160.8 L738.1,149.6 L751.4,145.0"/>
+  <path class="ln compute" d="M62.0,440.2 L75.3,435.9 L88.5,431.3 L101.8,429.2 L115.0,428.2 L128.3,424.8 L141.5,426.1 L154.8,426.4 L168.1,422.1 L181.3,419.5 L194.6,412.8 L207.8,411.6 L221.1,411.0 L234.3,402.5 L247.6,408.8 L260.9,403.6 L274.1,404.4 L287.4,395.4 L300.6,398.5 L313.9,398.4 L327.2,392.6 L340.4,387.9 L353.7,387.8 L366.9,383.9 L380.2,381.1 L393.4,371.5 L406.7,357.3 L420.0,347.2 L433.2,341.0 L446.5,326.2 L459.7,315.0 L473.0,301.7 L486.2,297.2 L499.5,281.4 L512.8,270.5 L526.0,259.9 L539.3,253.0 L552.5,236.9 L565.8,226.3 L579.0,212.8 L592.3,207.4 L605.6,190.3 L618.8,186.2 L632.1,167.8 L645.3,159.9 L658.6,146.5 L671.8,144.0 L685.1,128.3 L698.4,122.2 L711.6,109.5 L724.9,91.7 L738.1,87.5 L751.4,71.9"/>
+  <circle class="pt" cx="380.2" cy="381.1" r="3"/><circle class="pt" cx="406.7" cy="357.3" r="3"/><circle class="pt" cx="433.2" cy="341.0" r="3"/><circle class="pt" cx="459.7" cy="315.0" r="3"/><circle class="pt" cx="486.2" cy="297.2" r="3"/><circle class="pt" cx="512.8" cy="270.5" r="3"/><circle class="pt" cx="539.3" cy="253.0" r="3"/><circle class="pt" cx="565.8" cy="226.3" r="3"/><circle class="pt" cx="592.3" cy="207.4" r="3"/><circle class="pt" cx="618.8" cy="186.2" r="3"/><circle class="pt" cx="645.3" cy="159.9" r="3"/><circle class="pt" cx="671.8" cy="144.0" r="3"/><circle class="pt" cx="698.4" cy="122.2" r="3"/><circle class="pt" cx="724.9" cy="91.7" r="3"/><circle class="pt" cx="751.4" cy="71.9" r="3"/>
+  <line class="axis" x1="755.4" y1="71.9" x2="763.4" y2="71.9" opacity=".6"/><text class="endl" x="767.4" y="75.9">Training compute</text><line class="axis" x1="755.4" y1="145.0" x2="763.4" y2="145.0" opacity=".6"/><text class="endl dim" x="767.4" y="149.0">Model parameters</text><line class="axis" x1="755.4" y1="292.0" x2="763.4" y2="292.0" opacity=".6"/><text class="endl dim" x="767.4" y="296.0">Accelerator throughput</text><line class="axis" x1="755.4" y1="313.0" x2="763.4" y2="313.0" opacity=".6"/><text class="endl" x="767.4" y="317.0">Transistors per chip</text>
+  <g class="callout">
+    <line x1="374.2" y1="375.1" x2="322.2" y2="289.1"/>
+    <rect x="148.2" y="247.1" width="176" height="44" rx="1"/>
+    <text class="k" x="158.2" y="264.1">SEP 2012 &middot; ALEXNET</text>
+    <text x="158.2" y="281.1">Every line set to 1 here.</text>
+  </g>
+  <rect class="ms" x="375.2" y="376.1" width="10" height="10" transform="rotate(45 380.2 381.1)"/>
+  <line class="xh" id="xh" x1="62" y1="34" x2="62" y2="456"/>
+  <rect class="hit" id="hit" x="62" y="34" width="700" height="422"/>
+</svg>
+      <div class="tt" id="tt" role="status"></div>
+    </div>
+    <div class="chart-foot">
+      <div class="key">
+        <span><i style="--c:var(--s-transistors)"></i>Transistors per chip</span>
+        <span><i style="--c:var(--s-accel)"></i>Accelerator throughput</span>
+        <span><i style="--c:var(--s-params)"></i>Model parameters</span>
+        <span><i style="--c:var(--s-compute)"></i>Training compute</span>
+        <span><i class="gold"></i>Milestone</span>
+      </div>
+      <span class="stamp">Hover for values &middot; log axis, one scale</span>
+    </div>
+    <div class="readouts">
+      <div class="ro"><span class="lbl"><i style="--c:var(--s-transistors)"></i>Transistors</span><span class="v">&times;2 / 25.5 <span class="u">mo</span></span><span class="stamp">since 1971</span></div>
+      <div class="ro"><span class="lbl"><i style="--c:var(--s-compute)"></i>Training compute</span><span class="v">&times;2 / 5.6 <span class="u">mo</span></span><span class="stamp">since 2012</span></div>
+      <div class="ro"><span class="lbl">Moore&rsquo;s Law</span><span class="v">2 <span class="u">yrs / doubling</span></span><span class="stamp">the reference pace</span></div>
+      <div class="ro"><span class="lbl">Gap</span><span class="v">4.6<span class="u">&times;</span></span><span class="stamp">AI vs chips</span></div>
+    </div>
+  </section>
+
+  <details class="tbl">
+    <summary>Table view: doubling times</summary>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Series</th><th>Doubling time</th><th>Since</th><th>Source</th></tr></thead>
+        <tbody>
+          <tr><td>Transistors per chip</td><td class="n">25.5 months</td><td class="n">1971</td><td>chip records</td></tr>
+          <tr><td>AI training compute</td><td class="n">5.6 months</td><td class="n">2012</td><td>Epoch AI</td></tr>
+          <tr><td>Moore&rsquo;s Law (stated)</td><td class="n">24 months</td><td class="n">1965</td><td>reference</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+
+  <footer class="foot">
+    <span class="stamp">Plotline &middot; static pages &middot; no accounts, no tracking</span>
+    <span class="stamp">Updated Sep 20, 2026</span>
+  </footer>
+</main>
+
+<script>
+
+(function(){
+  var root=document.documentElement,btn=document.getElementById('theme-toggle'),nm=document.getElementById('theme-name');
+  function cur(){var t=root.getAttribute('data-theme');if(t==='dark'||t==='light')return t;return (window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light'}
+  function paint(){nm.textContent=cur()==='dark'?'Dark':'Light'}
+  btn.addEventListener('click',function(){var n=cur()==='dark'?'light':'dark';root.setAttribute('data-theme',n);try{localStorage.setItem('plotline-theme',n)}catch(e){}paint()});
+  paint();
+})();
+
+(function(){
+  var svg=document.getElementById('curve-chart'),hit=document.getElementById('hit'),xh=document.getElementById('xh'),tt=document.getElementById('tt');
+  if(!svg||!hit)return;
+  var ML=62,MR=158,W=920,X0=2000,X1=2026.4;
+  var moore=0.141661,comp=0.645064,accel=0.19,params=0.5;
+  var S=[['Transistors per chip','var(--s-transistors)',moore],['Accelerator throughput','var(--s-accel)',accel],['Model parameters','var(--s-params)',params],['Training compute','var(--s-compute)',comp]];
+  var sup={'0':'\u2070','1':'\u00b9','2':'\u00b2','3':'\u00b3','4':'\u2074','5':'\u2075','6':'\u2076','7':'\u2077','8':'\u2078','9':'\u2079','-':'\u207b'};
+  function fmt(l){var v=Math.pow(10,l);if(v>=0.01&&v<1000)return '\u00d7'+(v<10?v.toFixed(2):v.toFixed(0));var e=Math.floor(l),m=Math.pow(10,l-e);return '\u00d7'+m.toFixed(1)+'\u00d710'+String(e).split('').map(function(c){return sup[c]||c}).join('')}
+  function move(ev){
+    var r=svg.getBoundingClientRect(),sx=W/r.width,x=(ev.clientX-r.left)*sx;
+    var yr=X0+(x-ML)/(W-ML-MR)*(X1-X0);yr=Math.max(2000,Math.min(2026,yr));
+    var px=ML+(W-ML-MR)*(yr-X0)/(X1-X0);
+    xh.setAttribute('x1',px);xh.setAttribute('x2',px);xh.style.opacity=1;
+    var h='<b>'+(yr<2012?'Pre-2012 &middot; on the chip curve':yr.toFixed(1))+'</b>';
+    S.forEach(function(s){var l=(yr-2012)*(yr<2012?moore:s[2]);h+='<div class="row"><span><i style="--c:'+s[1]+'"></i>'+s[0]+'</span><span>'+fmt(l)+'</span></div>'});
+    tt.innerHTML=h;tt.style.display='block';
+    var cw=tt.parentNode.clientWidth,left=(ev.clientX-r.left)+14;if(left+tt.offsetWidth>cw-8)left=(ev.clientX-r.left)-tt.offsetWidth-14;
+    tt.style.left=Math.max(0,left)+'px';tt.style.top=Math.max(0,(ev.clientY-r.top)-10)+'px';
+  }
+  hit.addEventListener('pointermove',move);
+  hit.addEventListener('pointerleave',function(){xh.style.opacity=0;tt.style.display='none'});
+})();
+</script>
+</body>
+</html>

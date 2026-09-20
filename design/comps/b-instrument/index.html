@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Plotline</title>
+<meta name="description" content="Current events, drawn from the data.">
+<script>try{var t=localStorage.getItem("plotline-theme");if(t==="dark"||t==="light"){document.documentElement.setAttribute("data-theme",t)}}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#F2F3EF; --panel:#FBFBF8; --grid:#E1E4DD; --line:#CBD0C9; --line-2:#8F9891;
+  --ink:#14181C; --ink-2:#48525B; --ink-3:#77818A;
+  --signal:#A85F06; --signal-wash:rgba(168,95,6,.10);
+  --cool:#2A73B0; --cool-wash:rgba(42,115,176,.10);
+  --s-transistors:#2A73B0; --s-compute:#B5720A; --s-accel:#1F8F62; --s-params:#C4482A;
+  --gold:#A85F06;
+  --focus:#2A73B0;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0B0F14; --panel:#10151C; --grid:#151C25; --line:#222B36; --line-2:#465361;
+    --ink:#E4E9EE; --ink-2:#9BA7B3; --ink-3:#6B7784;
+    --signal:#F0A63A; --signal-wash:rgba(240,166,58,.10);
+    --cool:#5AA3D6; --cool-wash:rgba(90,163,214,.12);
+    --s-transistors:#3D8FC4; --s-compute:#C08118; --s-accel:#35A87A; --s-params:#D6633F;
+    --gold:#F0A63A;
+    --focus:#5AA3D6;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0B0F14; --panel:#10151C; --grid:#151C25; --line:#222B36; --line-2:#465361;
+  --ink:#E4E9EE; --ink-2:#9BA7B3; --ink-3:#6B7784;
+  --signal:#F0A63A; --signal-wash:rgba(240,166,58,.10);
+  --cool:#5AA3D6; --cool-wash:rgba(90,163,214,.12);
+  --s-transistors:#3D8FC4; --s-compute:#C08118; --s-accel:#35A87A; --s-params:#D6633F;
+  --gold:#F0A63A;
+  --focus:#5AA3D6;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; color:var(--ink);
+  background-color:var(--bg);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:32px 32px; background-position:-1px -1px;
+  font-family:'Instrument Sans',ui-sans-serif,system-ui,'Helvetica Neue',Arial,sans-serif;
+  font-size:15px; line-height:1.5; padding-block:0 56px;
+}
+a{color:inherit}
+.mono,.fig,.lbl,.kv dd,.stamp,.btn,.tick,.rail-n,.tt{font-family:'Geist Mono',ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-variant-numeric:tabular-nums}
+.lbl{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);line-height:1.4}
+.stamp{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);white-space:nowrap}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:16px}
+@media (min-width:760px){.wrap{padding-inline:32px}}
+
+/* top bar */
+.top{display:flex;align-items:center;gap:12px 28px;flex-wrap:wrap;padding-block:14px;border-bottom:1px solid var(--line);background:var(--bg)}
+.brand{display:inline-flex;align-items:center;gap:9px;text-decoration:none;font-weight:600;font-size:17px;letter-spacing:-.01em}
+.brand svg{display:block}
+.tag{color:var(--ink-2);font-size:13px}
+.top .right{margin-left:auto;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.crumb{display:flex;gap:8px;align-items:center;color:var(--ink-2);font-size:13px}
+.crumb .sep{color:var(--ink-3)}
+.btn{appearance:none;border:1px solid var(--line-2);background:var(--panel);color:var(--ink);font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding:6px 10px;display:inline-flex;align-items:center;gap:8px;cursor:pointer;border-radius:2px}
+.btn:hover{border-color:var(--ink-2)}
+.btn:focus-visible,a:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.btn .sw{width:10px;height:10px;border:1px solid var(--ink);border-radius:50%;background:linear-gradient(90deg,var(--ink) 50%,transparent 50%)}
+@media (max-width:759px){.top{gap:10px 16px}.tag{display:none}}
+
+/* lede */
+.lede{padding-block:44px 28px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px 48px;align-items:end}
+.lede h1{font-size:clamp(28px,4vw,44px);line-height:1.08;letter-spacing:-.02em;font-weight:500;margin:0;text-wrap:balance;max-width:16ch}
+.lede p{margin:0;color:var(--ink-2);max-width:56ch;font-size:16px}
+@media (max-width:759px){.lede{grid-template-columns:1fr;padding-block:32px 20px;gap:14px}}
+
+/* rails */
+.rail{display:grid;grid-template-columns:148px minmax(0,1fr);gap:20px 28px;padding-block:24px 32px;border-top:1px solid var(--line)}
+.rail-head{display:flex;flex-direction:column;gap:6px}
+.rail-head .name{font-size:12px;letter-spacing:.14em;text-transform:uppercase;font-weight:600}
+.rail-n{font-size:11px;color:var(--ink-3);letter-spacing:.06em}
+.rail.dim .name,.rail.dim .rail-n{color:var(--ink-3)}
+.slot{border:1px dashed var(--line);min-height:84px;display:flex;align-items:center;padding:16px;color:var(--ink-3);font-size:13px}
+@media (max-width:759px){.rail{grid-template-columns:1fr;gap:12px;padding-block:20px 24px}.rail-head{flex-direction:row;align-items:baseline;gap:14px}}
+
+/* panel */
+.panel{background:var(--panel);border:1px solid var(--line);position:relative;border-radius:2px}
+.panel::before,.panel::after{content:"";position:absolute;width:8px;height:8px;border-color:var(--line-2);border-style:solid;pointer-events:none}
+.panel::before{top:-1px;left:-1px;border-width:2px 0 0 2px}
+.panel::after{bottom:-1px;right:-1px;border-width:0 2px 2px 0}
+.panel-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.panel-head h2{margin:0;font-size:18px;font-weight:600;letter-spacing:-.01em}
+.panel-head h2 a{text-decoration:none}
+.panel-head h2 a:hover{text-decoration:underline;text-underline-offset:3px}
+.status{display:inline-flex;align-items:center;gap:8px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.status .dot{width:7px;height:7px;border-radius:50%;background:var(--line-2)}
+.status.live .dot{background:var(--signal);animation:pulse 2.2s ease-in-out infinite}
+.status.live{color:var(--signal)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+@media (prefers-reduced-motion:reduce){.status.live .dot{animation:none}}
+.panel-body{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr)}
+.readout{padding:18px 16px 16px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:14px;min-width:0}
+.fig{font-size:clamp(24px,5.2vw,44px);line-height:1;font-weight:500;letter-spacing:-.015em;color:var(--ink);word-break:keep-all;white-space:nowrap}
+.fig.hot{color:var(--signal)}
+.fig small{font-size:.5em;color:var(--ink-3);font-weight:400;letter-spacing:0}
+.fig-lbl{margin-top:8px}
+.kv{display:grid;grid-template-columns:auto minmax(0,1fr);gap:5px 14px;margin:0;font-size:13px;align-items:baseline}
+.kv dt{color:var(--ink-3);font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-family:'Geist Mono',ui-monospace,Menlo,monospace}
+.kv dd{margin:0;color:var(--ink)}
+.kv dd .u{color:var(--ink-3)}
+.spark{padding:14px 16px 10px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.spark svg{width:100%;height:auto;display:block}
+.key{display:flex;gap:14px;flex-wrap:wrap;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);font-family:'Geist Mono',ui-monospace,Menlo,monospace}
+.key span{display:inline-flex;align-items:center;gap:6px}
+.key i{width:14px;height:0;border-top:2px solid var(--c);display:inline-block}
+.key i.gold{width:8px;height:8px;border:0;background:var(--gold);transform:rotate(45deg)}
+.panel-copy{grid-column:1/-1;border-top:1px solid var(--line);padding:14px 16px;display:flex;gap:12px 24px;justify-content:space-between;align-items:flex-end;flex-wrap:wrap}
+.panel-copy p{margin:0;max-width:62ch;color:var(--ink-2);font-size:14px}
+.panel-copy .src{display:flex;gap:16px;align-items:center}
+.open{font-size:12px;letter-spacing:.08em;text-transform:uppercase;text-decoration:none;font-family:'Geist Mono',ui-monospace,Menlo,monospace;border-bottom:1px solid var(--ink);padding-bottom:1px;white-space:nowrap}
+.open:hover{color:var(--signal);border-color:var(--signal)}
+.face{padding:24px 16px;display:flex;flex-direction:column;gap:10px;color:var(--ink-3)}
+.face .fig{color:var(--ink-3);letter-spacing:.1em;font-size:clamp(22px,4vw,34px)}
+@media (max-width:759px){.panel-body{grid-template-columns:1fr}.readout{border-right:0;border-bottom:1px solid var(--line)}}
+
+/* about + footer */
+.about{padding-block:36px 8px;border-top:1px solid var(--line);display:grid;grid-template-columns:148px minmax(0,1fr);gap:16px 28px}
+.about p{margin:0;max-width:60ch;color:var(--ink-2)}
+.about .lbl{padding-top:3px}
+@media (max-width:759px){.about{grid-template-columns:1fr}}
+.foot{margin-top:40px;padding-top:14px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:10px 24px;flex-wrap:wrap}
+
+/* plot page */
+.plot-head{padding-block:36px 24px;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:20px 48px;align-items:start}
+.plot-head h1{font-size:clamp(34px,5vw,58px);line-height:1;letter-spacing:-.025em;font-weight:500;margin:0 0 14px}
+.plot-head .meta{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:8px}
+.lede-p{margin:0;font-size:17px;line-height:1.55;color:var(--ink);max-width:60ch}
+.lede-p::first-letter{color:var(--signal)}
+@media (max-width:759px){.plot-head{grid-template-columns:1fr;padding-block:28px 18px}.lede-p{font-size:16px}}
+.instruments{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:1px solid var(--line);background:var(--panel);margin-bottom:24px;border-radius:2px}
+.inst{padding:16px 18px 14px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:10px;min-width:0}
+.inst:last-child{border-right:0}
+.inst .fig{font-size:clamp(26px,3.6vw,40px)}
+.inst .lbl{display:flex;justify-content:space-between;gap:8px}
+.inst .lbl b{font-weight:500;color:var(--ink-2)}
+.inst p{margin:0;font-size:13px;color:var(--ink-2)}
+@media (max-width:759px){.instruments{grid-template-columns:1fr}.inst{border-right:0;border-bottom:1px solid var(--line)}.inst:last-child{border-bottom:0}}
+.sections{display:flex;gap:0;border-bottom:1px solid var(--line);margin-bottom:20px;overflow-x:auto}
+.sections a{font-family:'Geist Mono',ui-monospace,Menlo,monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;text-decoration:none;color:var(--ink-3);padding:10px 14px 10px 0;margin-right:14px;white-space:nowrap;border-bottom:2px solid transparent;margin-bottom:-1px}
+.sections a[aria-current]{color:var(--ink);border-color:var(--signal)}
+.chart-panel{background:var(--panel);border:1px solid var(--line);border-radius:2px;position:relative}
+.chart-panel::before,.chart-panel::after{content:"";position:absolute;width:8px;height:8px;border-color:var(--line-2);border-style:solid;pointer-events:none}
+.chart-panel::before{top:-1px;left:-1px;border-width:2px 0 0 2px}
+.chart-panel::after{bottom:-1px;right:-1px;border-width:0 2px 2px 0}
+.chart-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;padding:12px 16px;border-bottom:1px solid var(--line)}
+.chart-head h2{margin:0;font-size:16px;font-weight:600}
+.chart-head .sub{color:var(--ink-2);font-size:13px}
+.chart{position:relative;padding:12px 8px 4px}
+.chart svg{width:100%;height:auto;display:block;font-family:'Geist Mono',ui-monospace,Menlo,monospace}
+.chart .ax{fill:var(--ink-3);font-size:11px;letter-spacing:.04em}
+.chart .axt{fill:var(--ink-3);font-size:11px;letter-spacing:.1em;text-transform:uppercase}
+.chart .grid{stroke:var(--grid);stroke-width:1}
+.chart .axis{stroke:var(--line-2);stroke-width:1}
+.chart .ref{stroke:var(--cool);stroke-width:1}
+.chart .reflbl{fill:var(--cool);font-size:11px;letter-spacing:.1em}
+.chart .ln{fill:none;stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.chart .ln.transistors{stroke:var(--s-transistors)}
+.chart .ln.compute{stroke:var(--s-compute)}
+.chart .ln.accel{stroke:var(--s-accel)}
+.chart .ln.params{stroke:var(--s-params)}
+.chart .pt{fill:var(--s-compute);stroke:var(--panel);stroke-width:2}
+.chart .endl{fill:var(--ink);font-size:12px}
+.chart .endl.dim{fill:var(--ink-2)}
+.chart .ms{fill:var(--gold);stroke:var(--panel);stroke-width:2}
+.chart .callout rect{fill:var(--panel);stroke:var(--gold);stroke-width:1}
+.chart .callout text{fill:var(--ink);font-size:11px;letter-spacing:.06em}
+.chart .callout text.k{fill:var(--gold);letter-spacing:.12em}
+.chart .callout line{stroke:var(--gold);stroke-width:1}
+.chart .xh{stroke:var(--ink-3);stroke-width:1;opacity:0;pointer-events:none}
+.chart .hit{fill:transparent}
+.tt{position:absolute;pointer-events:none;background:var(--panel);border:1px solid var(--line-2);padding:8px 10px;font-size:11px;letter-spacing:.04em;line-height:1.6;color:var(--ink);display:none;min-width:190px;border-radius:2px;z-index:2}
+.tt b{font-weight:500;color:var(--ink-3);display:block;letter-spacing:.1em;margin-bottom:2px}
+.tt .row{display:flex;justify-content:space-between;gap:12px}
+.tt .row i{width:8px;height:8px;display:inline-block;margin-right:6px;background:var(--c);vertical-align:middle}
+.chart-foot{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px 24px;align-items:center;padding:12px 16px;border-top:1px solid var(--line)}
+@media (max-width:759px){.chart-foot{grid-template-columns:1fr}}
+.readouts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:1px solid var(--line)}
+.ro{padding:12px 16px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:4px;min-width:0}
+.ro:last-child{border-right:0}
+.ro .v{font-family:'Geist Mono',ui-monospace,Menlo,monospace;font-size:18px;font-variant-numeric:tabular-nums}
+.ro .v .u{color:var(--ink-3);font-size:12px}
+.ro .lbl{display:flex;align-items:center;gap:7px}
+.ro .lbl i{width:12px;border-top:2px solid var(--c);display:inline-block}
+@media (max-width:759px){.readouts{grid-template-columns:1fr 1fr}.ro:nth-child(2){border-right:0}.ro{border-bottom:1px solid var(--line)}.ro:nth-child(3),.ro:nth-child(4){border-bottom:0}}
+details.tbl{margin-top:16px;font-size:13px}
+details.tbl summary{cursor:pointer;font-family:'Geist Mono',ui-monospace,Menlo,monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+details.tbl .scroll{overflow-x:auto;margin-top:10px}
+table{border-collapse:collapse;min-width:420px;width:100%}
+th,td{text-align:left;padding:6px 10px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+th{font-family:'Geist Mono',ui-monospace,Menlo,monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);font-weight:500}
+td.n{font-family:'Geist Mono',ui-monospace,Menlo,monospace}
+</style>
+</head>
+<body>
+<header class="top wrap">
+  <a class="brand" href="index.html" aria-label="Plotline home"><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M1 5V1h4M13 1h4v4M1 13v4h4M13 17h4v-4" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 12.5l3.5-3 2.5 1.5L14 5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="14" cy="5" r="1.8" fill="var(--signal)"/></svg><span>Plotline</span></a>
+  <span class="tag">Current events, drawn from the data.</span>
+  <div class="right">
+    <span class="stamp">Updated Sep 20, 2026 &middot; 3 plots &middot; 2 live</span>
+    <button class="btn" id="theme-toggle" type="button" aria-label="Toggle light or dark theme"><span class="sw" aria-hidden="true"></span><span id="theme-name">Theme</span></button>
+  </div>
+</header>
+
+<section class="lede wrap">
+  <h1>The numbers behind the news, in a form you can explore.</h1>
+  <p>Each plot here is a small interactive built directly from primary sources: Treasury, FRED, city records, the agencies themselves. No accounts, no tracking, and every figure cites where it came from.</p>
+</section>
+
+<main class="wrap">
+
+  <section class="rail" aria-labelledby="rail-econ">
+    <div class="rail-head">
+      <span class="name" id="rail-econ">Economy</span>
+      <span class="rail-n">1 plot &middot; live</span>
+    </div>
+    <article class="panel">
+      <div class="panel-head">
+        <h2><a href="plot.html">The National Debt</a></h2>
+        <span class="status live"><span class="dot"></span>Live &middot; Treasury daily count</span>
+      </div>
+      <div class="panel-body">
+        <div class="readout">
+          <div>
+            <div class="fig hot" id="debt-ticker" aria-live="off">$40,090,000,000,000</div>
+            <div class="lbl fig-lbl">US federal debt &middot; counting from $40.09T on Sep 17, 2026</div>
+          </div>
+          <dl class="kv">
+            <dt>Pace</dt><dd>+$102,386 <span class="u">/ second, 90-day</span></dd>
+            <dt>Debt to GDP</dt><dd>123%</dd>
+            <dt>Passed GDP</dt><dd>Feb 2013</dd>
+            <dt>Span</dt><dd>33 <span class="u">years, daily</span></dd>
+          </dl>
+        </div>
+        <div class="spark">
+          <svg viewBox="0 0 360 132" role="img" aria-label="Sparkline: US federal debt and GDP, 1993 to 2026, with the Feb 2013 crossing marked">
+  <line x1="10" y1="122" x2="350" y2="122" stroke="var(--line)" />
+  <line x1="82.1" y1="122" x2="82.1" y2="126" stroke="var(--line-2)"/>
+  <line x1="185.2" y1="122" x2="185.2" y2="126" stroke="var(--line-2)"/>
+  <line x1="288.2" y1="122" x2="288.2" y2="126" stroke="var(--line-2)"/>
+  <path d="M10.0,104.4 L20.3,103.4 L30.6,102.7 L40.9,101.4 L51.2,100.1 L61.5,98.8 L71.8,97.6 L82.1,95.8 L92.4,95.0 L102.7,94.0 L113.0,92.7 L123.3,90.9 L133.6,88.9 L143.9,86.9 L154.2,85.1 L164.5,84.6 L174.8,85.3 L185.2,83.8 L195.5,82.3 L205.8,80.8 L216.1,79.2 L226.4,77.5 L236.7,75.7 L247.0,74.4 L257.3,72.4 L267.6,69.8 L277.9,67.5 L288.2,68.3 L298.5,62.7 L308.8,56.6 L319.1,51.5 L329.4,47.7 L339.7,43.6 L350.0,39.0" fill="none" stroke="var(--cool)" stroke-width="1.5" stroke-linejoin="round"/>
+  <path d="M10.0,110.8 L20.3,110.0 L30.6,109.5 L40.9,108.8 L51.2,108.3 L61.5,108.0 L71.8,107.5 L82.1,107.5 L92.4,107.2 L102.7,106.2 L113.0,104.7 L123.3,103.2 L133.6,101.9 L143.9,100.4 L154.2,99.1 L164.5,96.5 L174.8,91.7 L185.2,87.6 L195.5,84.3 L205.8,81.0 L216.1,78.2 L226.4,76.7 L236.7,75.9 L247.0,72.1 L257.3,70.6 L267.6,67.3 L277.9,64.2 L288.2,51.5 L298.5,46.7 L308.8,42.1 L319.1,35.5 L329.4,29.9 L339.7,24.5 L350.0,19.9" fill="none" stroke="var(--signal)" stroke-width="2" stroke-linejoin="round"/>
+  <line x1="217.1" y1="10" x2="217.1" y2="122" stroke="var(--gold)" stroke-width="1" stroke-dasharray="2 3"/>
+  <rect x="213.1" y="75.0" width="8" height="8" transform="rotate(45 217.1 79.0)" fill="var(--gold)" stroke="var(--panel)" stroke-width="2"/>
+  <circle cx="350" cy="19.9" r="3.5" fill="var(--signal)" stroke="var(--panel)" stroke-width="2"/>
+  <circle cx="350" cy="39.0" r="3" fill="var(--cool)" stroke="var(--panel)" stroke-width="2"/>
+</svg>
+          <div class="key">
+            <span><i style="--c:var(--signal)"></i>Debt</span>
+            <span><i style="--c:var(--cool)"></i>GDP</span>
+            <span><i class="gold"></i>Debt passes GDP, Feb 2013</span>
+            <span style="margin-left:auto">1993 &rarr; 2026</span>
+          </div>
+        </div>
+        <div class="panel-copy">
+          <p>Thirty-three years of Treasury&rsquo;s daily count, with GDP alongside it, the laws and shocks that bent the curve, and how long each trillion took.</p>
+          <div class="src"><span class="stamp">Src: Treasury &middot; FRED</span><a class="open" href="plot.html">Open plot &rarr;</a></div>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <section class="rail" aria-labelledby="rail-tech">
+    <div class="rail-head">
+      <span class="name" id="rail-tech">Technology</span>
+      <span class="rail-n">1 plot &middot; live</span>
+    </div>
+    <article class="panel">
+      <div class="panel-head">
+        <h2><a href="plot.html">The Curve</a></h2>
+        <span class="status live"><span class="dot"></span>Live &middot; Epoch AI</span>
+      </div>
+      <div class="panel-body">
+        <div class="readout">
+          <div>
+            <div class="fig hot">&times;2 <small>every</small> 5.6 <small>mo</small></div>
+            <div class="lbl fig-lbl">AI training compute &middot; doubling time since 2012</div>
+          </div>
+          <dl class="kv">
+            <dt>Transistors</dt><dd>&times;2 every 25.5 mo <span class="u">since 1971</span></dd>
+            <dt>Gap</dt><dd>4.6&times; <span class="u">the pace of Moore&rsquo;s Law</span></dd>
+            <dt>On one axis</dt><dd>4 <span class="u">exponentials, log scale</span></dd>
+          </dl>
+        </div>
+        <div class="spark">
+          <svg viewBox="0 0 360 132" role="img" aria-label="Sparkline: AI training compute peeling away from the transistor doubling line after 2012, log scale">
+  <line x1="10" y1="122" x2="350" y2="122" stroke="var(--line)"/>
+  <line x1="112.0" y1="10" x2="112.0" y2="122" stroke="var(--cool)" stroke-width="1" stroke-dasharray="2 3"/>
+  <path d="M10.0,120.4 L18.5,119.6 L27.0,118.9 L35.5,118.1 L44.0,117.4 L52.5,116.6 L61.0,115.9 L69.5,115.1 L78.0,114.4 L86.5,113.6 L95.0,112.8 L103.5,112.1 L112.0,111.3 L120.5,110.6 L129.0,109.8 L137.5,109.1 L146.0,108.3 L154.5,107.6 L163.0,106.8 L171.5,106.0 L180.0,105.3 L188.5,104.5 L197.0,103.8 L205.5,103.0 L214.0,102.3 L222.5,101.5 L231.0,100.8 L239.5,100.0 L248.0,99.2 L256.5,98.5 L265.0,97.7 L273.5,97.0 L282.0,96.2 L290.5,95.5 L299.0,94.7 L307.5,94.0 L316.0,93.2 L324.5,92.4 L333.0,91.7 L341.5,90.9 L350.0,90.2" fill="none" stroke="var(--s-transistors)" stroke-width="1.5" stroke-linejoin="round"/>
+  <path d="M10.0,120.4 L18.5,119.6 L27.0,118.9 L35.5,118.1 L44.0,117.4 L52.5,116.6 L61.0,115.9 L69.5,115.1 L78.0,114.4 L86.5,113.6 L95.0,112.8 L103.5,112.1 L112.0,111.3 L120.5,107.9 L129.0,104.5 L137.5,101.0 L146.0,97.6 L154.5,94.1 L163.0,90.7 L171.5,87.3 L180.0,83.8 L188.5,80.4 L197.0,76.9 L205.5,73.5 L214.0,70.0 L222.5,66.6 L231.0,63.2 L239.5,59.7 L248.0,56.3 L256.5,52.8 L265.0,49.4 L273.5,46.0 L282.0,42.5 L290.5,39.1 L299.0,35.6 L307.5,32.2 L316.0,28.8 L324.5,25.3 L333.0,21.9 L341.5,18.4 L350.0,15.0" fill="none" stroke="var(--s-compute)" stroke-width="2" stroke-linejoin="round"/>
+  <rect x="108.0" y="107.3" width="8" height="8" transform="rotate(45 112.0 111.3)" fill="var(--gold)" stroke="var(--panel)" stroke-width="2"/>
+  <text x="118.0" y="20" font-size="10" fill="var(--cool)" font-family="Geist Mono,ui-monospace,Menlo,monospace" letter-spacing=".08em">2012</text>
+  <text x="344" y="118" font-size="9" fill="var(--ink-3)" text-anchor="end" font-family="Geist Mono,ui-monospace,Menlo,monospace" letter-spacing=".08em">LOG</text>
+</svg>
+          <div class="key">
+            <span><i style="--c:var(--s-transistors)"></i>Transistors</span>
+            <span><i style="--c:var(--s-compute)"></i>Training compute</span>
+            <span><i class="gold"></i>2012 index point</span>
+            <span style="margin-left:auto">2006 &rarr; 2026</span>
+          </div>
+        </div>
+        <div class="panel-copy">
+          <p>Chips have doubled every two years since 1971. The AI built on them doubles every six months. Four exponentials on one axis, and how fast the tests fall.</p>
+          <div class="src"><span class="stamp">Src: Epoch AI</span><a class="open" href="plot.html">Open plot &rarr;</a></div>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <section class="rail" aria-labelledby="rail-pol">
+    <div class="rail-head">
+      <span class="name" id="rail-pol">Politics</span>
+      <span class="rail-n">1 plot &middot; in progress</span>
+    </div>
+    <article class="panel">
+      <div class="panel-head">
+        <h2>The Mamdani Scorecard</h2>
+        <span class="status"><span class="dot"></span>In progress &middot; city records</span>
+      </div>
+      <div class="face">
+        <div class="fig" aria-hidden="true">&middot;&middot;&middot;&middot;&middot;&middot;</div>
+        <span class="lbl">No readout yet. This instrument is being built from city records and will appear here when it goes live.</span>
+      </div>
+    </article>
+  </section>
+
+  <section class="rail dim" aria-labelledby="rail-cul">
+    <div class="rail-head">
+      <span class="name" id="rail-cul">Culture</span>
+      <span class="rail-n">0 plots</span>
+    </div>
+    <div class="slot">No plots on this rail yet.</div>
+  </section>
+
+  <section class="rail dim" aria-labelledby="rail-war">
+    <div class="rail-head">
+      <span class="name" id="rail-war">Warfare</span>
+      <span class="rail-n">0 plots</span>
+    </div>
+    <div class="slot">No plots on this rail yet.</div>
+  </section>
+
+  <section class="about">
+    <span class="lbl">About</span>
+    <p>Plotline is Luyen Chou&rsquo;s personal site of plots: small, self-contained interactive visualizers about current events, each built from primary sources. The pages are static, hosted on GitHub Pages, with no accounts and no tracking. Two plots are live, one is in progress, and the rails above will fill in as new ones are built.</p>
+  </section>
+
+  <footer class="foot">
+    <span class="stamp">Plotline &middot; static pages &middot; no accounts, no tracking</span>
+    <span class="stamp">Every figure cites where it came from</span>
+  </footer>
+</main>
+
+<script>
+
+(function(){
+  var root=document.documentElement,btn=document.getElementById('theme-toggle'),nm=document.getElementById('theme-name');
+  function cur(){var t=root.getAttribute('data-theme');if(t==='dark'||t==='light')return t;return (window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light'}
+  function paint(){nm.textContent=cur()==='dark'?'Dark':'Light'}
+  btn.addEventListener('click',function(){var n=cur()==='dark'?'light':'dark';root.setAttribute('data-theme',n);try{localStorage.setItem('plotline-theme',n)}catch(e){}paint()});
+  paint();
+})();
+
+(function(){
+  var el=document.getElementById('debt-ticker');if(!el)return;
+  var anchor=Date.UTC(2026,8,17,0,0,0), base=40.09e12, pace=102386;
+  var fmt=function(n){var s=Math.round(n).toString(),o='';while(s.length>3){o=','+s.slice(-3)+o;s=s.slice(0,-3)}return '$'+s+o};
+  var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function tick(){var v=base+Math.max(0,(Date.now()-anchor)/1000)*pace;el.textContent=fmt(v)}
+  tick();setInterval(tick,reduce?1000:100);
+})();
+</script>
+</body>
+</html>
