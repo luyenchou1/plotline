@@ -150,6 +150,9 @@ svg text{font-family:var(--sans);font-size:11.5px;fill:var(--muted)}
 .b-thresh{stroke:var(--ink-2);stroke-dasharray:4 3;opacity:.7}
 .b-rel{stroke:var(--event);stroke-width:1.5}
 .b-rel-label{font-size:10px;fill:var(--event);font-weight:500;letter-spacing:.05em;text-transform:uppercase}
+.pre-band{fill:var(--ink);opacity:.045}
+.pre-label{font-size:10.5px;fill:var(--muted);font-style:italic}
+.tip-cue{margin-top:6px;font-size:11px;color:var(--tip-muted)}
 .row-hit{fill:transparent;cursor:pointer}
 .row-hit:hover{fill:var(--ink);opacity:.04}
 .row-sel{fill:var(--accent);opacity:.07}
@@ -312,13 +315,14 @@ function drawDetail(){
   if(!S.sel)S.sel=B[0].key;const b=B.find(x=>x.key===S.sel)||B[0];
   const tabs=$('#dtabs');tabs.replaceChildren();for(const x of B){const t=el('button','tab');t.setAttribute('role','tab');t.setAttribute('aria-selected',x===b);t.style.setProperty('--pc',x.color);t.append(el('i'),document.createTextNode(x.name));t.onclick=()=>{S.sel=x.key;drawStack();drawDetail()};tabs.append(t)}
   const svg=$('#detail'),w=svg.clientWidth||700,mobile=w<640,h=mobile?300:400,m={l:mobile?40:48,r:mobile?14:20,t:22,b:30};
-  const X0=b.rel-3*MONTH,X1=T1;const x=t=>m.l+(t-X0)/(X1-X0)*(w-m.l-m.r);const y=v=>h-m.b-v*(h-m.b-m.t);
+  const firstT=Math.min(b.rel,...b.pts.map(p=>p.t));const X0=firstT-2*MONTH,X1=T1;const x=t=>m.l+(t-X0)/(X1-X0)*(w-m.l-m.r);const y=v=>h-m.b-v*(h-m.b-m.t);
   svg.setAttribute('viewBox',`0 0 ${w} ${h}`);svg.setAttribute('height',h);svg.replaceChildren();
   const g=svgEl('g',{class:'grid'});for(const v of [0,.25,.5,.75,1]){g.append(svgEl('line',{x1:m.l,x2:w-m.r,y1:y(v),y2:y(v)}));g.append(svgEl('text',{x:m.l-8,y:y(v)+4,'text-anchor':'end'},Math.round(v*100)+'%'))}svg.append(g);
   const span=(X1-X0)/YEAR;const yStep=span>4?1:span>2?0.5:0.25;const ax=svgEl('g',{});
   for(let yr=new Date(X0).getUTCFullYear();yr<=new Date(X1).getUTCFullYear()+1;yr++)for(let q=0;q<12;q+=yStep*12){const t=Date.UTC(yr,q,1);if(t<X0||t>X1)continue;ax.append(svgEl('text',{x:x(t),y:h-m.b+16,'text-anchor':'middle'},yStep>=1?String(yr):fmtMY(t)))}
   ax.append(svgEl('line',{x1:m.l,x2:w-m.r,y1:h-m.b,y2:h-m.b,stroke:'var(--axis)'}));svg.append(ax);
   const th=S.thresh/100;svg.append(svgEl('line',{class:'b-thresh',x1:m.l,x2:w-m.r,y1:y(th),y2:y(th)}));svg.append(svgEl('text',{class:'thresh-label',x:w-m.r-6,y:y(th)-5,'text-anchor':'end'},'solved at '+S.thresh+'%'));
+  if(x(b.rel)-m.l>8){svg.append(svgEl('rect',{class:'pre-band',x:m.l,y:m.t,width:x(b.rel)-m.l,height:h-m.b-m.t}));if(x(b.rel)-m.l>150)svg.append(svgEl('text',{class:'pre-label',x:x(b.rel)-6,y:h-m.b-8,'text-anchor':'end'},'models released before the test, scored on it later'))}
   svg.append(svgEl('line',{class:'b-rel',x1:x(b.rel),x2:x(b.rel),y1:m.t,y2:h-m.b}));svg.append(svgEl('text',{class:'b-rel-label',x:x(b.rel)+4,y:m.t+10},'published'));
   const line=[];const f0=frAt(b,b.rel);if(f0)line.push({t:b.rel,v:f0.v});for(const p of b.fr){if(p.t<b.rel)continue;if(line.length)line.push({t:p.t,v:line[line.length-1].v});line.push(p)}if(line.length)line.push({t:X1,v:line[line.length-1].v});
   if(line.length){const d=line.map((p,i)=>(i?'L':'M')+x(p.t).toFixed(1)+','+y(p.v).toFixed(1)).join('');svg.append(svgEl('path',{class:'d-area',d:d+`L${x(X1).toFixed(1)},${h-m.b}L${x(line[0].t).toFixed(1)},${h-m.b}Z`,fill:b.color}));svg.append(svgEl('path',{class:'d-line',d,style:'stroke:'+b.color}))}
@@ -326,7 +330,7 @@ function drawDetail(){
   const cur=svgEl('g',{'pointer-events':'none'});svg.append(cur);const hit=svgEl('rect',{class:'hit',x:m.l,y:0,width:w-m.l-m.r,height:h});svg.append(hit);const tip=$('#dtip');
   hit.addEventListener('pointermove',e=>{const r=svg.getBoundingClientRect();const px=(e.clientX-r.left)/r.width*w,py=(e.clientY-r.top)/r.height*h;let best=null,bd=22;for(const d of dots){const dd=Math.hypot(x(d.p.t)-px,y(d.p.v)-py);if(dd<bd){bd=dd;best=d}}
     cur.replaceChildren();tip.hidden=false;tip.replaceChildren();
-    if(best){const p=best.p;cur.append(svgEl('circle',{class:'dot',cx:x(p.t),cy:y(p.v),r:6,fill:b.color}));tip.append(el('div','tip-date',fmtDate(p.t)+(best.isRec?' · record':'')));const r2=el('div','tip-row');r2.append(el('span','k',p.name+(p.org?' · '+p.org:'')));r2.append(el('b',null,pct(p.v)));tip.append(r2);
+    if(best){const p=best.p;cur.append(svgEl('circle',{class:'dot',cx:x(p.t),cy:y(p.v),r:6,fill:b.color}));tip.append(el('div','tip-date','model released '+fmtDate(p.t)+(best.isRec?' · record':'')));const r2=el('div','tip-row');r2.append(el('span','k',p.name+(p.org?' · '+p.org:'')));r2.append(el('b',null,pct(p.v)));tip.append(r2);if(p.t<b.rel)tip.append(el('div','tip-cue','Released before the test was published; scored on it afterward.'));
       tip.style.left=Math.max(0,Math.min(w-tip.offsetWidth,x(p.t)+12))+'px';tip.style.top=Math.max(0,y(p.v)-tip.offsetHeight-12)+'px'}
     else{const t=clamp(X0+(px-m.l)/(w-m.l-m.r)*(X1-X0),X0,X1);const f=frAt(b,t);cur.append(svgEl('line',{class:'cross',x1:x(t),x2:x(t),y1:m.t,y2:h-m.b}));tip.append(el('div','tip-date',fmtMY(t)));const r2=el('div','tip-row');r2.append(el('span','k',f?'best on record: '+f.name:'no result on record yet'));if(f)r2.append(el('b',null,pct(f.v)));tip.append(r2);
       tip.style.left=Math.max(0,Math.min(w-tip.offsetWidth,x(t)+12))+'px';tip.style.top=Math.max(0,(f?y(f.v):h/2)-tip.offsetHeight/2)+'px'}});
