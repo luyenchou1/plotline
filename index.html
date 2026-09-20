@@ -12,6 +12,7 @@
   color-scheme:light;
   --bg:#f1f4f2;--surface:#fbfcfb;--surface-2:#e9eeeb;--ink:#14201a;--ink-2:#4f5c55;--muted:#7f8a84;
   --border:rgba(20,32,26,.11);--accent:#1d7a4e;--accent-ink:#17643f;--accent-soft:rgba(29,122,78,.13);--gold:#8a6a24;
+  --t-economy:#167a50;--t-technology:#1d4fcb;--t-politics:#b3212b;--t-culture:#6b3ab8;--t-warfare:#a4471a;
   --sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',sans-serif;--mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
 }
 @media (prefers-color-scheme:dark){
@@ -19,12 +20,14 @@
     color-scheme:dark;
     --bg:#0e1311;--surface:#161c19;--surface-2:#1f2622;--ink:#eef3f0;--ink-2:#b6c1ba;--muted:#86918b;
     --border:rgba(255,255,255,.10);--accent:#4cc38a;--accent-ink:#6fd3a1;--accent-soft:rgba(76,195,138,.16);--gold:#d4b36a;
+    --t-economy:#2fa56f;--t-technology:#4f82ee;--t-politics:#e84e58;--t-culture:#9a6ef0;--t-warfare:#db7330;
   }
 }
 :root[data-theme="dark"]{
   color-scheme:dark;
   --bg:#0e1311;--surface:#161c19;--surface-2:#1f2622;--ink:#eef3f0;--ink-2:#b6c1ba;--muted:#86918b;
   --border:rgba(255,255,255,.10);--accent:#4cc38a;--accent-ink:#6fd3a1;--accent-soft:rgba(76,195,138,.16);--gold:#d4b36a;
+  --t-economy:#2fa56f;--t-technology:#4f82ee;--t-politics:#e84e58;--t-culture:#9a6ef0;--t-warfare:#db7330;
 }
 *{box-sizing:border-box}
 html,body{margin:0}
@@ -46,22 +49,29 @@ a{color:var(--accent-ink)}
 .section-label{font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:500;margin:0 0 12px}
 .stories{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;list-style:none;padding:0;margin:0 0 40px}
 .story{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 20px 16px;display:flex;flex-direction:column;gap:8px;min-height:190px;position:relative;text-decoration:none;color:inherit;transition:border-color .15s}
-.story:hover{border-color:var(--accent)}
+.story{--tc:var(--accent);border-top:3px solid var(--tc)}
+.story:hover{border-color:var(--tc)}
+.story[data-theme="economy"]{--tc:var(--t-economy)}
+.story[data-theme="technology"]{--tc:var(--t-technology)}
+.story[data-theme="politics"]{--tc:var(--t-politics)}
+.story[data-theme="culture"]{--tc:var(--t-culture)}
+.story[data-theme="warfare"]{--tc:var(--t-warfare)}
+.story .kicker span:first-child{color:var(--tc);font-weight:600}
 .story .kicker{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:500;display:flex;justify-content:space-between;gap:8px}
 .story h2{font-size:19px;font-weight:600;margin:0;letter-spacing:-.01em;line-height:1.25}
 .story p{margin:0;color:var(--ink-2);font-size:13.5px;line-height:1.5;flex:1}
 .story .figure{font-family:var(--mono);font-size:22px;font-weight:500;color:var(--accent-ink);letter-spacing:-.01em;line-height:1.1}
 .story .figure small{display:block;font-family:var(--sans);font-size:11.5px;color:var(--muted);font-weight:400;margin-top:2px}
 .story .meta{font-size:12px;color:var(--muted);display:flex;justify-content:space-between;gap:8px}
-.story.soon{border-style:dashed;color:var(--ink-2)}
-.story.soon:hover{border-color:var(--border)}
+.story.soon{border-style:dashed;border-top-style:solid;color:var(--ink-2)}
+.story.soon:hover{border-color:var(--border);border-top-color:var(--tc)}
 .story.soon h2{color:var(--ink-2)}
 .pill{display:inline-block;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;font-weight:600;border-radius:4px;padding:1px 6px}
 .pill.live{color:var(--surface);background:var(--accent)}
 .pill.soon{color:var(--gold);border:1px solid var(--gold)}
 .spark{height:44px;width:100%}
-.spark path{fill:none;stroke:var(--accent);stroke-width:1.8;stroke-linejoin:round}
-.spark .fill{fill:var(--accent-soft);stroke:none}
+.spark path{fill:none;stroke:var(--tc);stroke-width:1.8;stroke-linejoin:round}
+.spark .fill{fill:var(--tc);opacity:.14;stroke:none}
 .about{border-top:1px solid var(--border);padding-top:20px;color:var(--ink-2);font-size:13.5px;max-width:72ch}
 .about p{margin:0 0 10px}
 @media (max-width:520px){.page{padding-block:20px 48px}.masthead{margin-bottom:28px}.story{min-height:0}}
@@ -82,7 +92,7 @@ a{color:var(--accent-ink)}
   <p class="section-label">Plots</p>
   <ul class="stories" aria-label="Plots">
     <li>
-      <a class="story" href="national-debt/">
+      <a class="story" href="national-debt/" data-theme="economy">
         <span class="kicker"><span>Economy</span><span class="pill live">Live</span></span>
         <h2>The National Debt</h2>
         <p>Thirty-three years of Treasury's daily count, with GDP alongside it, the laws and shocks that bent the curve, and how long each trillion took.</p>
@@ -94,10 +104,10 @@ a{color:var(--accent-ink)}
       </a>
     </li>
     <li>
-      <a class="story" href="the-curve/">
+      <a class="story" href="the-curve/" data-theme="technology">
         <span class="kicker"><span>Technology</span><span class="pill live">Live</span></span>
         <h2>The Curve</h2>
-        <p>Chips have doubled every two years since 1971. The AI built on them doubles every six months. Four exponentials on one axis, and how fast the tests fall.</p>
+        <p>Chips have doubled every two years since 1971. The AI built on them doubles every six months. Four exponentials on one axis, and the one everyone knows turns out to be the slowest.</p>
         <svg class="spark" viewBox="0 0 300 44" preserveAspectRatio="none" aria-hidden="true">
           <path class="fill" d="M0,42 L60,40 L120,37 L170,33 L200,30 L220,26 L240,20 L260,13 L280,7 L300,2 L300,44 L0,44 Z"/>
           <path d="M0,42 L60,40 L120,37 L170,33 L200,30 L220,26 L240,20 L260,13 L280,7 L300,2"/>
@@ -107,10 +117,10 @@ a{color:var(--accent-ink)}
       </a>
     </li>
     <li>
-      <a class="story" href="the-tests/">
+      <a class="story" href="the-tests/" data-theme="technology">
         <span class="kicker"><span>Technology</span><span class="pill live">Live</span></span>
         <h2>How Fast the Tests Fall</h2>
-        <p>Every major AI benchmark on the same clock, counted from the day it was published. Tests that once lasted years now fall in months.</p>
+        <p>Every major AI benchmark on one calendar, from the day each was published to the day it was solved. Tests that once lasted years now fall in months.</p>
         <svg class="spark" viewBox="0 0 300 44" preserveAspectRatio="none" aria-hidden="true">
           <path d="M0,40 L60,36 L120,30 L180,22 L240,12 L300,6" style="stroke:var(--muted);opacity:.5"/>
           <path d="M120,40 L150,30 L180,18 L210,10 L240,6" style="stroke:var(--muted);opacity:.7"/>
@@ -120,7 +130,7 @@ a{color:var(--accent-ink)}
       </a>
     </li>
     <li>
-      <div class="story soon">
+      <div class="story soon" data-theme="politics">
         <span class="kicker"><span>Politics</span><span class="pill soon">In progress</span></span>
         <h2>The Mamdani Scorecard</h2>
         <p>Campaign promises against the record: what was pledged, what has moved, and what the city's own numbers say.</p>
