@@ -1,0 +1,650 @@
+<!--HEAD-->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>National Debt Explorer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  color-scheme:light;
+  --bg:#f1f4f2;--surface:#fbfcfb;--surface-2:#e9eeeb;--ink:#14201a;--ink-2:#4f5c55;--muted:#7f8a84;
+  --grid:#e1e7e3;--axis:#c3cbc6;--border:rgba(20,32,26,.11);--band:rgba(20,32,26,.04);
+  --debt:#1d7a4e;--debt-ink:#17643f;--debt-soft:rgba(29,122,78,.13);--intra:#9fd0b8;--intra-soft:rgba(159,208,184,.55);
+  --unemp:#2a78d6;--infl:#d95a1f;--ffr:#4a3aa7;--event:#8a6a24;--event-soft:rgba(138,106,36,.12);
+  --tip-bg:#14201a;--tip-ink:#f6f8f7;--tip-muted:#aab5ae;--event-tip:#e0bd63;--focus:#1d7a4e;--shadow:0 6px 24px rgba(20,32,26,.10);
+  --sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',sans-serif;--mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#0e1311;--surface:#161c19;--surface-2:#1f2622;--ink:#eef3f0;--ink-2:#b6c1ba;--muted:#86918b;
+    --grid:#242c28;--axis:#38423c;--border:rgba(255,255,255,.10);--band:rgba(255,255,255,.045);
+    --debt:#4cc38a;--debt-ink:#6fd3a1;--debt-soft:rgba(76,195,138,.16);--intra:#2d6a4c;--intra-soft:rgba(45,106,76,.7);
+    --unemp:#4a95ec;--infl:#ee7a45;--ffr:#9a90ee;--event:#d4b36a;--event-soft:rgba(212,179,106,.14);
+    --tip-bg:#eef3f0;--tip-ink:#14201a;--tip-muted:#5c6862;--event-tip:#7a5c1a;--focus:#4cc38a;--shadow:0 6px 24px rgba(0,0,0,.4);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0e1311;--surface:#161c19;--surface-2:#1f2622;--ink:#eef3f0;--ink-2:#b6c1ba;--muted:#86918b;
+  --grid:#242c28;--axis:#38423c;--border:rgba(255,255,255,.10);--band:rgba(255,255,255,.045);
+  --debt:#4cc38a;--debt-ink:#6fd3a1;--debt-soft:rgba(76,195,138,.16);--intra:#2d6a4c;--intra-soft:rgba(45,106,76,.7);
+  --unemp:#4a95ec;--infl:#ee7a45;--ffr:#9a90ee;--event:#d4b36a;--event-soft:rgba(212,179,106,.14);
+  --tip-bg:#eef3f0;--tip-ink:#14201a;--tip-muted:#5c6862;--event-tip:#7a5c1a;--focus:#4cc38a;--shadow:0 6px 24px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 var(--sans);-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:var(--debt-ink)}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.page{max-width:1180px;margin:0 auto;padding-block:24px 56px;padding-inline:clamp(16px,3vw,32px)}
+
+/* site nav */
+.site-nav{display:flex;align-items:baseline;gap:12px;margin-bottom:14px;font-size:12.5px;color:var(--muted)}
+.site-nav a{font-family:var(--mono);font-weight:500;font-size:14px;color:var(--ink);text-decoration:none;letter-spacing:-.01em}
+.site-nav a:hover{color:var(--debt-ink)}
+.site-nav a::before{content:"←";margin-right:6px;color:var(--muted)}
+/* top bar */
+.top{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:12px}
+.eyebrow{display:block;font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:500;margin-bottom:6px}
+h1{font-size:clamp(22px,2.6vw,28px);font-weight:600;letter-spacing:-.02em;margin:0;line-height:1.15;text-wrap:balance}
+.top-right{display:flex;align-items:center;gap:14px;color:var(--ink-2);font-size:13px}
+.top-right b{color:var(--ink);font-weight:500}
+.icon-btn{width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:var(--surface);display:grid;place-items:center;font-size:15px;color:var(--ink-2)}
+.icon-btn:hover{color:var(--ink);border-color:var(--axis)}
+
+/* hero */
+.hero{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:10px;align-items:stretch;margin-bottom:12px}
+.clock{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 16px 11px;display:flex;flex-direction:column;justify-content:center;min-width:0}
+.clock-label{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:500;display:flex;align-items:center;gap:8px}
+.clock-label i{width:7px;height:7px;border-radius:50%;background:var(--debt);display:inline-block;animation:pulse 2.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.35}50%{opacity:1}}
+.clock-figure{font-family:var(--mono);font-weight:500;font-size:34px;letter-spacing:-.01em;line-height:1.15;margin:4px 0 5px;font-variant-numeric:tabular-nums;color:var(--ink);overflow-wrap:anywhere}
+.clock-figure.replaying{color:var(--debt-ink)}
+.clock-note{font-size:12px;color:var(--ink-2);line-height:1.5}
+.clock-note b{color:var(--ink);font-weight:500}
+.link{background:none;border:none;padding:0;color:var(--debt-ink);text-decoration:underline;text-underline-offset:3px;font-size:inherit}
+.link:hover{color:var(--ink)}
+.tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;min-width:0}
+.tile{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:9px 12px 8px;display:flex;flex-direction:column;gap:1px;min-width:0}
+.tile-label{font-size:11px;color:var(--muted);font-weight:500;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tile-value{font-family:var(--mono);font-size:clamp(17px,1.6vw,20px);font-weight:500;letter-spacing:-.01em;line-height:1.2;margin-top:2px}
+.tile-sub{font-size:11px;color:var(--ink-2);line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tile-sub .up{color:var(--debt-ink);font-weight:500}
+.bar-mini{height:4px;border-radius:2px;background:var(--surface-2);margin-top:6px;overflow:hidden;display:flex}
+.bar-mini i{display:block;height:100%;background:var(--debt)}
+.bar-mini i.b{background:var(--intra)}
+
+/* panels */
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 20px 14px;margin-bottom:16px}
+.panel-head{display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap;margin-bottom:8px}
+.panel h2{font-size:17px;font-weight:600;margin:0;letter-spacing:-.01em}
+.panel-head p{margin:0;color:var(--ink-2);font-size:13px;max-width:70ch}
+.controls{display:flex;justify-content:space-between;align-items:center;gap:12px 20px;flex-wrap:wrap;margin-bottom:8px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.chips .sep{width:1px;height:18px;background:var(--border);margin:0 4px}
+.chip{border:1px solid var(--border);background:transparent;border-radius:999px;padding:4px 11px;font-size:12.5px;color:var(--ink-2);line-height:1.3}
+.chip:hover{border-color:var(--axis);color:var(--ink)}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.controls-right{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.seg{display:inline-flex;border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.seg button{border:none;background:transparent;padding:5px 11px;font-size:12.5px;color:var(--ink-2)}
+.seg button+button{border-left:1px solid var(--border)}
+.seg button[aria-pressed="true"]{background:var(--surface-2);color:var(--ink);font-weight:500}
+.seg button:disabled{opacity:.4;cursor:not-allowed}
+.check{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink-2);cursor:pointer}
+.check input{accent-color:var(--debt);margin:0}
+
+.ind-tabs{display:flex;gap:4px;align-items:center;margin-top:6px;flex-wrap:wrap}
+.ind-tabs-label{font-size:11.5px;color:var(--muted);margin-right:6px}
+.ind-tab{border:1px solid transparent;background:transparent;border-radius:999px;padding:3px 10px;font-size:12px;color:var(--ink-2);display:inline-flex;align-items:center;gap:6px}
+.ind-tab i{width:10px;height:0;border-top:2px solid var(--muted);border-radius:2px}
+.ind-tab:hover{color:var(--ink);border-color:var(--border)}
+.ind-tab[aria-selected="true"]{background:var(--surface-2);color:var(--ink);border-color:var(--border);font-weight:500}
+.chart-wrap{position:relative}
+svg{display:block;width:100%;overflow:visible}
+svg text{font-family:var(--sans);font-size:11.5px;fill:var(--muted)}
+.grid line{stroke:var(--grid)}
+.axis-x text{fill:var(--muted)}
+.axis-y text{fill:var(--muted);font-variant-numeric:tabular-nums}
+.band{fill:var(--band)}
+.band-label{font-size:11px;fill:var(--ink-2);font-weight:500;paint-order:stroke;stroke:var(--surface);stroke-width:3px;stroke-linejoin:round}
+.band-line{stroke:var(--axis);stroke-dasharray:2 3}
+.area{fill:var(--debt-soft)}
+.area-pub{fill:var(--debt);opacity:.55}
+.area-intra{fill:var(--intra-soft)}
+.line{fill:none;stroke:var(--debt);stroke-width:2;stroke-linejoin:round}
+.line-thin{fill:none;stroke:var(--debt);stroke-width:1.5}
+.gdp-line{fill:none;stroke:var(--ink-2);stroke-width:1.8;stroke-dasharray:7 4;stroke-linejoin:round}
+.end-label{font-size:11px;font-weight:600;paint-order:stroke;stroke:var(--surface);stroke-width:3px;stroke-linejoin:round}
+.cross-dot{fill:var(--surface);stroke:var(--ink);stroke-width:2}
+.cross-label{font-size:11px;fill:var(--ink);font-weight:500;paint-order:stroke;stroke:var(--surface);stroke-width:3px}
+.ref-line{stroke:var(--ink-2);stroke-dasharray:4 3;opacity:.7}
+.ref-label{font-size:10.5px;fill:var(--ink-2)}
+.ind-line{fill:none;stroke-width:1.8;stroke-linejoin:round}
+.ind-area{opacity:.10}
+.ind-title{font-size:12px;fill:var(--ink);font-weight:500}
+.ind-sub{font-size:11px;fill:var(--muted)}
+.ind-val{font-size:13px;fill:var(--ink);font-weight:500;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.cross{stroke:var(--axis);stroke-width:1}
+.dot{stroke:var(--surface);stroke-width:2}
+.hit{fill:transparent;cursor:crosshair;touch-action:pan-y}
+.ev-line{stroke:var(--event);stroke-dasharray:2 4;opacity:.45}
+.ev-dot{fill:var(--surface);stroke:var(--event);stroke-width:2;cursor:pointer}
+.ev-dot:hover,.ev-dot.on{fill:var(--event)}
+.ev-label{font-size:11px;fill:var(--event);cursor:pointer}
+.ev-label:hover{text-decoration:underline}
+.ms-dot{fill:var(--debt);stroke:var(--surface);stroke-width:1.5}
+.ms-label{font-size:10.5px;fill:var(--debt-ink);font-weight:500;font-variant-numeric:tabular-nums}
+.axis-note{font-size:10.5px;fill:var(--muted);font-style:italic}
+.nav-wrap{margin-top:10px;position:relative}
+.nav-bg{fill:var(--surface-2)}
+.nav-area{fill:var(--debt);opacity:.25}
+.nav-dim{fill:var(--surface);opacity:.62}
+.nav-win{fill:none;stroke:var(--ink);stroke-width:1.2}
+.nav-handle{fill:var(--ink);cursor:ew-resize}
+.nav-grab{fill:transparent;cursor:grab}
+.nav-new{fill:transparent;cursor:crosshair}
+.nav-text{font-size:10.5px;fill:var(--muted)}
+.hint{font-size:12px;color:var(--muted);margin-top:8px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.hint kbd{font-family:var(--mono);font-size:11px;border:1px solid var(--border);border-radius:4px;padding:0 4px;color:var(--ink-2)}
+
+.tooltip{position:absolute;z-index:4;background:var(--tip-bg);color:var(--tip-ink);border-radius:10px;padding:11px 13px 10px;font-size:12.5px;line-height:1.45;pointer-events:none;box-shadow:var(--shadow);width:max-content;max-width:280px}
+.tooltip.pinned{pointer-events:auto}
+.tip-date{font-size:11px;color:var(--tip-muted);letter-spacing:.04em;text-transform:uppercase;font-weight:500;margin-bottom:6px;padding-right:20px}
+.tip-row{display:flex;justify-content:space-between;gap:18px;align-items:baseline}
+.tip-row+.tip-row{margin-top:3px}
+.tip-row .k{display:flex;align-items:center;gap:7px;color:var(--tip-muted)}
+.tip-row .k i{width:12px;height:0;border-top:2px solid var(--debt);display:inline-block;border-radius:2px}
+.tip-row b{font-family:var(--mono);font-weight:500;font-variant-numeric:tabular-nums;color:var(--tip-ink);font-size:13px}
+.tip-row .d{display:block;font-size:11px;color:var(--tip-muted);font-family:var(--sans);font-weight:400;text-align:right}
+.tooltip.event{border:1.5px solid var(--event-tip);max-width:300px}
+.tip-tag{display:inline-block;font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:var(--tip-bg);background:var(--event-tip);border-radius:4px;padding:1px 6px;margin-right:8px;vertical-align:1px}
+.tip-head{font-size:14px;font-weight:600;color:var(--event-tip);line-height:1.3;margin:2px 0 1px}
+.tip-title{font-size:12px;color:var(--tip-muted);line-height:1.4;margin-bottom:8px}
+.tip-cue{margin-top:8px;font-size:11px;color:var(--tip-muted)}
+.ev-halo{fill:none;stroke:var(--event);stroke-width:2;opacity:.6}
+.cross.ev{stroke:var(--event);stroke-dasharray:3 3;opacity:.7}
+.tip-sec{margin-top:8px;padding-top:7px;border-top:1px solid rgba(128,128,128,.25)}
+.tip-close{position:absolute;right:6px;top:4px;background:none;border:none;color:var(--tip-muted);font-size:16px;line-height:1;padding:2px 5px}
+.tip-close:hover{color:var(--tip-ink)}
+
+.event-dialog{border:1px solid var(--border);border-left:4px solid var(--event);border-radius:12px;background:var(--surface);color:var(--ink);padding:20px 24px 18px;max-width:min(560px,calc(100vw - 32px));box-shadow:var(--shadow)}
+.event-dialog::backdrop{background:rgba(10,14,12,.45);backdrop-filter:blur(2px)}
+.event-dialog .eyebrow{margin-bottom:8px}
+.event-dialog .eyebrow .tag{display:inline-block;font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:var(--surface);background:var(--event);border-radius:4px;padding:1px 6px;margin-right:8px;vertical-align:1px}
+.event-dialog h3{margin:0 0 8px;font-size:17px;font-weight:600;line-height:1.3;text-wrap:balance}
+.event-dialog p{margin:0;font-size:14px;color:var(--ink-2);line-height:1.6}
+.event-dialog .row{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap;align-items:center}
+.event-dialog .btn{border:1px solid var(--border);background:var(--surface);border-radius:8px;padding:6px 12px;font-size:13px;color:var(--ink)}
+.event-dialog .btn:hover{border-color:var(--axis)}
+.event-dialog .btn.primary{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.event-dialog .src{margin-left:auto;font-size:13px}
+.tip-btn{display:inline-block;margin-top:9px;border:1px solid var(--event-tip);background:transparent;color:var(--event-tip);border-radius:6px;padding:4px 10px;font-size:12px;font-weight:500;cursor:pointer}
+.tip-btn:hover{background:var(--event-tip);color:var(--tip-bg)}
+.events{list-style:none;padding:0;margin:14px 0 0;display:flex;gap:6px;overflow-x:auto;scrollbar-width:thin;padding-bottom:4px}
+.events li{flex:0 0 auto}
+.ev-chip{border:1px solid var(--border);background:transparent;border-radius:8px;padding:5px 9px;font-size:12px;color:var(--ink-2);display:flex;flex-direction:column;align-items:flex-start;gap:0;line-height:1.3;text-align:left}
+.ev-chip span{font-family:var(--mono);font-size:10.5px;color:var(--muted)}
+.ev-chip:hover{border-color:var(--event);color:var(--ink)}
+.ev-chip.in{background:var(--event-soft);border-color:transparent;color:var(--ink)}
+.ev-chip.on{border-color:var(--event);background:var(--event-soft);color:var(--ink)}
+
+/* presidency table */
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:500;text-align:left;padding:6px 10px 8px 0;border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:9px 10px 9px 0;border-bottom:1px solid var(--grid);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;font-family:var(--mono);font-size:13px}
+th.num{font-family:var(--sans);font-size:11.5px}
+td .who{font-weight:500;color:var(--ink)}
+td .when{display:block;font-size:11.5px;color:var(--muted)}
+.barcell{white-space:nowrap}
+.hbar{display:flex;align-items:center;gap:8px}
+.hbar i{display:block;height:12px;border-radius:0 4px 4px 0;background:var(--debt);flex:0 0 auto}
+.hbar i.partial{background:repeating-linear-gradient(135deg,var(--debt) 0 4px,transparent 4px 7px)}
+.hbar b{font-family:var(--mono);font-weight:500;font-size:12.5px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.table-wrap{overflow-x:auto}
+.note{font-size:12.5px;color:var(--muted);margin:10px 0 0;line-height:1.5}
+
+/* milestones */
+.ms-bar{fill:var(--debt)}
+.ms-bar.hi{fill:var(--debt-ink)}
+.ms-bar-hit{fill:transparent;cursor:pointer}
+.ms-x{font-size:11px;fill:var(--muted)}
+.ms-x.yr{font-size:10px}
+.ms-call{font-size:11.5px;fill:var(--ink);font-weight:500}
+.ms-call.sub{fill:var(--muted);font-weight:400;font-size:11px}
+
+/* footer */
+.foot{color:var(--ink-2);font-size:13px;line-height:1.6}
+.foot h2{font-size:15px;margin:0 0 6px;color:var(--ink)}
+.foot p{margin:0 0 10px;max-width:78ch}
+.foot details{margin-top:8px}
+.foot summary{cursor:pointer;font-weight:500;color:var(--ink);width:max-content}
+.foot .btn{border:1px solid var(--border);background:var(--surface);border-radius:8px;padding:7px 12px;font-size:13px;color:var(--ink)}
+.foot .btn:hover{border-color:var(--axis)}
+.datatable{max-height:420px;overflow:auto;border:1px solid var(--border);border-radius:10px;margin-top:10px}
+.datatable table{font-size:12.5px}
+.datatable th{position:sticky;top:0;background:var(--surface);padding:8px 10px;z-index:1}
+.datatable td{padding:5px 10px}
+.sr{position:absolute;left:-9999px}
+
+@media (max-width:820px){
+  .hero{grid-template-columns:1fr}
+  .tiles{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .controls{align-items:flex-start}
+}
+@media (max-width:520px){
+  .page{padding-block:16px 40px}
+  .panel{padding:14px 12px 12px;border-radius:12px}
+  .clock{padding:16px}
+  .tiles{gap:8px}
+  .tile{padding:12px 12px 10px}
+  .chips{overflow-x:auto;flex-wrap:nowrap;max-width:100%;padding-bottom:2px;scrollbar-width:none}
+  .hint{font-size:11px}
+  th,td{padding-right:8px}
+}
+@media (prefers-reduced-motion:reduce){.clock-label i{animation:none}}
+</style>
+<!--/HEAD-->
+<!--BODY-->
+<div class="page">
+<nav class="site-nav"><a href="../">Plotline</a><span>Current events, drawn from the data</span></nav>
+<header class="top">
+  <div class="brand"><span class="eyebrow">U.S. Treasury · Debt to the Penny · daily since April 1993</span><h1>The National Debt</h1></div>
+  <div class="top-right"><span>Reported through <b id="asof"></b></span><button class="icon-btn" id="theme" aria-label="Switch light or dark theme" title="Light / dark">◐</button></div>
+</header>
+
+<section class="hero" aria-label="Current debt">
+  <div class="clock">
+    <div class="clock-label"><i></i>Estimated right now</div>
+    <div class="clock-figure" id="clock" aria-live="off">—</div>
+    <div class="clock-note">Treasury reported <b id="clock-last"></b> on <span id="clock-date"></span>; the ticker adds the trailing 90-day pace of <b id="pace"></b> per second. <button class="link" id="replay">Replay 1993 → today</button></div>
+  </div>
+  <div class="tiles" id="tiles"></div>
+</section>
+
+<section class="panel" aria-labelledby="chart-h">
+  <div class="panel-head"><h2 id="chart-h">Total federal debt outstanding</h2><p>Nominal dollars. Shaded columns are presidential terms, gold marks are milestones. Drag the strip below the chart to zoom.</p></div>
+  <div class="controls">
+    <div class="chips" id="ranges" role="group" aria-label="Time range"></div>
+    <div class="controls-right">
+      <div class="seg" role="group" aria-label="Series"><button data-view="total" aria-pressed="true">Total</button><button data-view="split" aria-pressed="false">Who holds it</button></div>
+      <div class="seg" role="group" aria-label="Scale"><button data-scale="linear" aria-pressed="true">Linear</button><button data-scale="log" aria-pressed="false">Log</button></div>
+      <label class="check"><input type="checkbox" id="gdp-toggle" checked> GDP line</label>
+      <label class="check"><input type="checkbox" id="events-toggle" checked> Events</label>
+    </div>
+  </div>
+  <div class="chart-wrap">
+    <svg id="main" tabindex="0" role="img" aria-label="Federal debt over time. Arrow keys move the cursor by one reporting day; Escape clears a pinned point."></svg>
+    <div class="tooltip" id="tip" hidden></div>
+  </div>
+  <div class="ind-tabs" id="ind-tabs" role="tablist" aria-label="Comparison panel"><span class="ind-tabs-label">Compare with</span></div>
+  <div id="indicators"></div>
+  <div class="nav-wrap"><svg id="nav" aria-label="Zoom control: drag to choose a period"></svg></div>
+  <div class="hint"><span>Hover to read · click to pin · <kbd>←</kbd> <kbd>→</kbd> step a day · <kbd>Esc</kbd> clears</span><span id="coverage"></span></div>
+  <ol class="events" id="event-list" aria-label="Events"></ol>
+  <dialog id="event-dialog" class="event-dialog" aria-labelledby="ev-dlg-title"></dialog>
+</section>
+
+<section class="panel" aria-labelledby="terms-h">
+  <div class="panel-head"><h2 id="terms-h">Debt added, by presidential term</h2><p>Start and end are the first Treasury reading on or after each inauguration. Context, not attribution: deficits reflect laws, recessions and interest costs that span administrations.</p></div>
+  <div class="table-wrap"><table id="terms-table"></table></div>
+  <p class="note" id="terms-note"></p>
+</section>
+
+<section class="panel" aria-labelledby="ms-h">
+  <div class="panel-head"><h2 id="ms-h">How long each trillion took</h2><p>Days between the first crossing of one whole trillion and the next. Shorter bars mean faster borrowing.</p></div>
+  <svg id="ms" role="img" aria-label="Bar chart of days between successive trillion-dollar milestones"></svg>
+  <p class="note" id="ms-note"></p>
+</section>
+
+<section class="foot" aria-labelledby="src-h">
+  <h2 id="src-h">Reading this page</h2>
+  <p>Debt is total public debt outstanding: debt held by the public plus intragovernmental holdings (mostly trust funds such as Social Security), in nominal dollars, from Treasury's daily <a href="https://fiscaldata.treasury.gov/datasets/debt-to-the-penny/" target="_blank" rel="noopener">Debt to the Penny</a> series, which begins April 1, 1993. The breakdown by holder starts September 1997. GDP is nominal gross domestic product from the Bureau of Economic Analysis via <a href="https://fred.stlouisfed.org/series/GDP" target="_blank" rel="noopener">FRED</a>, quarterly at a seasonally adjusted annual rate, drawn through quarter midpoints. Debt-to-GDP divides each day's debt by that interpolated GDP; at quarter ends it matches FRED's published ratio. After the latest quarter (<span id="gdp-q"></span>) GDP is held at its last value, so the most recent ratio readings are provisional. Snapshot retrieved <span id="retrieved"></span>.</p>
+  <p>Comparison panels: Debt-to-GDP is described above. The others use monthly data from FRED: <a href="https://fred.stlouisfed.org/series/UNRATE" target="_blank" rel="noopener">U-3 unemployment</a> (seasonally adjusted), <a href="https://fred.stlouisfed.org/series/CPIAUCNS" target="_blank" rel="noopener">CPI-U inflation</a> (12-month change, not seasonally adjusted) and the <a href="https://fred.stlouisfed.org/series/FEDFUNDS" target="_blank" rel="noopener">effective federal funds rate</a> (monthly average, a policy rate rather than Treasury's borrowing cost). Each panel has its own axis; nothing here shares a scale with the debt. Unemployment and inflation have no October 2025 value: the federal shutdown of October 1 to November 12, 2025 stopped BLS data collection for that month, and the agency later confirmed those figures would not be published. The lines break there rather than bridging the gap.</p>
+  <p>The live ticker is an estimate. It takes the average change per second over the 90 days before Treasury's latest reading and runs it forward. The log scale turns constant percentage growth into a straight line, which is the honest way to compare growth rates across decades. Zoomed-in linear views under six years fit the axis to the data and say so; wider views start at zero. Presidential terms and events are context, not causes.</p>
+  <details><summary>Monthly data table</summary><div class="datatable" id="datatable"></div></details>
+  <!--DL--><p style="margin-top:12px"><button class="btn" id="download">Download daily CSV</button></p><!--/DL-->
+</section>
+</div>
+
+<script>
+/*__DATA__*/
+(function(){
+'use strict';
+const $=s=>document.querySelector(s), DAY=864e5, YEAR=365.25*DAY, E0=Date.parse(DATA.epoch);
+const D=DATA.rows.map((r,i)=>({t:E0+r[0]*DAY,v:r[1]*1e9,p:r[2]==null?null:r[2]*1e9,g:r[3]==null?null:r[3]*1e9,i}));
+const N=D.length,T0=D[0].t,T1=D[N-1].t,LAST=DATA.last;
+const terms=DATA.terms.map(r=>({name:r[0],short:r[1],start:Date.parse(r[2]),end:r[3]?Date.parse(r[3]):T1+DAY,partial:!r[3]}));
+const GDPQ=DATA.gdp.map(([d,v])=>({t:Date.parse(d)+45*DAY,v:v*1e9,q:d})); // value placed at the quarter's midpoint
+const GDP_LAST=DATA.gdp[DATA.gdp.length-1];
+function gdpAt(t){if(t<=GDPQ[0].t)return GDPQ[0].v;const n=GDPQ.length;if(t>=GDPQ[n-1].t)return GDPQ[n-1].v;let l=0,h=n-1;while(h-l>1){const m=(l+h)>>1;if(GDPQ[m].t<=t)l=m;else h=m}const a=GDPQ[l],b=GDPQ[h];return a.v+(b.v-a.v)*(t-a.t)/(b.t-a.t)}
+const ratioOf=d=>d.v/gdpAt(d.t)*100;
+const crossover=D.find(d=>d.v>gdpAt(d.t));
+const ratioMonthly=new Map();{let cur=null;for(const d of D){const k=new Date(d.t).toISOString().slice(0,7);ratioMonthly.set(k,ratioOf(d))}}
+const IND=[
+ {key:'debtgdp',label:'Debt-to-GDP',sub:'total debt ÷ nominal GDP, annualized',cls:'debt',map:ratioMonthly,fmt:v=>v.toFixed(0)+'%',ref:100},
+ {key:'unemployment',label:'Unemployment',sub:'U-3 rate, seasonally adjusted',cls:'unemp',map:new Map(DATA.unemployment),fmt:v=>v.toFixed(1)+'%'},
+ {key:'inflation',label:'Inflation',sub:'CPI-U, 12-month change',cls:'infl',map:new Map(DATA.inflation),fmt:v=>v.toFixed(1)+'%'},
+ {key:'fedfunds',label:'Fed funds rate',sub:'effective rate, monthly average',cls:'ffr',map:new Map(DATA.fedfunds),fmt:v=>v.toFixed(2)+'%'}];
+const events=DATA.events.map((e,i)=>({...e,t:Date.parse(e.date),id:i}));
+const monthKey=t=>new Date(t).toISOString().slice(0,7);
+const fmtDate=t=>new Date(t).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric',timeZone:'UTC'});
+const fmtMY=t=>new Date(t).toLocaleDateString('en-US',{month:'short',year:'numeric',timeZone:'UTC'});
+const fmtT=(v,d=2)=>'$'+(v/1e12).toFixed(d)+'T';
+const fmtB=v=>'$'+Math.round(v/1e9).toLocaleString('en-US')+'B';
+const fmtFull=v=>'$'+Math.round(v).toLocaleString('en-US');
+const fmtMoney=v=>Math.abs(v)>=1e12?fmtT(v):fmtB(v);
+const fmtDays=n=>n.toLocaleString('en-US')+' days';
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+function bisect(t){let l=0,h=N;while(l<h){const m=(l+h)>>1;if(D[m].t<t)l=m+1;else h=m}return l}
+function nearest(t){const i=bisect(t);if(i<=0)return D[0];if(i>=N)return D[N-1];return t-D[i-1].t<=D[i].t-t?D[i-1]:D[i]}
+function atOrAfter(t){return D[Math.min(N-1,bisect(t))]}
+function atOrBefore(t){const i=bisect(t);return D[i<N&&D[i].t===t?i:Math.max(0,i-1)]}
+function svgEl(tag,attrs,text){const n=document.createElementNS('http://www.w3.org/2000/svg',tag);for(const k in attrs)n.setAttribute(k,attrs[k]);if(text!=null)n.textContent=text;return n}
+function el(tag,cls,text){const n=document.createElement(tag);if(cls)n.className=cls;if(text!=null)n.textContent=text;return n}
+const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- theme ---------- */
+const root=document.documentElement;
+try{const s=localStorage.getItem('debt-theme');if(s)root.dataset.theme=s}catch(e){}
+$('#theme').onclick=()=>{const dark=getComputedStyle(root).colorScheme==='dark';root.dataset.theme=dark?'light':'dark';try{localStorage.setItem('debt-theme',root.dataset.theme)}catch(e){}drawAll()};
+
+/* ---------- headline numbers ---------- */
+$('#asof').textContent=fmtDate(T1);$('#gdp-q').textContent='Q'+(Math.floor(new Date(GDP_LAST[0]).getUTCMonth()/3)+1)+' '+new Date(GDP_LAST[0]).getUTCFullYear();$('#retrieved').textContent=fmtDate(Date.parse(DATA.retrieved));
+const paceStart=atOrAfter(T1-90*DAY),pace=(LAST.total-paceStart.v)/((T1-paceStart.t)/1000);
+const lastTs=T1+20*3600e3; // Treasury's daily figure is as of close of business, roughly 4pm ET
+$('#clock-last').textContent=fmtFull(LAST.total);$('#clock-date').textContent=fmtDate(T1);$('#pace').textContent=fmtFull(pace);
+let replaying=false;
+function tick(){if(replaying)return;const v=LAST.total+pace*Math.max(0,(Date.now()-lastTs)/1000);$('#clock').textContent=fmtFull(v)}
+tick();setInterval(tick,120);
+function fitClock(){const c=$('#clock'),box=c.clientWidth||300;c.style.fontSize=clamp(box/(19*0.64),20,40)+'px'}
+fitClock();
+
+const yearAgo=atOrBefore(T1-YEAR),d12=LAST.total-yearAgo.v;
+const milestones=[];{let next=5e12;for(const d of D){while(d.v>=next){milestones.push({tril:next/1e12,t:d.t,v:d.v});next+=1e12}}}
+for(let i=0;i<milestones.length;i++)milestones[i].days=i?Math.round((milestones[i].t-milestones[i-1].t)/DAY):null;
+const lastMs=milestones[milestones.length-1],firstTimed=milestones.find(m=>m.days!=null);
+const tiles=[
+ {label:'Held by the public',value:fmtT(LAST.public),sub:(LAST.public/LAST.total*100).toFixed(1)+'% of total · the rest is owed to federal trust funds',bar:LAST.public/LAST.total},
+ {label:'Debt as a share of GDP',value:ratioOf(D[N-1]).toFixed(0)+'%',sub:'GDP '+fmtT(GDP_LAST[1]*1e9,1)+' annualized · debt passed GDP in '+fmtMY(crossover.t)},
+ {label:'Added in the past 12 months',value:'+'+fmtT(d12),sub:'<span class="up">+'+(d12/yearAgo.v*100).toFixed(1)+'%</span> · about '+fmtB(d12/365)+' a day'},
+ {label:'The latest trillion',value:fmtDays(lastMs.days),sub:'$'+(lastMs.tril-1)+'T → $'+lastMs.tril+'T · the first one here took '+fmtDays(firstTimed.days)}];
+for(const t of tiles){const d=el('div','tile');d.append(el('div','tile-label',t.label),el('div','tile-value',t.value));const s=el('div','tile-sub');s.innerHTML=t.sub;d.append(s);if(t.bar!=null){const b=el('div','bar-mini');const i=el('i');if(t.b)i.className='b';i.style.width=(t.bar*100).toFixed(1)+'%';b.append(i);d.append(b)}$('#tiles').append(d)}
+
+/* ---------- state ---------- */
+const S={t0:T0,t1:T1,view:'total',scale:'linear',events:true,pinned:null,hover:null,evHover:null,evOpen:null,ind:'debtgdp',gdp:true};
+{const box=$('#ind-tabs');for(const opt of [...IND.map(i=>({key:i.key,label:i.label,cls:i.cls})),{key:'all',label:'All'}]){const b=el('button','ind-tab');b.setAttribute('role','tab');b.dataset.ind=opt.key;if(opt.cls){const i=el('i');i.style.borderColor='var(--'+opt.cls+')';b.append(i)}b.append(document.createTextNode(opt.label));b.onclick=()=>{S.ind=opt.key;drawAll()};box.append(b)}}
+const rangeChips=[{id:'all',label:'All',range:()=>[T0,T1]},...[20,10,5,2,1].map(n=>({id:n+'y',label:n+'y',range:()=>[T1-n*YEAR,T1]})),
+ ...terms.map((tm,i)=>({id:'term'+i,label:tm.short,range:()=>[Math.max(T0,tm.start),Math.min(T1,tm.end)],term:true}))];
+{const box=$('#ranges');rangeChips.forEach((c,i)=>{if(c.term&&!rangeChips[i-1].term)box.append(el('span','sep'));const b=el('button','chip',c.label);b.dataset.id=c.id;b.setAttribute('aria-pressed','false');b.onclick=()=>setRange(...c.range());box.append(b)})}
+function setRange(a,b){a=clamp(a,T0,T1-30*DAY);b=clamp(b,a+30*DAY,T1);S.t0=a;S.t1=b;S.pinned=null;S.hover=null;drawAll()}
+document.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>{S.view=b.dataset.view;if(S.view==='split')S.scale='linear';drawAll()});
+document.querySelectorAll('[data-scale]').forEach(b=>b.onclick=()=>{S.scale=b.dataset.scale;drawAll()});
+$('#gdp-toggle').onchange=e=>{S.gdp=e.target.checked;drawAll()};
+$('#events-toggle').onchange=e=>{S.events=e.target.checked;if(!S.events){closeEvent(false);S.pinned=null;clearCursor()}drawAll()};
+
+/* ---------- scales ---------- */
+let L=null; // layout shared by main + indicators
+function niceStep(range,target){const raw=range/target,p=Math.pow(10,Math.floor(Math.log10(raw)));for(const m of [1,2,2.5,5,10]){if(m*p>=raw)return m*p}return 10*p}
+function xTicks(t0,t1,w){const months=[1,2,3,6,12,24,60,120],target=Math.max(3,Math.floor(w/95));let step=120;for(const m of months){if((t1-t0)/(m*YEAR/12)<=target){step=m;break}}const out=[];const d=new Date(t0);let y=d.getUTCFullYear(),m=d.getUTCMonth();if(step>=12){const ys=step/12;y=Math.ceil(y/ys)*ys;m=0}else{m=Math.ceil((m+(d.getUTCDate()>1?1:0))/step)*step}for(;;){const t=Date.UTC(y,m,1);if(t>t1)break;if(t>=t0)out.push({t,label:step>=12?String(y):new Date(t).toLocaleDateString('en-US',{month:'short',year:'2-digit',timeZone:'UTC'}).replace(' ',' ’')});m+=step;y+=Math.floor(m/12);m%=12}return out}
+
+/* ---------- main chart ---------- */
+function drawMain(){
+  const svg=$('#main'),w=svg.clientWidth||800,mobile=w<640,h=mobile?300:400;
+  const m={l:mobile?50:62,r:mobile?12:18,t:mobile?46:52,b:26};
+  const t0=S.t0,t1=S.t1,span=t1-t0;
+  const i0=Math.max(0,bisect(t0)-1),i1=Math.min(N-1,bisect(t1)+1),vis=D.slice(i0,i1+1);
+  const x=t=>m.l+(t-t0)/span*(w-m.l-m.r);
+  let lo=Infinity,hi=-Infinity;for(const d of vis){if(d.v<lo)lo=d.v;if(d.v>hi)hi=d.v}
+  const gdpPts=S.gdp?GDPQ.filter(q=>q.t>=t0-120*DAY&&q.t<=t1+120*DAY):[];
+  if(S.gdp){const ga=gdpAt(t0),gb=gdpAt(t1);for(const v of [ga,gb,...gdpPts.map(q=>q.v)]){if(v<lo)lo=v;if(v>hi)hi=v}}
+  const zeroBase=S.view==='split'||span>=6*YEAR;
+  let yMin,yMax,y;
+  if(S.scale==='log'){yMin=lo*0.92;yMax=hi*1.06;const a=Math.log(yMin),b=Math.log(yMax);y=v=>h-m.b-(Math.log(v)-a)/(b-a)*(h-m.b-m.t)}
+  else{yMin=zeroBase?0:lo-(hi-lo)*0.08;yMax=zeroBase?hi*1.04:hi+(hi-lo)*0.08;if(yMax===yMin)yMax=yMin+1e9;y=v=>h-m.b-(v-yMin)/(yMax-yMin)*(h-m.b-m.t)}
+  L={x,y,w,h,m,t0,t1,mobile};
+  svg.setAttribute('viewBox',`0 0 ${w} ${h}`);svg.setAttribute('height',h);svg.replaceChildren();
+  const defs=svgEl('defs',{});defs.append(svgEl('clipPath',{id:'clip-main'}));defs.firstChild.append(svgEl('rect',{id:'clip-rect',x:m.l,y:0,width:w-m.l-m.r,height:h}));svg.append(defs);
+  // presidency bands
+  const bands=svgEl('g',{class:'bands'});terms.forEach((tm,i)=>{const a=Math.max(t0,tm.start),b=Math.min(t1,tm.end);if(b<=a)return;const xa=x(a),xb=x(b);if(i%2)bands.append(svgEl('rect',{class:'band',x:xa,y:m.t,width:xb-xa,height:h-m.b-m.t}));if(tm.start>t0&&tm.start<t1)bands.append(svgEl('line',{class:'band-line',x1:xa,x2:xa,y1:m.t-14,y2:h-m.b}));const label=tm.short,lw=label.length*6.5+10,lastTerm=i===terms.length-1,firstTerm=i===0;
+    if(xb-xa>lw)bands.append(svgEl('text',{class:'band-label',x:(xa+xb)/2,y:m.t-6,'text-anchor':'middle'},label));
+    else if(lastTerm&&xb>=w-m.r-1)bands.append(svgEl('text',{class:'band-label',x:xb,y:m.t-6,'text-anchor':'end'},label));
+    else if(firstTerm&&xa<=m.l+1)bands.append(svgEl('text',{class:'band-label',x:xa,y:m.t-6,'text-anchor':'start'},label))});svg.append(bands);
+  // grid + y axis
+  const grid=svgEl('g',{class:'grid'}),ay=svgEl('g',{class:'axis-y'});
+  let ticks=[];
+  if(S.scale==='log'){const c=[1,2,3,4,5,6,8,10,15,20,30,40,60].map(v=>v*1e12);ticks=c.filter(v=>v>=yMin&&v<=yMax);if(ticks.length>7)ticks=[1,2,5,10,20,50].map(v=>v*1e12).filter(v=>v>=yMin&&v<=yMax)}
+  else{const step=niceStep(yMax-yMin,mobile?4:5);for(let v=Math.ceil(yMin/step)*step;v<=yMax+1e-6;v+=step)ticks.push(v)}
+  for(const v of ticks){grid.append(svgEl('line',{x1:m.l,x2:w-m.r,y1:y(v),y2:y(v)}));ay.append(svgEl('text',{x:m.l-8,y:y(v)+4,'text-anchor':'end'},v===0?'$0':v>=1e12?'$'+(v/1e12).toFixed(v%1e12?1:0)+'T':'$'+Math.round(v/1e9)+'B'))}
+  if(!zeroBase&&S.scale!=='log')ay.append(svgEl('text',{class:'axis-note',x:m.l-8,y:h-m.b+16,'text-anchor':'end'},'axis fitted, not from zero'));
+  svg.append(grid,ay);
+  // x axis
+  const ax=svgEl('g',{class:'axis-x'});for(const tk of xTicks(t0,t1,w-m.l-m.r)){ax.append(svgEl('line',{x1:x(tk.t),x2:x(tk.t),y1:h-m.b,y2:h-m.b+4,stroke:'var(--axis)'}),svgEl('text',{x:x(tk.t),y:h-m.b+16,'text-anchor':'middle'},tk.label))}ax.append(svgEl('line',{x1:m.l,x2:w-m.r,y1:h-m.b,y2:h-m.b,stroke:'var(--axis)'}));svg.append(ax);
+  // series
+  const plot=svgEl('g',{'clip-path':'url(#clip-main)'});
+  const P=(pts,acc)=>pts.map((d,i)=>(i?'L':'M')+x(d.t).toFixed(1)+','+y(acc(d)).toFixed(1)).join('');
+  const base=h-m.b;
+  if(S.view==='split'){
+    const sp=vis.filter(d=>d.p!=null);
+    if(sp.length){const top=P(sp,d=>d.v);const pubTop=P(sp,d=>d.p);
+      plot.append(svgEl('path',{class:'area-pub',d:pubTop+`L${x(sp[sp.length-1].t).toFixed(1)},${base}L${x(sp[0].t).toFixed(1)},${base}Z`}));
+      plot.append(svgEl('path',{class:'area-intra',d:top+sp.slice().reverse().map(d=>'L'+x(d.t).toFixed(1)+','+y(d.p).toFixed(1)).join('')+'Z'}));
+      plot.append(svgEl('path',{class:'line-thin',d:pubTop,style:'stroke:var(--debt-ink)'}))}
+    plot.append(svgEl('path',{class:'line',d:P(vis,d=>d.v)}));
+  }else{
+    const line=P(vis,d=>d.v);
+    if(zeroBase||S.scale==='log')plot.append(svgEl('path',{class:'area',d:line+`L${x(vis[vis.length-1].t).toFixed(1)},${base}L${x(vis[0].t).toFixed(1)},${base}Z`}));
+    plot.append(svgEl('path',{class:'line',d:line}));
+  }
+  if(S.gdp){const gp=[{t:t0,v:gdpAt(t0)},...gdpPts.filter(q=>q.t>t0&&q.t<t1),{t:t1,v:gdpAt(t1)}];plot.append(svgEl('path',{class:'gdp-line',d:P(gp,q=>q.v)}));
+    const lab=svgEl('g',{class:'end-labels'});const endD=atOrBefore(t1);
+    lab.append(svgEl('text',{class:'end-label',x:x(t1)-4,y:y(endD.v)+(endD.v>=gdpAt(t1)?-7:13),'text-anchor':'end',style:'fill:var(--debt-ink)'},'Debt'),svgEl('text',{class:'end-label',x:x(t1)-4,y:y(gdpAt(t1))+(endD.v>=gdpAt(t1)?13:-7),'text-anchor':'end',style:'fill:var(--ink-2)'},'GDP'));svg.append(lab);
+    if(crossover&&crossover.t>=t0&&crossover.t<=t1&&S.view==='total'){const cx=x(crossover.t),cy=y(crossover.v);svg.append(svgEl('circle',{class:'cross-dot',cx,cy,r:4.5}),svgEl('text',{class:'cross-label',x:cx+8,y:cy+17},'Debt passes GDP · '+fmtMY(crossover.t)))}}
+  svg.append(plot);
+  if(S.view==='split'){const lg=svgEl('g',{});const items=[['Held by the public','var(--debt)',.55],['Intragovernmental','var(--intra-soft)',1]];let cx=w-m.r;for(const [name,fill,op] of items.reverse()){const tw=name.length*6.4;lg.append(svgEl('text',{x:cx,y:h-m.b-10,'text-anchor':'end',style:'fill:var(--ink-2);font-size:11.5px'},name));cx-=tw+6;lg.append(svgEl('rect',{x:cx-12,y:h-m.b-19,width:12,height:11,rx:2,fill,opacity:op}));cx-=12+14}svg.append(lg)}
+  // $5T milestone labels
+  if(S.view==='total'){const g=svgEl('g',{});let lastX=-1e9;for(const ms of milestones){if(ms.tril%5||ms.t<t0||ms.t>t1)continue;const px=x(ms.t),py=y(ms.v);if(px-lastX<44)continue;lastX=px;g.append(svgEl('circle',{class:'ms-dot',cx:px,cy:py,r:3.5}));if(!S.events||py-16>m.t+3*14+4)g.append(svgEl('text',{class:'ms-label',x:px-7,y:py-7,'text-anchor':'end'},'$'+ms.tril+'T'))}svg.append(g)}
+  // hit area
+  const hit=svgEl('rect',{class:'hit',x:m.l,y:m.t-16,width:w-m.l-m.r,height:h-m.t+16-m.b});svg.append(hit);
+  const tAt=e=>{const r=svg.getBoundingClientRect();return t0+(e.clientX-r.left-m.l)/(w-m.l-m.r)*span};
+  hit.addEventListener('pointermove',e=>{if(S.pinned!=null)return;S.evHover=null;setCursor(nearest(clamp(tAt(e),t0,t1)))});
+  hit.addEventListener('pointerleave',e=>{if(S.pinned==null&&!(e.relatedTarget&&e.relatedTarget.closest&&e.relatedTarget.closest('.events-layer')))clearCursor()});
+  hit.addEventListener('click',e=>{const d=nearest(clamp(tAt(e),t0,t1));if(S.pinned===d.i){S.pinned=null;clearCursor()}else{S.pinned=d.i;setCursor(d,true)}});
+  // events
+  const evg=svgEl('g',{class:'events-layer'});
+  if(S.events){const lanes=[];const inRange=events.filter(e=>e.t>=t0&&e.t<=t1);
+    for(const e of inRange){const px=x(e.t),d=nearest(e.t),py=y(d.v);
+      evg.append(svgEl('line',{class:'ev-line',x1:px,x2:px,y1:m.t,y2:h-m.b}));
+      const width=e.name.length*6.2+8,anchorEnd=px+width>w-m.r,left=anchorEnd?px-width:px,right=left+width;let lane=-1;for(let k=0;k<3;k++){if((lanes[k]??-1e9)+8<=left){lane=k;break}}
+      if(lane>=0){lanes[lane]=right;const tx=svgEl('text',{class:'ev-label',x:anchorEnd?px-5:px+5,y:m.t+12+lane*14,'text-anchor':anchorEnd?'end':'start'},e.name);tx.onclick=()=>openEvent(e);tx.onpointerenter=()=>{if(S.pinned==null)hoverEvent(e)};tx.onpointerleave=()=>{if(S.pinned==null)clearCursor()};evg.append(tx)}
+      const dot=svgEl('circle',{class:'ev-dot'+(S.evOpen===e.id?' on':''),cx:px,cy:py,r:mobile?3.5:5});dot.setAttribute('aria-label',e.name+' · '+fmtDate(e.t));dot.onclick=ev=>{ev.stopPropagation();openEvent(e)};dot.onpointerenter=()=>{if(S.pinned==null)hoverEvent(e)};dot.onpointerleave=()=>{if(S.pinned==null)clearCursor()};evg.append(dot)}
+  }
+  svg.append(evg);
+  svg.append(svgEl('g',{id:'cursor-main','pointer-events':'none'}));
+  if(S.pinned!=null&&D[S.pinned].t>=t0&&D[S.pinned].t<=t1)setCursor(D[S.pinned],true);else if(S.pinned!=null){S.pinned=null;clearCursor()}
+}
+
+/* ---------- indicator panels ---------- */
+function monthMid(ym){const t=Date.parse(ym+'-01T00:00:00Z');return t+15*DAY}
+function drawIndicators(){
+  const box=$('#indicators');box.style.minHeight=box.offsetHeight+'px';box.replaceChildren();const {x,w,m,t0,t1,mobile}=L,h=mobile?96:110;
+  for(const ind of IND){
+    if(S.ind!=='all'&&S.ind!==ind.key)continue;
+    const svg=svgEl('svg',{viewBox:`0 0 ${w} ${h}`,height:h,class:'ind',role:'img','aria-label':ind.label});
+    const pts=[];for(const [ym,v] of ind.map){const t=monthMid(ym);if(v==null||t<t0-40*DAY||t>t1+40*DAY)continue;pts.push({t,v,ym})}
+    let lo=Infinity,hi=-Infinity;for(const p of pts){if(p.v<lo)lo=p.v;if(p.v>hi)hi=p.v}if(!pts.length){lo=0;hi=1}
+    const pad=(hi-lo)*0.15||1;lo=Math.min(lo,0)===lo?lo-pad:Math.max(0,lo-pad);hi+=pad;
+    if(ind.ref!=null){lo=Math.min(lo,ind.ref-pad);hi=Math.max(hi,ind.ref+pad)}
+    const top=26,bot=h-8;const y=v=>bot-(v-lo)/(hi-lo)*(bot-top);
+    svg.append(svgEl('rect',{x:m.l,y:top,width:w-m.l-m.r,height:bot-top,fill:'var(--surface)'}));
+    const step=niceStep(hi-lo,2),g=svgEl('g',{class:'grid'}),ay=svgEl('g',{class:'axis-y'});
+    for(let v=Math.ceil(lo/step)*step;v<=hi+1e-9;v+=step){g.append(svgEl('line',{x1:m.l,x2:w-m.r,y1:y(v),y2:y(v)}));ay.append(svgEl('text',{x:m.l-8,y:y(v)+4,'text-anchor':'end'},(Math.round(v*100)/100)+'%'))}
+    if(lo<0&&hi>0)g.append(svgEl('line',{x1:m.l,x2:w-m.r,y1:y(0),y2:y(0),style:'stroke:var(--axis)'}));
+    if(ind.ref!=null&&ind.ref>lo&&ind.ref<hi){g.append(svgEl('line',{class:'ref-line',x1:m.l,x2:w-m.r,y1:y(ind.ref),y2:y(ind.ref)}));g.append(svgEl('text',{class:'ref-label',x:w-m.r-4,y:y(ind.ref)-4,'text-anchor':'end'},'debt = GDP'))}
+    svg.append(g,ay);
+    const clipId='clip-'+ind.key;const defs=svgEl('defs',{});const cp=svgEl('clipPath',{id:clipId});cp.append(svgEl('rect',{x:m.l,y:0,width:w-m.l-m.r,height:h}));defs.append(cp);svg.append(defs);
+    let d='',prev=null;for(const p of pts){const gap=prev&&(p.t-prev.t)>45*DAY;d+=(prev&&!gap?'L':'M')+x(p.t).toFixed(1)+','+y(p.v).toFixed(1);prev=p}
+    svg.append(svgEl('path',{class:'ind-line',d,style:'stroke:var(--'+ind.cls+')','clip-path':'url(#'+clipId+')'}));
+    const monthPx=(w-m.l-m.r)/((t1-t0)/(YEAR/12));
+    for(const [ym,v] of ind.map){if(v!=null)continue;const t=monthMid(ym);if(t<t0||t>t1)continue;const px=x(t);
+      svg.append(svgEl('line',{x1:px,x2:px,y1:top+4,y2:bot,style:'stroke:var(--axis);stroke-dasharray:2 3'}));
+      if(monthPx>28)svg.append(svgEl('text',{class:'ind-sub',x:px,y:top+14,'text-anchor':'middle'},'no data · '+new Date(t).toLocaleDateString('en-US',{month:'short',year:'numeric',timeZone:'UTC'})))}
+    svg.append(svgEl('text',{class:'ind-title',x:m.l,y:14},ind.label));if(!mobile)svg.append(svgEl('text',{class:'ind-sub',x:m.l+ind.label.length*7+8,y:14},ind.sub));
+    const latest=[...ind.map].reverse().find(([k,v])=>v!=null);
+    svg.append(svgEl('text',{class:'ind-val',id:'val-'+ind.key,x:w-m.r,y:14,'text-anchor':'end'},latest?ind.fmt(latest[1]):''));
+    svg.append(svgEl('text',{class:'ind-sub',id:'valsub-'+ind.key,x:w-m.r,y:h-0,'text-anchor':'end',style:'display:none'},''));
+    svg.append(svgEl('g',{id:'cursor-'+ind.key,'pointer-events':'none'}));
+    svg.dataset.y=[lo,hi,top,bot].join(',');
+    const hit=svgEl('rect',{class:'hit',x:m.l,y:0,width:w-m.l-m.r,height:h});
+    hit.addEventListener('pointermove',e=>{if(S.pinned!=null)return;const r=svg.getBoundingClientRect();S.evHover=null;setCursor(nearest(clamp(t0+(e.clientX-r.left-m.l)/(w-m.l-m.r)*(t1-t0),t0,t1)))});
+    hit.addEventListener('pointerleave',()=>{if(S.pinned==null)clearCursor()});
+    hit.addEventListener('click',e=>{const r=svg.getBoundingClientRect();const d=nearest(clamp(t0+(e.clientX-r.left-m.l)/(w-m.l-m.r)*(t1-t0),t0,t1));if(S.pinned===d.i){S.pinned=null;clearCursor()}else{S.pinned=d.i;setCursor(d,true)}});
+    svg.append(hit);
+    const wrap=el('div','ind-wrap');wrap.style.marginTop='6px';wrap.append(svg);box.append(wrap);
+  }
+  box.style.minHeight='';
+  const lastMonth=[...IND.find(i=>i.key==='unemployment').map].reverse().find(([k,v])=>v!=null)[0];
+  $('#coverage').textContent='Comparison panels run monthly through '+new Date(lastMonth+'-15T00:00:00Z').toLocaleDateString('en-US',{month:'short',year:'numeric',timeZone:'UTC'});
+}
+
+/* ---------- cursor + tooltip ---------- */
+function hoverEvent(e){S.evHover=e.id;setCursor(nearest(e.t))}
+function setCursor(d,pin=false){
+  const {x,y,w,h,m}=L;const px=x(d.t);
+  const g=$('#cursor-main');g.replaceChildren();
+  const isEv=S.evHover!=null;
+  g.append(svgEl('line',{class:'cross'+(isEv?' ev':''),x1:px,x2:px,y1:m.t,y2:h-m.b}));
+  if(isEv)g.append(svgEl('circle',{class:'ev-halo',cx:px,cy:y(d.v),r:11}));else g.append(svgEl('circle',{class:'dot',cx:px,cy:y(d.v),r:5,fill:'var(--debt)'}));
+  if(S.view==='split'&&d.p!=null)g.append(svgEl('circle',{class:'dot',cx:px,cy:y(d.p),r:4,fill:'var(--debt-ink)'}));
+  const mk=monthKey(d.t);
+  for(const ind of IND){const svg=$('#cursor-'+ind.key)?.ownerSVGElement;if(!svg)continue;const [lo,hi,top,bot]=svg.dataset.y.split(',').map(Number);const cg=$('#cursor-'+ind.key);cg.replaceChildren();cg.append(svgEl('line',{class:'cross',x1:px,x2:px,y1:top,y2:bot}));const v=ind.map.get(mk);const valEl=$('#val-'+ind.key);if(v!=null){cg.append(svgEl('circle',{class:'dot',cx:px,cy:bot-(v-lo)/(hi-lo)*(bot-top),r:4,fill:'var(--'+ind.cls+')'}));valEl.textContent=ind.fmt(v)}else valEl.textContent='n/a'}
+  // tooltip
+  const tip=$('#tip');tip.hidden=false;tip.classList.toggle('pinned',pin);tip.classList.toggle('event',isEv);tip.replaceChildren();
+  if(pin){const c=el('button','tip-close','×');c.setAttribute('aria-label','Unpin');c.onclick=()=>{S.pinned=null;clearCursor()};tip.append(c)}
+  const dateRow=el('div','tip-date');if(isEv)dateRow.append(el('span','tip-tag','Milestone'));dateRow.append(document.createTextNode(fmtDate(isEv?events[S.evHover].t:d.t)));tip.append(dateRow);
+  if(isEv){const e=events[S.evHover];tip.append(el('div','tip-head',e.name),el('div','tip-title',e.title))}
+  const row=(label,val,delta,color)=>{const r=el('div','tip-row');const k=el('span','k');const i=el('i');if(color)i.style.borderColor=color;k.append(i,document.createTextNode(label));const b=el('b',null,val);if(delta){const s=el('span','d',delta);b.append(s)}r.append(k,b);return r};
+  const prev=atOrBefore(d.t-YEAR);const delta=d.t-prev.t>300*DAY?((d.v-prev.v)>=0?'+':'−')+fmtT(Math.abs(d.v-prev.v))+' vs a year earlier':'';
+  tip.append(row('Total debt',fmtT(d.v),delta));
+  if(S.gdp)tip.append(row('GDP, annualized',fmtT(gdpAt(d.t)),'debt is '+ratioOf(d).toFixed(0)+'% of GDP','var(--ink-2)'));
+  if(S.view==='split'&&d.p!=null){tip.append(row('Held by the public',fmtT(d.p),(d.p/d.v*100).toFixed(0)+'%','var(--debt-ink)'));tip.append(row('Intragovernmental',fmtT(d.g),(d.g/d.v*100).toFixed(0)+'%','var(--intra)'))}
+  const sec=el('div','tip-sec');for(const ind of IND){const v=ind.map.get(mk);sec.append(row(ind.label,v==null?'n/a':ind.fmt(v),null,'var(--'+ind.cls+')'))}tip.append(sec);
+  if(isEv&&!pin)tip.append(el('div','tip-cue','Click the marker to pin, then read the full note'));
+  if(isEv&&pin){const b=el('button','tip-btn','Read the full note →');b.onclick=ev=>{ev.stopPropagation();showEventDialog(events[S.evHover])};tip.append(b)}
+  const tw=tip.offsetWidth,th=tip.offsetHeight;let left=px+14;if(left+tw>w-m.r)left=px-14-tw;tip.style.left=Math.max(0,left)+'px';tip.style.top=clamp(y(d.v)-th/2,m.t,h-m.b-th)+'px';
+}
+function clearCursor(){S.hover=null;S.evHover=null;$('#cursor-main')?.replaceChildren();for(const ind of IND){$('#cursor-'+ind.key)?.replaceChildren();const latest=[...ind.map].reverse().find(([k,v])=>v!=null);const e=$('#val-'+ind.key);if(e)e.textContent=latest?ind.fmt(latest[1]):''}$('#tip').hidden=true}
+$('#main').addEventListener('keydown',e=>{if(e.key==='Escape'){S.pinned=null;clearCursor();return}if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();let i=S.pinned==null?bisect(S.t1):S.pinned;i=clamp(i+(e.key==='ArrowRight'?1:-1),bisect(S.t0),Math.min(N-1,bisect(S.t1)));S.pinned=i;setCursor(D[i],true)}});
+
+/* ---------- events UI ---------- */
+function openEvent(e){S.evOpen=e.id;S.pinned=nearest(e.t).i;drawAll();S.evHover=e.id;setCursor(D[S.pinned],true)}
+function closeEvent(redraw){S.evOpen=null;const dlg=$('#event-dialog');if(dlg.open)dlg.close();if(redraw)drawAll()}
+function showEventDialog(e){const dlg=$('#event-dialog');dlg.replaceChildren();
+  const eb=el('div','eyebrow');eb.append(el('span','tag','Milestone'),document.createTextNode(fmtDate(e.t)));
+  const h=el('h3',null,e.title);h.id='ev-dlg-title';
+  const row=el('div','row');const z=el('button','btn','Zoom to this period');z.onclick=()=>{dlg.close();setRange(e.t-18*30*DAY,e.t+18*30*DAY);openEvent(e)};
+  const c=el('button','btn primary','Close');c.onclick=()=>dlg.close();const a=el('a','src','Source ↗');a.href=e.url;a.target='_blank';a.rel='noopener';row.append(c,z,a);
+  dlg.append(eb,h,el('p',null,e.text),row);dlg.showModal();
+  dlg.onclick=ev=>{if(ev.target===dlg)dlg.close()}}
+function drawEventList(){const ol=$('#event-list');ol.replaceChildren();for(const e of events){const li=el('li');const b=el('button','ev-chip'+(e.t>=S.t0&&e.t<=S.t1?' in':'')+(S.evOpen===e.id?' on':''));b.append(el('span',null,fmtMY(e.t)),document.createTextNode(e.name));b.onclick=()=>{if(e.t<S.t0||e.t>S.t1)setRange(e.t-18*30*DAY,e.t+18*30*DAY);openEvent(e);showEventDialog(e)};li.append(b);ol.append(li)}}
+
+/* ---------- navigator (brush) ---------- */
+let navBuilt=false;
+function drawNav(){
+  const svg=$('#nav'),w=L.w,h=48,m=L.m;svg.setAttribute('viewBox',`0 0 ${w} ${h}`);svg.setAttribute('height',h);svg.replaceChildren();
+  const x=t=>m.l+(t-T0)/(T1-T0)*(w-m.l-m.r),max=D[N-1].v*1.05,y=v=>h-4-v/max*(h-8);
+  svg.append(svgEl('rect',{class:'nav-bg',x:m.l,y:0,width:w-m.l-m.r,height:h,rx:4}));
+  const stepN=Math.max(1,Math.floor(N/600));let d='';for(let i=0;i<N;i+=stepN)d+=(i?'L':'M')+x(D[i].t).toFixed(1)+','+y(D[i].v).toFixed(1);d+='L'+x(T1).toFixed(1)+','+y(D[N-1].v).toFixed(1);
+  svg.append(svgEl('path',{class:'nav-area',d:d+`L${x(T1).toFixed(1)},${h-4}L${x(T0).toFixed(1)},${h-4}Z`}));
+  for(let yv=1995;yv<=2025;yv+=5){const t=Date.UTC(yv,0,1);svg.append(svgEl('text',{class:'nav-text',x:x(t),y:h-6,'text-anchor':'middle'},yv))}
+  const xa=x(S.t0),xb=x(S.t1);
+  svg.append(svgEl('rect',{class:'nav-dim',x:m.l,y:0,width:Math.max(0,xa-m.l),height:h}),svgEl('rect',{class:'nav-dim',x:xb,y:0,width:Math.max(0,w-m.r-xb),height:h}));
+  svg.append(svgEl('rect',{class:'nav-win',x:xa,y:.5,width:Math.max(1,xb-xa),height:h-1,rx:3}));
+  svg.append(svgEl('rect',{class:'nav-new',x:m.l,y:0,width:w-m.l-m.r,height:h,'data-mode':'new'}));
+  svg.append(svgEl('rect',{class:'nav-grab',x:xa,y:0,width:Math.max(1,xb-xa),height:h,'data-mode':'pan'}));
+  svg.append(svgEl('rect',{class:'nav-handle',x:xa-3,y:h/2-9,width:6,height:18,rx:2,'data-mode':'left'}),svgEl('rect',{class:'nav-handle',x:xb-3,y:h/2-9,width:6,height:18,rx:2,'data-mode':'right'}));
+  if(!navBuilt){navBuilt=true;let drag=null;
+    const tAt=e=>{const r=svg.getBoundingClientRect();return T0+(e.clientX-r.left-m.l)/(w-m.l-m.r)*(T1-T0)};
+    svg.addEventListener('pointerdown',e=>{const mode=e.target.dataset.mode;if(!mode)return;e.preventDefault();svg.setPointerCapture(e.pointerId);const t=tAt(e);drag={mode,t,t0:S.t0,t1:S.t1,moved:false}});
+    svg.addEventListener('pointermove',e=>{if(!drag)return;const t=tAt(e),dt=t-drag.t;drag.moved=true;let a=drag.t0,b=drag.t1;
+      if(drag.mode==='pan'){const spanS=b-a;a=clamp(a+dt,T0,T1-spanS);b=a+spanS}
+      else if(drag.mode==='left')a=clamp(t,T0,b-30*DAY);else if(drag.mode==='right')b=clamp(t,a+30*DAY,T1);
+      else{a=Math.min(drag.t,t);b=Math.max(drag.t,t);if(b-a<30*DAY)b=a+30*DAY}
+      S.t0=clamp(a,T0,T1-30*DAY);S.t1=clamp(b,S.t0+30*DAY,T1);S.pinned=null;requestAnimationFrame(drawAll)});
+    const end=e=>{if(!drag)return;if(!drag.moved&&drag.mode==='new'){const t=tAt(e),half=Math.max(30*DAY,(S.t1-S.t0)/2);setRange(t-half,t+half)}drag=null};
+    svg.addEventListener('pointerup',end);svg.addEventListener('pointercancel',()=>{drag=null});
+    svg.addEventListener('dblclick',()=>setRange(T0,T1));}
+}
+
+/* ---------- presidency table ---------- */
+function drawTerms(){
+  const rows=terms.map(tm=>{const a=atOrAfter(Math.max(T0,tm.start)),b=tm.partial?D[N-1]:atOrBefore(tm.end);const days=(b.t-a.t)/DAY,added=b.v-a.v;return{tm,a,b,days,added,pct:added/a.v,ann:Math.pow(b.v/a.v,365.25/days)-1,perDay:added/days}});
+  const maxAdd=Math.max(...rows.map(r=>r.added));const tbl=$('#terms-table');tbl.replaceChildren();
+  const thead=el('thead');const tr=el('tr');[['Term',''],['Start → end','num'],['Debt added','barcell'],['Growth','num'],['Per year','num'],['Per day','num']].forEach(([t,c])=>{const th=el('th',c,t);tr.append(th)});thead.append(tr);tbl.append(thead);
+  const tb=el('tbody');for(const r of rows){const tr=el('tr');
+    const c1=el('td');const who=el('span','who',r.tm.name);const when=el('span','when',fmtMY(r.a.t)+' – '+(r.tm.partial?'now':fmtMY(r.b.t))+(r.tm.partial?' · in progress':'')+(r.a.t>r.tm.start+40*DAY?' · data begins Apr 1993':''));c1.append(who,when);
+    const c2=el('td','num',fmtT(r.a.v)+' → '+fmtT(r.b.v));
+    const c3=el('td','barcell');const hb=el('div','hbar');const i=el('i');if(r.tm.partial)i.classList.add('partial');i.style.width=Math.max(3,r.added/maxAdd*(L.mobile?70:120)).toFixed(0)+'px';const bb=el('b',null,'+'+fmtT(r.added));hb.append(i,bb);c3.append(hb);
+    const c4=el('td','num','+'+(r.pct*100).toFixed(0)+'%');const c5=el('td','num',(r.ann*100).toFixed(1)+'%');const c6=el('td','num',fmtB(r.perDay));
+    tr.append(c1,c2,c3,c4,c5,c6);tb.append(tr)}
+  tbl.append(tb);
+  const fastest=rows.reduce((a,b)=>b.perDay>a.perDay?b:a),slowest=rows.reduce((a,b)=>b.ann<a.ann?b:a);
+  $('#terms-note').textContent='"Per year" is the compound annual growth rate of the debt across the term. The fastest dollar pace so far is '+fastest.tm.short+' at '+fmtB(fastest.perDay)+' a day; the slowest percentage growth is '+slowest.tm.short+' at '+(slowest.ann*100).toFixed(1)+'% a year. Trump II uses a partial term and will change.';
+}
+
+/* ---------- milestones ---------- */
+function drawMilestones(){
+  const svg=$('#ms'),w=svg.clientWidth||800,mobile=w<640,h=mobile?220:260,m={l:mobile?40:52,r:12,t:30,b:38};
+  const ms=milestones.filter(x=>x.days!=null);const n=ms.length,maxD=Math.max(...ms.map(x=>x.days));
+  svg.setAttribute('viewBox',`0 0 ${w} ${h}`);svg.setAttribute('height',h);svg.replaceChildren();
+  const bw=(w-m.l-m.r)/n,x=i=>m.l+i*bw,y=v=>h-m.b-v/(maxD*1.08)*(h-m.b-m.t);
+  const g=svgEl('g',{class:'grid'}),ay=svgEl('g',{class:'axis-y'});const step=niceStep(maxD,4);for(let v=0;v<=maxD*1.08;v+=step){g.append(svgEl('line',{x1:m.l,x2:w-m.r,y1:y(v),y2:y(v)}));ay.append(svgEl('text',{x:m.l-8,y:y(v)+4,'text-anchor':'end'},v?v.toLocaleString('en-US'):'0'))}
+  ay.append(svgEl('text',{x:m.l-8,y:m.t-12,'text-anchor':'end',class:'ind-sub'},'days'));svg.append(g,ay);
+  const longest=ms.reduce((a,b)=>b.days>a.days?b:a),shortest=ms.reduce((a,b)=>b.days<a.days?b:a);
+  ms.forEach((x0,i)=>{const bx=x(i)+1,bwid=Math.max(1,bw-2),by=y(x0.days);const hi=x0===longest||x0===shortest||x0===lastMs;
+    const r=svgEl('rect',{class:'ms-bar'+(hi?' hi':''),x:bx,y:by,width:bwid,height:h-m.b-by,rx:Math.min(3,bwid/2)});svg.append(r);
+    if(x0.tril%5===0||x0.tril===6){svg.append(svgEl('text',{class:'ms-x',x:bx+bwid/2,y:h-m.b+14,'text-anchor':'middle'},'$'+x0.tril+'T'),svgEl('text',{class:'ms-x yr',x:bx+bwid/2,y:h-m.b+27,'text-anchor':'middle'},new Date(x0.t).getUTCFullYear()))}
+    const hit=svgEl('rect',{class:'ms-bar-hit',x:x(i),y:m.t-10,width:bw,height:h-m.t+10-m.b});hit.setAttribute('aria-label','$'+(x0.tril-1)+'T → $'+x0.tril+'T: '+fmtDays(x0.days)+' · crossed '+fmtDate(x0.t));
+    hit.addEventListener('pointerenter',()=>{const c=$('#ms-call');c.replaceChildren();c.append(svgEl('tspan',{x:w-m.r,dy:0},'$'+(x0.tril-1)+'T → $'+x0.tril+'T · '+fmtDays(x0.days)),svgEl('tspan',{class:'ms-call sub',x:w-m.r,dy:14},'crossed '+fmtDate(x0.t)));r.style.fill='var(--debt-ink)'});
+    hit.addEventListener('pointerleave',()=>{r.style.fill='';defaultCall()});svg.append(hit)});
+  const call=svgEl('text',{id:'ms-call',class:'ms-call',x:w-m.r,y:m.t-8,'text-anchor':'end'});svg.append(call);
+  function defaultCall(){call.replaceChildren();call.append(svgEl('tspan',{x:w-m.r,dy:0},'Longest: $'+(longest.tril-1)+'T → $'+longest.tril+'T, '+fmtDays(longest.days)),svgEl('tspan',{class:'ms-call sub',x:w-m.r,dy:14},'Shortest: $'+(shortest.tril-1)+'T → $'+shortest.tril+'T, '+fmtDays(shortest.days)+' ('+fmtMY(shortest.t)+')'))}
+  defaultCall();
+  const avgRecent=ms.slice(-5).reduce((a,b)=>a+b.days,0)/5,avgEarly=ms.slice(0,5).reduce((a,b)=>a+b.days,0)/5;
+  $('#ms-note').textContent='The first five trillions on this chart averaged '+Math.round(avgEarly).toLocaleString('en-US')+' days each; the most recent five averaged '+Math.round(avgRecent)+'. A trillion is a larger share of a $6T debt than of a $40T one, so read this alongside the log scale above, which shows percentage growth.';
+}
+
+/* ---------- data table + download ---------- */
+let tableBuilt=false;
+document.querySelector('.foot details').addEventListener('toggle',e=>{if(!e.target.open||tableBuilt)return;tableBuilt=true;
+  const rows=[];let cur=null;for(const d of D){const k=monthKey(d.t);if(k!==cur){cur=k;rows.push(d)}else rows[rows.length-1]=d}
+  const tbl=el('table');const tr=el('tr');['Month (last reading)','Total','Public','Intragov.','Unemp.','Inflation','Fed funds'].forEach((t,i)=>tr.append(el('th',i?'num':'',t)));const th=el('thead');th.append(tr);tbl.append(th);
+  const tb=el('tbody');for(const d of rows){const k=monthKey(d.t),r=el('tr');r.append(el('td',null,fmtDate(d.t)),el('td','num',fmtT(d.v,3)),el('td','num',d.p==null?'—':fmtT(d.p,3)),el('td','num',d.g==null?'—':fmtT(d.g,3)));for(const ind of IND){const v=ind.map.get(k);r.append(el('td','num',v==null?'—':ind.fmt(v)))}tb.append(r)}
+  tbl.append(tb);$('#datatable').append(tbl)});
+const dl=$('#download');if(dl)dl.onclick=()=>{const csv='date,total_federal_debt_usd,debt_held_by_public_usd,intragovernmental_holdings_usd\n'+D.map(d=>new Date(d.t).toISOString().slice(0,10)+','+Math.round(d.v)+','+(d.p==null?'':Math.round(d.p))+','+(d.g==null?'':Math.round(d.g))).join('\n');const u=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));const a=document.createElement('a');a.href=u;a.download='us-federal-debt.csv';a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)};
+
+/* ---------- replay ---------- */
+$('#replay').onclick=()=>{if(replaying)return;replaying=true;S.pinned=null;S.t0=T0;S.t1=T1;S.view='total';drawAll();clearCursor();
+  const clip=$('#clip-rect'),{x,y,w,m}=L,full=w-m.l-m.r,dur=reduced?1200:7000,start=performance.now();const fig=$('#clock'),dateEl=$('#clock-date');fig.classList.add('replaying');
+  const marker=svgEl('circle',{class:'dot',r:5,fill:'var(--debt)'});$('#cursor-main').append(marker);
+  function frame(now){const p=Math.min(1,(now-start)/dur);const t=T0+p*(T1-T0);const d=atOrBefore(t);clip.setAttribute('width',Math.max(0,x(t)-m.l));marker.setAttribute('cx',x(d.t));marker.setAttribute('cy',y(d.v));fig.textContent=fmtFull(d.v);$('.clock-label').lastChild.textContent=fmtDate(d.t);
+    if(p<1)requestAnimationFrame(frame);else{setTimeout(()=>{replaying=false;fig.classList.remove('replaying');$('.clock-label').lastChild.textContent='Estimated right now';clip.setAttribute('width',full);$('#cursor-main').replaceChildren();tick()},900)}}
+  requestAnimationFrame(frame)};
+
+/* ---------- orchestration ---------- */
+function syncControls(){document.querySelectorAll('#ranges .chip').forEach(b=>{const c=rangeChips.find(c=>c.id===b.dataset.id),[a,z]=c.range();b.setAttribute('aria-pressed',Math.abs(a-S.t0)<DAY&&Math.abs(z-S.t1)<DAY)});
+  document.querySelectorAll('[data-view]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.view===S.view));
+  document.querySelectorAll('[data-scale]').forEach(b=>{b.setAttribute('aria-pressed',b.dataset.scale===S.scale);b.disabled=S.view==='split'&&b.dataset.scale==='log'});
+  $('#events-toggle').checked=S.events;$('#gdp-toggle').checked=S.gdp;
+  document.querySelectorAll('.ind-tab').forEach(b=>b.setAttribute('aria-selected',b.dataset.ind===S.ind))}
+function drawAll(){syncControls();drawMain();drawIndicators();drawNav();drawEventList()}
+drawAll();drawTerms();drawMilestones();
+let rt;new ResizeObserver(()=>{clearTimeout(rt);rt=setTimeout(()=>{fitClock();drawAll();drawTerms();drawMilestones()},60)}).observe($('.page'));
+})();
+</script>
+<!--/BODY-->
