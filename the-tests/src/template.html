@@ -327,7 +327,7 @@ document.querySelectorAll('[data-thresh]').forEach(b=>b.onclick=()=>{S.thresh=+b
 /* ---------- same clock, stacked ---------- */
 function drawStack(){
   const svg=$('#clock'),w=svg.clientWidth||800,mobile=w<640;$('#clock-desc').textContent=DESC.abs;
-  const rows=B;const rh=mobile?54:60,m={l:mobile?118:200,r:mobile?66:96,t:mobile?58:78,b:24},h=m.t+rows.length*rh+m.b;
+  const rows=B;const rh=mobile?54:60,m={l:mobile?118:200,r:mobile?66:96,t:mobile?66:100,b:24},h=m.t+rows.length*rh+m.b;
   const X0=Math.min(...rows.map(b=>b.rel))-2*MONTH,X1=T1;const x=t=>m.l+(t-X0)/(X1-X0)*(w-m.l-m.r);
   svg.setAttribute('viewBox',`0 0 ${w} ${h}`);svg.setAttribute('height',h);svg.replaceChildren();
   const th=S.thresh/100;const ctip=$('#ctip');const hideTip=()=>{ctip.hidden=true;ctip.classList.remove('event')};
@@ -336,8 +336,8 @@ function drawStack(){
   const msTip=(e,px,py)=>{ctip.hidden=false;ctip.classList.add('event');ctip.replaceChildren();const d=el('div','tip-date');d.append(el('span','tip-tag','Release'),document.createTextNode(fmtDate(e.t)));ctip.append(d,el('div','tip-head',e.name),el('div','tip-title',e.title),el('div','tip-cue','Click for the note and source'));const tw=ctip.offsetWidth;let l=px+14;if(l+tw>w-m.r)l=px-14-tw;ctip.style.left=Math.max(0,l)+'px';ctip.style.top=py+'px'};
   for(const e of MS){if(e.t<X0||e.t>X1)continue;const px=x(e.t);msg.append(svgEl('line',{class:'ms-line',x1:px,x2:px,y1:m.t-6,y2:h-m.b}));
     const width=e.name.length*6.4+8,anchorEnd=px+width>w-m.r,left=anchorEnd?px-width:px,right=left+width;let lane=-1;for(let k=0;k<(mobile?1:3);k++){if((lanes[k]??-1e9)+8<=left){lane=k;break}}
-    if(lane>=0){lanes[lane]=right;const tx=svgEl('text',{class:'ms-label',x:anchorEnd?px-5:px+5,y:m.t-32-(mobile?0:13)+lane*13,'text-anchor':anchorEnd?'end':'start'},e.name);tx.onpointerenter=()=>msTip(e,px,m.t-4);tx.onpointerleave=hideTip;tx.onclick=()=>{hideTip();showMs(e)};msg.append(tx)}
-    const tick=svgEl('circle',{class:'ms-tick'+(msOpen===e.id?' on':''),cx:px,cy:m.t-16,r:4.5});tick.setAttribute('aria-label',e.name+' · '+fmtDate(e.t));tick.onpointerenter=()=>msTip(e,px,m.t-4);tick.onpointerleave=hideTip;tick.onclick=()=>{hideTip();showMs(e)};msg.append(tick)}
+    if(lane>=0){lanes[lane]=right;const tx=svgEl('text',{class:'ms-label',x:anchorEnd?px-5:px+5,y:m.t-(mobile?40:66)+lane*14,'text-anchor':anchorEnd?'end':'start'},e.name);tx.onpointerenter=()=>msTip(e,px,m.t-4);tx.onpointerleave=hideTip;tx.onclick=()=>{hideTip();showMs(e)};msg.append(tx)}
+    const tick=svgEl('circle',{class:'ms-tick'+(msOpen===e.id?' on':''),cx:px,cy:m.t-22,r:4.5});tick.setAttribute('aria-label',e.name+' · '+fmtDate(e.t));tick.onpointerenter=()=>msTip(e,px,m.t-4);tick.onpointerleave=hideTip;tick.onclick=()=>{hideTip();showMs(e)};msg.append(tick)}
   svg.append(msg);
   const cur=svgEl('g',{'pointer-events':'none'});const reads=[];const rowHits=[];
   rows.forEach((b,i)=>{const y0=m.t+i*rh,yb=y0+rh-8,yt=y0+6;const yv=v=>yb-v*(yb-yt);
@@ -371,14 +371,16 @@ LB.addEventListener('keydown',e=>{if(e.key==='ArrowLeft')$('#lb-prev').click();i
 function drawLightbox(){
   const b=B.find(x=>x.key===lbKey);if(!b)return;const i=B.indexOf(b);
   $('#lb-eyebrow').textContent='Test '+(i+1)+' of '+B.length+' · published '+fmtDate(b.rel)+' · '+b.n+' runs on record';$('#lb-title').textContent=b.name;
-  const svg=$('#detail'),w=svg.clientWidth||700,mobile=w<560,h=mobile?280:400,m={l:mobile?40:48,r:mobile?14:20,t:22,b:30};
+  const svg=$('#detail'),w=svg.clientWidth||700,mobile=w<560,h=mobile?300:430,m={l:mobile?40:48,r:mobile?14:20,t:mobile?30:52,b:30};
   const firstT=Math.min(b.rel,...b.pts.map(p=>p.t));const X0=firstT-2*MONTH,X1=T1;const x=t=>m.l+(t-X0)/(X1-X0)*(w-m.l-m.r);const y=v=>h-m.b-v*(h-m.b-m.t);
   svg.setAttribute('viewBox',`0 0 ${w} ${h}`);svg.setAttribute('height',h);svg.replaceChildren();
   const g=svgEl('g',{class:'grid'});for(const v of [0,.25,.5,.75,1]){g.append(svgEl('line',{x1:m.l,x2:w-m.r,y1:y(v),y2:y(v)}));g.append(svgEl('text',{x:m.l-8,y:y(v)+4,'text-anchor':'end'},Math.round(v*100)+'%'))}svg.append(g);
   const span=(X1-X0)/YEAR;const step=span>4?12:span>2?6:3;const ax=svgEl('g',{class:'x-axis'});for(let yr=new Date(X0).getUTCFullYear();yr<=new Date(X1).getUTCFullYear();yr++)for(let mo=0;mo<12;mo+=step){const t=Date.UTC(yr,mo,1);if(t<X0||t>X1)continue;ax.append(svgEl('text',{x:x(t),y:h-m.b+16,'text-anchor':'middle'},step>=12?String(yr):fmtMY(t)))}ax.append(svgEl('line',{x1:m.l,x2:w-m.r,y1:h-m.b,y2:h-m.b,stroke:'var(--axis)'}));svg.append(ax);
   const th=S.thresh/100;svg.append(svgEl('line',{class:'b-thresh',x1:m.l,x2:w-m.r,y1:y(th),y2:y(th)}));svg.append(svgEl('text',{class:'thresh-label',x:w-m.r-6,y:y(th)-5,'text-anchor':'end'},'solved at '+S.thresh+'%'));
   if(x(b.rel)-m.l>8){svg.append(svgEl('rect',{class:'pre-band',x:m.l,y:m.t,width:x(b.rel)-m.l,height:h-m.b-m.t}));if(x(b.rel)-m.l>150)svg.append(svgEl('text',{class:'pre-label',x:x(b.rel)-6,y:h-m.b-8,'text-anchor':'end'},'models released before the test, scored on it later'))}
-  for(const e of MS){if(e.t<X0||e.t>X1)continue;svg.append(svgEl('line',{class:'ms-line',x1:x(e.t),x2:x(e.t),y1:m.t,y2:h-m.b}));svg.append(svgEl('text',{class:'ms-label',x:x(e.t)+4,y:h-m.b-6},mobile?'':e.name))}
+  {const lanes=[];for(const e of MS){if(e.t<X0||e.t>X1)continue;const px=x(e.t);svg.append(svgEl('line',{class:'ms-line',x1:px,x2:px,y1:m.t-6,y2:h-m.b}));svg.append(svgEl('circle',{class:'ms-tick',cx:px,cy:m.t-12,r:3.5,style:'pointer-events:none'}));if(mobile)continue;
+    const width=e.name.length*6.4+8,anchorEnd=px+width>w-m.r,left=anchorEnd?px-width:px,right=left+width;let lane=-1;for(let k=0;k<2;k++){if((lanes[k]??-1e9)+8<=left){lane=k;break}}
+    if(lane>=0){lanes[lane]=right;svg.append(svgEl('text',{class:'ms-label',x:anchorEnd?px-5:px+5,y:m.t-38+lane*13,'text-anchor':anchorEnd?'end':'start',style:'cursor:default'},e.name))}}}
   svg.append(svgEl('line',{class:'b-rel',x1:x(b.rel),x2:x(b.rel),y1:m.t,y2:h-m.b}));svg.append(svgEl('text',{class:'b-rel-label',x:x(b.rel)+4,y:m.t+10},'published'));
   const line=[];const f0=frAt(b,b.rel);if(f0)line.push({t:b.rel,v:f0.v});for(const p of b.fr){if(p.t<b.rel)continue;if(line.length)line.push({t:p.t,v:line[line.length-1].v});line.push(p)}if(line.length)line.push({t:X1,v:line[line.length-1].v});
   if(line.length){const d=line.map((p,i)=>(i?'L':'M')+x(p.t).toFixed(1)+','+y(p.v).toFixed(1)).join('');svg.append(svgEl('path',{class:'x-area',d:d+`L${x(X1).toFixed(1)},${h-m.b}L${x(line[0].t).toFixed(1)},${h-m.b}Z`}));svg.append(svgEl('path',{class:'x-line',d}))}
