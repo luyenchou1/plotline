@@ -182,8 +182,9 @@ svg text{font-family:var(--sans);font-size:11.5px;fill:var(--muted)}
 </section>
 
 <section class="panel" aria-labelledby="clock-h">
-  <div class="panel-head"><h2 id="clock-h">On the same clock</h2><p>One row per benchmark, oldest at the top, all starting from the day each was published. The curve is the best score so far; the dot marks the month it was solved. Read down the page and the dots walk left.</p></div>
+  <div class="panel-head"><h2 id="clock-h">On the same clock</h2><p id="clock-desc"></p></div>
   <div class="controls">
+    <div><span class="lbl">Clock</span><div class="seg" role="group" aria-label="Clock"><button data-clock="rel" aria-pressed="true">Since publication</button><button data-clock="abs">Calendar</button></div></div>
     <div><span class="lbl">Count a test as solved at</span><div class="seg" role="group" aria-label="Threshold"><button data-thresh="50">50%</button><button data-thresh="80" aria-pressed="true">80%</button><button data-thresh="90">90%</button></div></div>
   </div>
   <div class="chart-wrap"><svg id="clock" role="img" aria-label="Best score on each benchmark against months since its publication, one row per benchmark"></svg></div>
@@ -243,6 +244,7 @@ B.forEach((b,i)=>{b.color=RAMP[Math.min(RAMP.length-1,Math.floor(i/B.length*RAMP
 $('#asof').textContent=fmtMY(T1);$('#updated').textContent=fmtDate(Date.parse(DATA.retrieved));
 function frAt(b,t){let r=null;for(const p of b.fr){if(p.t<=t)r=p;else break}return r}
 const S={thresh:80,clock:'rel'};
+const DESC={rel:'One row per benchmark, oldest at the top, all starting from the day each was published. The curve is the best score so far; the dot marks the month it was solved. Read down the page and the dots walk left.',abs:'The same rows in calendar time. The gold tick is the day each benchmark was published; the dot is the day it was solved. Read down the page and the gap between tick and dot closes.'};
 function solvedAt(b){const th=S.thresh/100;for(const p of b.fr){if(p.v>=th)return p}return null}
 function monthsTo(b){const s=solvedAt(b);return s?Math.max(0,(s.t-b.rel)/MONTH):null}
 
@@ -259,29 +261,35 @@ function fitLog(pts){let n=pts.length,sx=0,sy=0,sxy=0,sxx=0;for(const p of pts){
 
 /* ---------- controls ---------- */
 document.querySelectorAll('[data-thresh]').forEach(b=>b.onclick=()=>{S.thresh=+b.dataset.thresh;document.querySelectorAll('[data-thresh]').forEach(x=>x.setAttribute('aria-pressed',x===b));drawAll()});
+document.querySelectorAll('[data-clock]').forEach(b=>b.onclick=()=>{S.clock=b.dataset.clock;document.querySelectorAll('[data-clock]').forEach(x=>x.setAttribute('aria-pressed',x===b));drawStack()});
 
 /* ---------- same clock, stacked ---------- */
 function drawStack(){
-  const svg=$('#clock'),w=svg.clientWidth||800,mobile=w<640;
+  const svg=$('#clock'),w=svg.clientWidth||800,mobile=w<640,rel=S.clock==='rel';$('#clock-desc').textContent=DESC[S.clock];
   const rows=B;const rh=mobile?54:60,m={l:mobile?118:200,r:mobile?66:96,t:26,b:24},h=m.t+rows.length*rh+m.b;
-  const maxMo=Math.max(12,...rows.map(b=>(T1-b.rel)/MONTH));const x=v=>m.l+v/maxMo*(w-m.l-m.r);
+  const X0=rel?0:Math.min(...rows.map(b=>b.rel))-2*MONTH,X1=rel?Math.max(12,...rows.map(b=>(T1-b.rel)/MONTH)):T1;
+  const x=v=>m.l+(v-X0)/(X1-X0)*(w-m.l-m.r);const ax=(b,t)=>rel?(t-b.rel)/MONTH:t;
   svg.setAttribute('viewBox',`0 0 ${w} ${h}`);svg.setAttribute('height',h);svg.replaceChildren();
-  const th=S.thresh/100;const step=maxMo>48?12:6;
-  const g=svgEl('g',{class:'grid'});for(let v=0;v<=maxMo;v+=step){g.append(svgEl('line',{x1:x(v),x2:x(v),y1:m.t-6,y2:h-m.b,style:v?'':'stroke:var(--axis)'}));g.append(svgEl('text',{x:x(v),y:m.t-10,'text-anchor':'middle'},v?v+' mo':'published'))}svg.append(g);
+  const th=S.thresh/100;
+  const g=svgEl('g',{class:'grid'});
+  if(rel){const step=X1>48?12:6;for(let v=0;v<=X1;v+=step){g.append(svgEl('line',{x1:x(v),x2:x(v),y1:m.t-6,y2:h-m.b,style:v?'':'stroke:var(--axis)'}));g.append(svgEl('text',{x:x(v),y:m.t-10,'text-anchor':'middle'},v?v+' mo':'published'))}}
+  else{for(let yr=new Date(X0).getUTCFullYear()+1;yr<=new Date(X1).getUTCFullYear();yr++){const t=Date.UTC(yr,0,1);g.append(svgEl('line',{x1:x(t),x2:x(t),y1:m.t-6,y2:h-m.b}));g.append(svgEl('text',{x:x(t),y:m.t-10,'text-anchor':'middle'},yr))}}
+  svg.append(g);
   const cur=svgEl('g',{'pointer-events':'none'});const reads=[];
   rows.forEach((b,i)=>{const y0=m.t+i*rh,yb=y0+rh-8,yt=y0+6;const yv=v=>yb-v*(yb-yt);
     svg.append(svgEl('text',{class:'row-name',x:m.l-12,y:y0+rh/2-1,'text-anchor':'end'},b.name));svg.append(svgEl('text',{class:'row-sub',x:m.l-12,y:y0+rh/2+12,'text-anchor':'end'},'published '+fmtMY(b.rel)));
     svg.append(svgEl('line',{class:'row-base',x1:m.l,x2:w-m.r,y1:yb,y2:yb}));svg.append(svgEl('line',{class:'row-thresh',x1:m.l,x2:w-m.r,y1:yv(th),y2:yv(th)}));
-    const ageNow=(T1-b.rel)/MONTH;const fr=b.fr.filter(p=>p.t>=b.rel);const line=[];const f0=frAt(b,b.rel);if(f0)line.push({a:0,v:f0.v});for(const p of fr){const a=(p.t-b.rel)/MONTH;if(line.length)line.push({a,v:line[line.length-1].v});line.push({a,v:p.v})}const last=b.fr[b.fr.length-1];if(last)line.push({a:ageNow,v:last.v});
-    if(line.length){const d=line.map((p,k)=>(k?'L':'M')+x(p.a).toFixed(1)+','+yv(p.v).toFixed(1)).join('');svg.append(svgEl('path',{class:'row-area',d:d+`L${x(ageNow).toFixed(1)},${yb}L${x(0)},${yb}Z`,fill:b.color}));svg.append(svgEl('path',{class:'row-line',d,style:'stroke:'+b.color}))}
-    svg.append(svgEl('line',{class:'today',x1:x(ageNow),x2:x(ageNow),y1:yt,y2:yb}));
+    const fr=b.fr.filter(p=>p.t>=b.rel);const line=[];const f0=frAt(b,b.rel);if(f0)line.push({a:ax(b,b.rel),v:f0.v});for(const p of fr){const a=ax(b,p.t);if(line.length)line.push({a,v:line[line.length-1].v});line.push({a,v:p.v})}const last=b.fr[b.fr.length-1];const aNow=ax(b,T1);if(last)line.push({a:aNow,v:last.v});
+    if(line.length){const d=line.map((p,k)=>(k?'L':'M')+x(p.a).toFixed(1)+','+yv(p.v).toFixed(1)).join('');svg.append(svgEl('path',{class:'row-area',d:d+`L${x(aNow).toFixed(1)},${yb}L${x(line[0].a).toFixed(1)},${yb}Z`,fill:b.color}));svg.append(svgEl('path',{class:'row-line',d,style:'stroke:'+b.color}))}
+    if(rel)svg.append(svgEl('line',{class:'today',x1:x(aNow),x2:x(aNow),y1:yt,y2:yb}));
+    else svg.append(svgEl('line',{class:'b-rel',x1:x(b.rel),x2:x(b.rel),y1:yt-2,y2:yb}));
     const sp=solvedAt(b);
-    if(sp){const a=Math.max(0,(sp.t-b.rel)/MONTH);svg.append(svgEl('circle',{class:'row-dot',cx:x(a),cy:yv(th),r:5.5,fill:b.color}));svg.append(svgEl('text',{class:'row-val',x:x(a)+9,y:yv(th)-7},a<1?'<1 mo':Math.round(a)+' mo'))}
-    else{const best=b.fr[b.fr.length-1];svg.append(svgEl('text',{class:'row-val open',x:x(ageNow)+8,y:yv(best.v)+4},'still open · '+pct(best.v)))}
+    if(sp){const mo=Math.max(0,(sp.t-b.rel)/MONTH);const a=rel?mo:Math.max(sp.t,b.rel);svg.append(svgEl('circle',{class:'row-dot',cx:x(a),cy:yv(th),r:5.5,fill:b.color}));svg.append(svgEl('text',{class:'row-val',x:x(a)+9,y:yv(th)-7},(mo<1?'<1 mo':Math.round(mo)+' mo')+(rel?'':' · '+fmtMY(sp.t))))}
+    else{const best=b.fr[b.fr.length-1];svg.append(svgEl('text',{class:'row-val open',x:x(aNow)+8,y:yv(best.v)+4},'still open · '+pct(best.v)))}
     reads.push({b,yv,y0})});
   svg.append(cur);const hit=svgEl('rect',{class:'hit',x:m.l,y:m.t-6,width:w-m.l-m.r,height:h-m.t+6-m.b});svg.append(hit);
-  hit.addEventListener('pointermove',e=>{const r=svg.getBoundingClientRect();const a=clamp(((e.clientX-r.left)/r.width*w-m.l)/(w-m.l-m.r)*maxMo,0,maxMo);cur.replaceChildren();cur.append(svgEl('line',{class:'cross',x1:x(a),x2:x(a),y1:m.t-6,y2:h-m.b}));cur.append(svgEl('text',{class:'row-read',x:x(a),y:h-m.b+16,'text-anchor':'middle'},a<0.5?'at publication':Math.round(a)+' months after publication'));
-    for(const {b,yv,y0} of reads){const t=b.rel+a*MONTH;if(t>T1)continue;const f=frAt(b,t);if(!f)continue;cur.append(svgEl('circle',{class:'dot',cx:x(a),cy:yv(f.v),r:4,fill:b.color}));cur.append(svgEl('text',{class:'row-read',x:w-m.r+8,y:y0+rh/2+4},pct(f.v)))}});
+  hit.addEventListener('pointermove',e=>{const r=svg.getBoundingClientRect();const xv=clamp(X0+((e.clientX-r.left)/r.width*w-m.l)/(w-m.l-m.r)*(X1-X0),X0,X1);cur.replaceChildren();cur.append(svgEl('line',{class:'cross',x1:x(xv),x2:x(xv),y1:m.t-6,y2:h-m.b}));cur.append(svgEl('text',{class:'row-read',x:x(xv),y:h-m.b+16,'text-anchor':'middle'},rel?(xv<0.5?'at publication':Math.round(xv)+' months after publication'):fmtMY(xv)));
+    for(const {b,yv,y0} of reads){const t=rel?b.rel+xv*MONTH:xv;if(t>T1||t<b.rel)continue;const f=frAt(b,t);if(!f)continue;cur.append(svgEl('circle',{class:'dot',cx:x(xv),cy:yv(f.v),r:4,fill:b.color}));cur.append(svgEl('text',{class:'row-read',x:w-m.r+8,y:y0+rh/2+4},pct(f.v)))}});
   hit.addEventListener('pointerleave',()=>cur.replaceChildren());
   const solved=rows.map(b=>({b,mo:monthsTo(b)})).filter(r=>r.mo!=null);const avg=a=>a.reduce((s,r)=>s+r.mo,0)/a.length;
   $('#ms-note').textContent=solved.length>=6?'The first three benchmarks to be solved took an average of '+Math.round(avg(solved.slice(0,3)))+' months from publication; the three most recent took '+Math.round(avg(solved.slice(-3)))+'. Benchmarks are now written to be hard for the models that exist on the day they are published, and they still fall within a year or two.':'';
