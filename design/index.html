@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Plotline design review</title>
+<meta name="robots" content="noindex">
+<style>
+:root{color-scheme:light dark;--bg:#f1f4f2;--surface:#fbfcfb;--ink:#14201a;--ink-2:#4f5c55;--muted:#7f8a84;--border:rgba(20,32,26,.11);--accent:#1d7a4e}
+@media (prefers-color-scheme:dark){:root{--bg:#0e1311;--surface:#161c19;--ink:#eef3f0;--ink-2:#b6c1ba;--muted:#86918b;--border:rgba(255,255,255,.1);--accent:#4cc38a}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,sans-serif}
+.page{max-width:1100px;margin:0 auto;padding:28px clamp(16px,3vw,32px) 56px}
+h1{font-size:26px;margin:0 0 6px}p.sub{margin:0 0 26px;color:var(--ink-2);max-width:70ch}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 18px;display:flex;flex-direction:column;gap:8px}
+.card h2{font-size:17px;margin:0}.card .k{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.card p{margin:0;color:var(--ink-2);font-size:13.5px;flex:1}
+.links{display:flex;gap:8px;flex-wrap:wrap}.links a{font-size:13px;color:var(--accent);border:1px solid var(--border);border-radius:8px;padding:5px 10px;text-decoration:none}.links a:hover{border-color:var(--accent)}
+.frames{margin-top:36px;display:grid;gap:22px}
+.frame h3{font-size:15px;margin:0 0 8px}.frame iframe{width:100%;height:560px;border:1px solid var(--border);border-radius:10px;background:#fff}
+</style>
+</head>
+<body><div class="page">
+<h1>Plotline design review</h1>
+<p class="sub">Four directions for the same content. Each comp has a landing page and the top of a plot page. Open them full size, on the phone too; the frames below are a quick side by side.</p>
+<div class="grid">
+  <div class="card"><span class="k">Direction 0 · current</span><h2>Ledger green</h2><p>IBM Plex Sans and Mono, green-tinted neutrals, green accent, gold milestones, compact stat tiles, rounded cards. What is live today.</p><div class="links"><a href="../">Landing</a><a href="../the-curve/">The Curve</a><a href="../national-debt/">The National Debt</a></div></div>
+  <div class="card"><span class="k">Direction A</span><h2>Field notebook</h2><p>One person's working notebook about the world: paper, marginalia, hand-set annotations, a pinned first-person note on every plot.</p><div class="links"><a href="comps/a-notebook/index.html">Landing</a><a href="comps/a-notebook/plot.html">Plot page</a><a href="comps/a-notebook/NOTES.md">Notes</a></div></div>
+  <div class="card"><span class="k">Direction B</span><h2>Instrument panel</h2><p>Live instruments for reading the world: dark-first, dense, precise, the numbers as the design, plots grouped under theme rails.</p><div class="links"><a href="comps/b-instrument/index.html">Landing</a><a href="comps/b-instrument/plot.html">Plot page</a><a href="comps/b-instrument/NOTES.md">Notes</a></div></div>
+  <div class="card"><span class="k">Direction C</span><h2>Poster</h2><p>Each plot as a poster: headline number and claim set huge, the chart as the illustration, one flat accent per theme, a sequence of panels instead of a card grid.</p><div class="links"><a href="comps/c-poster/index.html">Landing</a><a href="comps/c-poster/plot.html">Plot page</a><a href="comps/c-poster/NOTES.md">Notes</a></div></div>
+</div>
+<div class="frames">
+  <div class="frame"><h3>0 · Current (landing)</h3><iframe src="../" title="Current landing" loading="lazy"></iframe></div>
+  <div class="frame"><h3>A · Field notebook (landing)</h3><iframe src="comps/a-notebook/index.html" title="Notebook landing" loading="lazy"></iframe></div>
+  <div class="frame"><h3>B · Instrument panel (landing)</h3><iframe src="comps/b-instrument/index.html" title="Instrument landing" loading="lazy"></iframe></div>
+  <div class="frame"><h3>C · Poster (landing)</h3><iframe src="comps/c-poster/index.html" title="Poster landing" loading="lazy"></iframe></div>
+</div>
+</div></body></html>
