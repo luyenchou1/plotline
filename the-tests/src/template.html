@@ -329,7 +329,7 @@ document.querySelectorAll('[data-thresh]').forEach(b=>b.onclick=()=>{S.thresh=+b
 /* ---------- same clock, stacked ---------- */
 function drawStack(){
   const svg=$('#clock'),w=svg.clientWidth||800,mobile=w<640;$('#clock-desc').textContent=DESC.abs;
-  const rows=B;const rh=mobile?54:60,m={l:mobile?118:200,r:mobile?66:96,t:mobile?40:128,b:24},h=m.t+rows.length*rh+m.b;
+  const rows=B;const rh=mobile?54:60,m={l:mobile?118:200,r:mobile?66:96,t:mobile?46:134,b:24},h=m.t+rows.length*rh+m.b;
   const X0=Math.min(...rows.map(b=>b.rel))-2*MONTH,X1=T1;const x=t=>m.l+(t-X0)/(X1-X0)*(w-m.l-m.r);
   svg.setAttribute('viewBox',`0 0 ${w} ${h}`);svg.setAttribute('height',h);svg.replaceChildren();
   const th=S.thresh/100;const ctip=$('#ctip');const hideTip=()=>{ctip.hidden=true;ctip.classList.remove('event','mini')};
@@ -337,7 +337,7 @@ function drawStack(){
   const msg=svgEl('g',{class:'ms-layer'});
   const msTip=(e,px,py)=>{ctip.hidden=false;ctip.classList.add('event','mini');ctip.replaceChildren();ctip.append(el('span','tip-head',e.name),document.createTextNode(' · '+fmtDate(e.t)+' · click for the note'));const tw=ctip.offsetWidth,tht=ctip.offsetHeight;let l=px+12;if(l+tw>w-m.r)l=px-12-tw;ctip.style.left=Math.max(0,l)+'px';ctip.style.top=(py-tht/2)+'px'};
   for(const e of MS){if(e.t<X0||e.t>X1)continue;const px=x(e.t);msg.append(svgEl('line',{class:'ms-line',x1:px,x2:px,y1:m.t-6,y2:h-m.b}));
-    const cy=m.t-30;
+    const cy=m.t-36;
     if(!mobile){const tx=svgEl('text',{class:'ms-label',x:0,y:0,transform:`translate(${px+3.5},${cy-11}) rotate(-90)`},e.name);tx.onpointerenter=()=>msTip(e,px,cy);tx.onpointerleave=hideTip;tx.onclick=()=>{hideTip();showMs(e)};msg.append(tx)}
     const tick=svgEl('circle',{class:'ms-tick'+(msOpen===e.id?' on':''),cx:px,cy,r:4.5});tick.setAttribute('aria-label',e.name+' · '+fmtDate(e.t));tick.onpointerenter=()=>msTip(e,px,cy);tick.onpointerleave=hideTip;tick.onclick=()=>{hideTip();showMs(e)};msg.append(tick)}
   svg.append(msg);
