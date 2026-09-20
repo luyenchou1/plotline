@@ -385,7 +385,7 @@ function drawExpanded(svg,b,top,w,m,mobile,CH,SW,INFO,xMain,ctip,hideTip){
   // close control
   const close=svgEl('text',{class:'x-close',x:w-m.r,y:top+12,'text-anchor':'end'},'close ×');close.onclick=()=>{S.sel=null;hideTip();drawStack()};svg.append(close);
   // info panel (HTML inside the SVG)
-  const fo=svgEl('foreignObject',{x:SW?cr+20:cl,y:SW?top+6:top+CH+4,width:SW?SW:(w-m.r-cl),height:SW?CH-6:INFO-4});
+  const fo=svgEl('foreignObject',{x:SW?cr+20:8,y:SW?top+6:top+CH+4,width:SW?SW:(w-16),height:SW?CH-6:INFO-4});
   const side=document.createElementNS('http://www.w3.org/1999/xhtml','div');side.className='xside';
   side.append(el('h3',null,b.name),el('div','pub','Published '+fmtDate(b.rel)+' · '+b.n+' runs on record'),el('p',null,b.desc));
   const kv=el('dl');const add=(k,v,sub)=>{kv.append(el('dt',null,k));const dd=el('dd');dd.append(el('b',null,v));if(sub)dd.append(el('small',null,sub));kv.append(dd)};
