@@ -35,6 +35,7 @@ A living record of the design principles and patterns we settle on while buildin
 - Auto-updating is a feature to sell, not hide. Every plot shows "Auto-updated <date>" subtly in its nav line, the landing cards show the same date, and a scheduled job re-fetches, rebuilds and commits. Going to a plot should always show the latest record holder and the latest state of the art. *(2026-09-20)*
 - Every number on a page is computed from the data file at build time. Nothing is typed into the page. *(2026-09-20)*
 - Prefer machine-readable primary sources (Treasury's API, FRED CSVs, Epoch AI's datasets). Where the official leaderboard is not machine-readable, say which source the plot follows and how it lags. *(2026-09-20)*
+- Plots are built to grow: adding a benchmark, a milestone or a data series is a data-file edit plus a rebuild, never a page edit. Each plot's README says how. *(2026-09-20)*
 - Check currency before shipping: compare the plot's frontier against the official leaderboard and note protocol differences (HLE: Scale's official numbers versus Artificial Analysis's text-only subset). *(2026-09-20)*
 
 ## Themes

@@ -1,10 +1,58 @@
 [
- {"date":"2023-03-14","name":"GPT-4","title":"OpenAI releases GPT-4","text":"The first model to post a serious score on graduate-level science questions: 36 percent on GPQA Diamond when that test arrived eight months later, scored retroactively. Most rows on this chart begin, or begin to move, here.","url":"https://arxiv.org/abs/2303.08774"},
- {"date":"2024-09-12","name":"o1: reasoning models","title":"OpenAI previews o1, the first reasoning model","text":"o1 was trained to think through a problem before answering and to spend more compute at inference time. Watch what happens to the math and science rows right after this line: AIME, MATH and GPQA all turn upward within months, and ARC-AGI records its first score.","url":"https://openai.com/index/introducing-openai-o1-preview/"},
- {"date":"2025-01-20","name":"DeepSeek-R1","title":"DeepSeek releases R1 with open weights","text":"A reasoning model comparable to o1 from a Chinese lab, with weights anyone could download. It put open models on the frontier of these tests and made the frontier a crowd rather than one or two labs.","url":"https://api-docs.deepseek.com/news/news250120"},
- {"date":"2025-04-16","name":"o3","title":"OpenAI releases o3","text":"The model that solved AIME at the 80 percent threshold four months after the mock exam was published, and took ARC-AGI from 35 to 61 percent in one step. The first release for which several benchmarks jumped at once.","url":"https://openai.com/index/introducing-o3-and-o4-mini/"},
- {"date":"2025-08-07","name":"GPT-5","title":"OpenAI releases GPT-5","text":"Reached 90 percent on AIME and 98 percent on the hardest tier of MATH, and set the first FrontierMath record above 50 percent. From here the older math benchmarks stop being informative.","url":"https://cdn.openai.com/gpt-5-system-card.pdf"},
- {"date":"2025-11-18","name":"Gemini 3 Pro","title":"Google releases Gemini 3 Pro","text":"The first model past 90 percent on GPQA Diamond and past 37 percent on Humanity's Last Exam, and a large step on ARC-AGI-2. Recorded by Epoch AI's Benchmarking Hub.","url":"https://epoch.ai/benchmarks"},
- {"date":"2026-06-09","name":"Claude Fable 5","title":"Anthropic releases Claude Fable 5","text":"Took ARC-AGI to 98.5 percent and ARC-AGI-2 to 89 percent, the benchmarks built to resist exactly this. Recorded by Epoch AI's Benchmarking Hub.","url":"https://epoch.ai/benchmarks"},
- {"date":"2026-09-03","name":"GPT-6 Astra","title":"OpenAI releases GPT-6 Astra","text":"The current record on GPQA Diamond, ARC-AGI-2 and FrontierMath in this collection, and the first model past 50 percent on Humanity's Last Exam on the official Scale AI leaderboard. Recorded by Epoch AI's Benchmarking Hub.","url":"https://labs.scale.com/leaderboard/humanitys_last_exam"}
+ {
+  "date": "2023-03-14",
+  "name": "GPT-4",
+  "title": "OpenAI releases GPT-4",
+  "text": "The first model to post a serious score on graduate-level science questions: 36 percent on GPQA Diamond when that test arrived eight months later, scored retroactively. Most rows on this chart begin, or begin to move, here.",
+  "url": "https://arxiv.org/abs/2303.08774"
+ },
+ {
+  "date": "2024-09-12",
+  "name": "o1",
+  "title": "OpenAI previews o1, the first reasoning model",
+  "text": "o1 was trained to think through a problem before answering and to spend more compute at inference time. Watch what happens to the math and science rows right after this line: AIME, MATH and GPQA all turn upward within months, and ARC-AGI records its first score.",
+  "url": "https://openai.com/index/introducing-openai-o1-preview/"
+ },
+ {
+  "date": "2025-01-20",
+  "name": "DeepSeek-R1",
+  "title": "DeepSeek releases R1 with open weights",
+  "text": "A reasoning model comparable to o1 from a Chinese lab, with weights anyone could download. It put open models on the frontier of these tests and made the frontier a crowd rather than one or two labs.",
+  "url": "https://api-docs.deepseek.com/news/news250120"
+ },
+ {
+  "date": "2025-04-16",
+  "name": "o3",
+  "title": "OpenAI releases o3",
+  "text": "The model that solved AIME at the 80 percent threshold four months after the mock exam was published, and took ARC-AGI from 35 to 61 percent in one step. The first release for which several benchmarks jumped at once.",
+  "url": "https://openai.com/index/introducing-o3-and-o4-mini/"
+ },
+ {
+  "date": "2025-08-07",
+  "name": "GPT-5",
+  "title": "OpenAI releases GPT-5",
+  "text": "Reached 90 percent on AIME and 98 percent on the hardest tier of MATH, and set the first FrontierMath record above 50 percent. From here the older math benchmarks stop being informative.",
+  "url": "https://cdn.openai.com/gpt-5-system-card.pdf"
+ },
+ {
+  "date": "2025-11-18",
+  "name": "Gemini 3 Pro",
+  "title": "Google releases Gemini 3 Pro",
+  "text": "The first model past 90 percent on GPQA Diamond and past 37 percent on Humanity's Last Exam, and a large step on ARC-AGI-2. Recorded by Epoch AI's Benchmarking Hub.",
+  "url": "https://epoch.ai/benchmarks"
+ },
+ {
+  "date": "2026-06-09",
+  "name": "Claude Fable 5",
+  "title": "Anthropic releases Claude Fable 5",
+  "text": "Took ARC-AGI to 98.5 percent and ARC-AGI-2 to 89 percent, the benchmarks built to resist exactly this. Recorded by Epoch AI's Benchmarking Hub.",
+  "url": "https://epoch.ai/benchmarks"
+ },
+ {
+  "date": "2026-09-03",
+  "name": "GPT-6 Astra",
+  "title": "OpenAI releases GPT-6 Astra",
+  "text": "The current record on GPQA Diamond, ARC-AGI-2 and FrontierMath in this collection, and the first model past 50 percent on Humanity's Last Exam on the official Scale AI leaderboard. Recorded by Epoch AI's Benchmarking Hub.",
+  "url": "https://labs.scale.com/leaderboard/humanitys_last_exam"
+ }
 ]
