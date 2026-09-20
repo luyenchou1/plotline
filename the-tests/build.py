@@ -19,7 +19,7 @@ for b in d['benchmarks']:
         'points': [[p['date'], p['display'] or p['model'], p['org'], r3(p['score'])] for p in b['points']],
         'frontier': [[p['date'], p['display'] or p['model'], p['org'], r3(p['score'])] for p in b['frontier']],
     })
-payload = {'retrieved': d['retrieved'], 'benchmarks': benchmarks}
+payload = {'retrieved': d['retrieved'], 'benchmarks': benchmarks, 'milestones': json.load(open(root/'src'/'milestones.json'))}
 js = 'const DATA=' + json.dumps(payload, separators=(',', ':'), ensure_ascii=False) + ';'
 tpl = open(root/'src'/'template.html', encoding='utf-8').read()
 assert '/*__DATA__*/' in tpl

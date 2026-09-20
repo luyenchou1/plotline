@@ -153,6 +153,26 @@ svg text{font-family:var(--sans);font-size:11.5px;fill:var(--muted)}
 .pre-band{fill:var(--ink);opacity:.045}
 .pre-label{font-size:10.5px;fill:var(--muted);font-style:italic}
 .tip-cue{margin-top:6px;font-size:11px;color:var(--tip-muted)}
+.ms-line{stroke:var(--event);stroke-dasharray:2 4;opacity:.35}
+.ms-tick{fill:var(--surface);stroke:var(--event);stroke-width:2;cursor:pointer}
+.ms-tick:hover,.ms-tick.on{fill:var(--event)}
+.ms-label{font-size:10px;fill:var(--event);letter-spacing:.06em;text-transform:uppercase;font-weight:500;cursor:pointer}
+.ms-label:hover{text-decoration:underline}
+.rec-label{font-size:10.5px;fill:var(--ink-2);paint-order:stroke;stroke:var(--surface);stroke-width:3px}
+.tooltip.event{border:1.5px solid var(--event)}
+.tip-tag{display:inline-block;font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:var(--tip-bg);background:var(--event);border-radius:4px;padding:1px 6px;margin-right:8px;vertical-align:1px}
+.tip-head{font-size:14px;font-weight:600;color:var(--event);line-height:1.3;margin:2px 0 1px}
+.tip-title{font-size:12px;color:var(--tip-muted);line-height:1.4}
+.event-dialog{border:1px solid var(--border);border-left:4px solid var(--event);border-radius:12px;background:var(--surface);color:var(--ink);padding:20px 24px 18px;max-width:min(560px,calc(100vw - 32px));box-shadow:var(--shadow)}
+.event-dialog::backdrop{background:rgba(10,14,12,.45);backdrop-filter:blur(2px)}
+.event-dialog .tag{display:inline-block;font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:var(--surface);background:var(--event);border-radius:4px;padding:1px 6px;margin-right:8px;vertical-align:1px}
+.event-dialog .eyebrow{margin-bottom:8px}
+.event-dialog h3{margin:0 0 8px;font-size:17px;font-weight:600;line-height:1.3}
+.event-dialog p{margin:0;font-size:14px;color:var(--ink-2);line-height:1.6}
+.event-dialog .row{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap;align-items:center}
+.btn{border:1px solid var(--border);background:var(--surface);border-radius:8px;padding:6px 12px;font-size:13px;color:var(--ink)}
+.btn.primary{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.event-dialog .src{margin-left:auto;font-size:13px}
 .row-hit{fill:transparent;cursor:pointer}
 .row-hit:hover{fill:var(--ink);opacity:.04}
 .row-sel{fill:var(--accent);opacity:.07}
@@ -195,8 +215,9 @@ svg text{font-family:var(--sans);font-size:11.5px;fill:var(--muted)}
   <div class="controls">
     <div><span class="lbl">Count a test as solved at</span><div class="seg" role="group" aria-label="Threshold"><button data-thresh="50">50%</button><button data-thresh="80" aria-pressed="true">80%</button><button data-thresh="90">90%</button></div></div>
   </div>
-  <div class="chart-wrap"><svg id="clock" role="img" aria-label="Best score on each benchmark against months since its publication, one row per benchmark"></svg></div>
-  <div class="hint">Hover to read every benchmark on the same date · click a row to open that test below</div>
+  <div class="chart-wrap"><svg id="clock" role="img" aria-label="Best score on each benchmark in calendar time, one row per benchmark"></svg><div class="tooltip" id="ctip" hidden></div></div>
+  <div class="hint">Hover to read every benchmark on the same date · click a row to open that test below · gold marks are model releases that moved the frontier</div>
+  <dialog id="event-dialog" class="event-dialog" aria-labelledby="ev-dlg-title"></dialog>
   <p class="note" id="ms-note"></p>
 </section>
 
@@ -250,6 +271,7 @@ $('#theme').onclick=()=>{const dark=getComputedStyle(root).colorScheme==='dark';
 const ALL=DATA.benchmarks.map(b=>({...b,rel:b.release?Date.parse(b.release):null,pts:b.points.map(p=>({t:Date.parse(p[0]),name:pretty(p[1]),org:p[2],v:p[3]})),fr:b.frontier.map(p=>({t:Date.parse(p[0]),name:pretty(p[1]),org:p[2],v:p[3]}))}));
 const B=ALL.filter(b=>b.unit==='fraction'&&b.rel).sort((a,b)=>a.rel-b.rel);
 const METR=ALL.find(b=>b.key==='metr');
+const MS=DATA.milestones.map((e,i)=>({...e,t:Date.parse(e.date),id:i}));let msOpen=null;
 const T1=Math.max(...ALL.flatMap(b=>b.pts.map(p=>p.t)),Date.parse(DATA.retrieved));
 const RAMP=['var(--r1)','var(--r2)','var(--r3)','var(--r4)','var(--r5)','var(--r6)'];
 B.forEach((b,i)=>{b.color=RAMP[Math.min(RAMP.length-1,Math.floor(i/B.length*RAMP.length))];b.on=true});
@@ -277,7 +299,7 @@ document.querySelectorAll('[data-thresh]').forEach(b=>b.onclick=()=>{S.thresh=+b
 /* ---------- same clock, stacked ---------- */
 function drawStack(){
   const svg=$('#clock'),w=svg.clientWidth||800,mobile=w<640,rel=S.clock==='rel';$('#clock-desc').textContent=DESC[S.clock];
-  const rows=B;const rh=mobile?54:60,m={l:mobile?118:200,r:mobile?66:96,t:26,b:24},h=m.t+rows.length*rh+m.b;
+  const rows=B;const rh=mobile?54:60,m={l:mobile?118:200,r:mobile?66:96,t:mobile?58:64,b:24},h=m.t+rows.length*rh+m.b;
   const X0=rel?0:Math.min(...rows.map(b=>b.rel))-2*MONTH,X1=rel?Math.max(12,...rows.map(b=>(T1-b.rel)/MONTH)):T1;
   const x=v=>m.l+(v-X0)/(X1-X0)*(w-m.l-m.r);const ax=(b,t)=>rel?(t-b.rel)/MONTH:t;
   svg.setAttribute('viewBox',`0 0 ${w} ${h}`);svg.setAttribute('height',h);svg.replaceChildren();
@@ -286,6 +308,15 @@ function drawStack(){
   if(rel){const step=X1>48?12:6;for(let v=0;v<=X1;v+=step){g.append(svgEl('line',{x1:x(v),x2:x(v),y1:m.t-6,y2:h-m.b,style:v?'':'stroke:var(--axis)'}));g.append(svgEl('text',{x:x(v),y:m.t-10,'text-anchor':'middle'},v?v+' mo':'published'))}}
   else{for(let yr=new Date(X0).getUTCFullYear()+1;yr<=new Date(X1).getUTCFullYear();yr++){const t=Date.UTC(yr,0,1);g.append(svgEl('line',{x1:x(t),x2:x(t),y1:m.t-6,y2:h-m.b}));g.append(svgEl('text',{x:x(t),y:m.t-10,'text-anchor':'middle'},yr))}}
   svg.append(g);
+  // milestone lane: ticks + labels above the rows, faint lines through them
+  const msg=svgEl('g',{class:'ms-layer'});const lanes=[];const ctip=$('#ctip');
+  if(!rel)for(const e of MS){if(e.t<X0||e.t>X1)continue;const px=x(e.t);msg.append(svgEl('line',{class:'ms-line',x1:px,x2:px,y1:m.t-6,y2:h-m.b}));
+    const width=e.name.length*6.4+8,anchorEnd=px+width>w-m.r,left=anchorEnd?px-width:px,right=left+width;let lane=-1;for(let k=0;k<2;k++){if((lanes[k]??-1e9)+8<=left){lane=k;break}}
+    const show=(pin)=>{ctip.hidden=false;ctip.classList.add('event');ctip.replaceChildren();const d=el('div','tip-date');d.append(el('span','tip-tag','Release'),document.createTextNode(fmtDate(e.t)));ctip.append(d,el('div','tip-head',e.name),el('div','tip-title',e.title));if(!pin)ctip.append(el('div','tip-cue','Click for the note and source'));const tw=ctip.offsetWidth;let l=px+14;if(l+tw>w-m.r)l=px-14-tw;ctip.style.left=Math.max(0,l)+'px';ctip.style.top=(m.t-4)+'px'};
+    const hide=()=>{ctip.hidden=true;ctip.classList.remove('event')};
+    if(lane>=0){lanes[lane]=right;const tx=svgEl('text',{class:'ms-label',x:anchorEnd?px-5:px+5,y:m.t-32+lane*13,'text-anchor':anchorEnd?'end':'start'},e.name);tx.onpointerenter=()=>show(false);tx.onpointerleave=hide;tx.onclick=()=>{hide();showMs(e)};msg.append(tx)}
+    const tick=svgEl('circle',{class:'ms-tick'+(msOpen===e.id?' on':''),cx:px,cy:m.t-16,r:4.5});tick.setAttribute('aria-label',e.name+' · '+fmtDate(e.t));tick.onpointerenter=()=>show(false);tick.onpointerleave=hide;tick.onclick=()=>{hide();showMs(e)};msg.append(tick)}
+  svg.append(msg);
   const cur=svgEl('g',{'pointer-events':'none'});const reads=[];const rowHits=[];
   rows.forEach((b,i)=>{const y0=m.t+i*rh,yb=y0+rh-8,yt=y0+6;const yv=v=>yb-v*(yb-yt);
     if(S.sel===b.key)svg.append(svgEl('rect',{class:'row-sel',x:0,y:y0,width:w,height:rh,rx:6}));
@@ -310,6 +341,8 @@ function drawStack(){
   $('#ms-note').textContent=solved.length>=6?'The first three benchmarks to be solved took an average of '+Math.round(avg(solved.slice(0,3)))+' months from publication; the three most recent took '+Math.round(avg(solved.slice(-3)))+'. Benchmarks are now written to be hard for the models that exist on the day they are published, and they still fall within a year or two.':'';
 }
 
+function showMs(e){msOpen=e.id;const dlg=$('#event-dialog');dlg.replaceChildren();const eb=el('div','eyebrow');eb.append(el('span','tag','Release'),document.createTextNode(fmtDate(e.t)));const h=el('h3',null,e.title);h.id='ev-dlg-title';const row=el('div','row');const c=el('button','btn primary','Close');c.onclick=()=>dlg.close();const a=el('a','src','Source ↗');a.href=e.url;a.target='_blank';a.rel='noopener';row.append(c,a);dlg.append(eb,h,el('p',null,e.text),row);dlg.showModal();dlg.onclick=ev=>{if(ev.target===dlg)dlg.close()};dlg.onclose=()=>{msOpen=null}}
+
 /* ---------- one test at a time ---------- */
 function drawDetail(){
   if(!S.sel)S.sel=B[0].key;const b=B.find(x=>x.key===S.sel)||B[0];
@@ -327,6 +360,7 @@ function drawDetail(){
   const line=[];const f0=frAt(b,b.rel);if(f0)line.push({t:b.rel,v:f0.v});for(const p of b.fr){if(p.t<b.rel)continue;if(line.length)line.push({t:p.t,v:line[line.length-1].v});line.push(p)}if(line.length)line.push({t:X1,v:line[line.length-1].v});
   if(line.length){const d=line.map((p,i)=>(i?'L':'M')+x(p.t).toFixed(1)+','+y(p.v).toFixed(1)).join('');svg.append(svgEl('path',{class:'d-area',d:d+`L${x(X1).toFixed(1)},${h-m.b}L${x(line[0].t).toFixed(1)},${h-m.b}Z`,fill:b.color}));svg.append(svgEl('path',{class:'d-line',d,style:'stroke:'+b.color}))}
   const recSet=new Set(b.fr);const dots=[];for(const p of b.pts){if(p.t<X0||p.t>X1)continue;const isRec=recSet.has(p)||b.fr.some(f=>f.t===p.t&&f.v===p.v);svg.append(svgEl('circle',{class:'d-pt'+(isRec?' rec':''),cx:x(p.t).toFixed(1),cy:y(p.v).toFixed(1),r:isRec?4:2.6,fill:b.color}));dots.push({p,isRec})}
+  {let lastX=-1e9,lastY=-1e9;const recs=b.fr.filter(p=>p.t>=b.rel);for(const p of recs){const px=x(p.t),py=y(p.v);if(px-lastX<(mobile?70:56)&&Math.abs(py-lastY)<14)continue;lastX=px;lastY=py;const right=px>w-m.r-110;svg.append(svgEl('text',{class:'rec-label',x:right?px-8:px+8,y:py-8,'text-anchor':right?'end':'start'},p.name))}}
   const cur=svgEl('g',{'pointer-events':'none'});svg.append(cur);const hit=svgEl('rect',{class:'hit',x:m.l,y:0,width:w-m.l-m.r,height:h});svg.append(hit);const tip=$('#dtip');
   hit.addEventListener('pointermove',e=>{const r=svg.getBoundingClientRect();const px=(e.clientX-r.left)/r.width*w,py=(e.clientY-r.top)/r.height*h;let best=null,bd=22;for(const d of dots){const dd=Math.hypot(x(d.p.t)-px,y(d.p.v)-py);if(dd<bd){bd=dd;best=d}}
     cur.replaceChildren();tip.hidden=false;tip.replaceChildren();
