@@ -10,6 +10,8 @@ get "https://ourworldindata.org/grapher/pisa-test-score-mean-performance-on-the-
 get "https://ourworldindata.org/grapher/pisa-test-score-mean-performance-on-the-reading-scale.csv?v=1&csvType=full&useColumnShortNames=true" pisa_reading.csv
 # PISA science (World Bank EdStats mirror of OECD; runs through 2018)
 get "https://api.worldbank.org/v2/country/all/indicator/LO.PISA.SCI?format=json&per_page=30000" pisa_science_wb.json
+# OECD PISA 2025 Results Volume I, Annex B1 chapter 2 tables (StatLink), trend tables through 2025
+get "https://stat.link/files/73451bc5-en/mrq53f.xlsx" pisa2025_tables.xlsx
 # NCES Digest table 236.55, expenditure per pupil (newest edition that exists wins)
 for ed in d25 d24 d23; do
   if curl -sL -A "$UA" -o nces.tmp "https://nces.ed.gov/programs/digest/${ed}/tables/dt${ed#d}_236.55.asp" && grep -q "Expenditure per pupil" nces.tmp; then mv nces.tmp nces_236_55.html; echo "ok  nces_236_55.html ($ed)"; break; fi

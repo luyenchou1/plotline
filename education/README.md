@@ -6,8 +6,10 @@ American school results since 1990 against what the country spends per pupil, an
 
 ```
 src/fetch.sh        pulls the raw sources into src/raw/ (git-ignored), then runs assemble.py
-                    - PISA math and reading by country: Our World in Data grapher CSVs (OECD data)
-                    - PISA science: World Bank API, indicator LO.PISA.SCI (through 2018)
+                    - PISA, all rounds through 2025, three subjects: OECD PISA 2025 Results Vol. I, Annex B1 tables I.B1.2a.36-38
+                      (StatLink xlsx https://stat.link/files/73451bc5-en/mrq53f.xlsx); primary where present
+                    - PISA math and reading fallback: Our World in Data grapher CSVs (OECD data)
+                    - PISA science fallback: World Bank API, indicator LO.PISA.SCI (through 2018)
                     - NAEP: nationsreportcard.gov data service, one request per assessment year
                       (the API rejects year lists; years before 1996 need the R2 sample suffix)
                     - Spending per pupil: NCES Digest table 236.55, HTML (newest edition that exists)
@@ -22,6 +24,8 @@ Every fetch keeps the previous file if the new download fails or is empty, so a 
 ## Sources
 
 - NAEP, National Center for Education Statistics. https://www.nationsreportcard.gov/ (public domain)
-- PISA, OECD, via Our World in Data (CC BY) and the World Bank (CC BY 4.0)
+- PISA, OECD (CC BY 4.0), with Our World in Data (CC BY) and the World Bank (CC BY 4.0) as fallbacks
 - NCES Digest of Education Statistics, table 236.55 (public domain)
 - OECD Education at a Glance, expenditure per student (OECD terms of use)
+
+When the next PISA round is published (2028 results, due 2029), point `fetch.sh` at the new volume's Annex B1 StatLink; the sheet names and layout have been stable across editions.

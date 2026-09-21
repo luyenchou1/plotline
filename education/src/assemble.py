@@ -27,6 +27,45 @@ for y in sorted({y for e in sci.values() for y in e['scores']}):
     if len(vals) >= 25 and y not in sci.setdefault('OECD average', {'code':'OECD','oecd':False,'scores':{}})['scores']:
         sci['OECD average']['scores'][y] = round(statistics.mean(vals), 1)
 pisa['science'] = sci
+# ---- OECD's own trend tables from PISA 2025 Results Volume I, Annex B1 (Tables I.B1.2a.36-38): the official
+# rescaled series for every round, all three subjects, through 2025. Primary where present; OWID / World Bank fill the rest.
+OECD_NAMES = {'Korea':'South Korea','Chinese Taipei':'Taiwan','Hong Kong (China)':'Hong Kong','Macao (China)':'Macao','Slovak Republic':'Slovakia',
+              'Viet Nam':'Vietnam','B-S-J-Z (China)':'China (B-S-J-Z)','Palestinian Authority':'Palestine','United Kingdom':'United Kingdom'}
+SKIP = {'OECD average-23','OECD average-35'}
+pisaMeta = {'latestRound': None, 'caution': {}}
+try:
+    import openpyxl
+    wb = openpyxl.load_workbook(raw/'pisa2025_tables.xlsx', read_only=True, data_only=True)
+    for subj, sheet in (('science','Table I.B1.2a.36'), ('reading','Table I.B1.2a.37'), ('math','Table I.B1.2a.38')):
+        rows = list(wb[sheet].iter_rows(values_only=True))
+        hdr = next(r for r in rows if r and any(isinstance(c, str) and c.startswith('PISA 20') for c in r))
+        cols = [(i, int(c[5:9])) for i, c in enumerate(hdr) if isinstance(c, str) and c.startswith('PISA 20') and 'PISA' not in c[9:]]
+        codes = {NAMES.get(n, n): e['code'] for n, e in pisa[subj].items()}
+        for r in rows:
+            if not r or not isinstance(r[0], str): continue
+            name = r[0].strip()
+            if name in SKIP or len(name) > 40 or name.startswith(('Notes','Information','1.')): continue
+            flag = name.endswith('*'); name = name.rstrip('*').strip(); name = OECD_NAMES.get(name, NAMES.get(name, name))
+            vals = {y: r[i] for i, y in cols if isinstance(r[i], (int, float))}
+            if not vals: continue
+            e = pisa[subj].setdefault(name, {'code': codes.get(name, ''), 'oecd': codes.get(name, '') in OECD, 'scores': {}})
+            if name == 'OECD average':
+                # keep the OECD's per-round average for earlier rounds; take the new round from this table
+                latest = max(vals); e['scores'][latest] = round(vals[latest], 1)
+            else:
+                for y, v in vals.items(): e['scores'][y] = round(v, 1)
+            if flag: pisaMeta['caution'].setdefault(name, []).append(subj)
+            pisaMeta['latestRound'] = max(pisaMeta['latestRound'] or 0, max(vals))
+    print('OECD 2025 tables merged; latest round', pisaMeta['latestRound'], '| flagged', len(pisaMeta['caution']))
+except Exception as ex:
+    print('OECD 2025 tables not used:', ex)
+
+# any round where the OECD average is missing but 30+ members have a score: mean of members (marked in the notes)
+for subj in pisa:
+    oa = pisa[subj].setdefault('OECD average', {'code':'OECD','oecd':False,'scores':{}})
+    for y in sorted({y for e in pisa[subj].values() for y in e['scores']}):
+        vals = [e['scores'][y] for n, e in pisa[subj].items() if e['oecd'] and y in e['scores']]
+        if len(vals) >= 30 and y not in oa['scores']: oa['scores'][y] = round(statistics.mean(vals), 1)
 for subj in pisa:
     for e in pisa[subj].values(): e['scores'] = [[y, s] for y, s in sorted(e['scores'].items())]
 
@@ -53,7 +92,7 @@ latest = max(y for y in years if sum(1 for c in OECD if y in by.get(c, {})) >= 3
 oecd_spend = sorted(([c, by[c][latest]] for c in OECD if latest in by.get(c, {})), key=lambda x: -x[1])
 oecd_spend_year = latest
 
-out = {'retrieved': datetime.date.today().isoformat(), 'pisa': pisa, 'naep': naep,
+out = {'retrieved': datetime.date.today().isoformat(), 'pisa': pisa, 'pisaMeta': pisaMeta, 'naep': naep,
        'spend': {'series': spend, 'base': base, 'source': 'NCES Digest of Education Statistics, table 236.55'},
        'oecdSpend': {'year': oecd_spend_year, 'rows': oecd_spend, 'unit': 'USD PPP per student, constant 2020 prices, primary to post-secondary non-tertiary'}}
 json.dump(out, open(root/'data.json', 'w'), separators=(',', ':'), ensure_ascii=False)
