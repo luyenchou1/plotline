@@ -342,18 +342,16 @@ td .when{display:block;font-size:11.5px;color:var(--muted)}
     <div class="controls-right">
       <div class="seg" role="group" aria-label="Scale" id="scale-seg"><button data-scale="linear" aria-pressed="true">Linear</button><button data-scale="log">Log</button></div>
       <div class="chips" id="ranges" role="group" aria-label="Time range"></div>
-      <label class="check"><input type="checkbox" id="events-toggle" checked> Milestones</label>
       <button class="link" id="replay">Replay</button>
     </div>
   </div>
   <div class="explain"><div class="explain-text" id="explain"></div><div class="legend" id="legend"></div></div>
   <div class="chart-wrap">
-    <svg id="main" tabindex="0" role="img" aria-label="Growth of transistors per chip, AI training compute, accelerator throughput and model parameters over time."></svg>
+    <svg id="main" role="img" aria-label="Growth of transistors per chip, AI training compute, accelerator throughput and model parameters over time."></svg>
     <div class="tooltip" id="tip" hidden></div>
   </div>
   <div class="nav-wrap" style="margin-top:10px"><svg id="nav" aria-label="Zoom control: drag to choose a period"></svg></div>
   <div class="hint"><span>Hover to read · click a point to pin it and see its source · <kbd>Esc</kbd> clears · drag the strip to zoom · double-click it to reset</span><span id="fitnote"></span></div>
-  <ol class="events" id="event-list" aria-label="Milestones"></ol>
   <dialog id="event-dialog" class="event-dialog" aria-labelledby="ev-dlg-title"></dialog>
 </section>
 
@@ -450,7 +448,6 @@ const rangeChips=[{id:'all',label:'All',range:()=>[T0,T1]},{id:'4004',label:'Sin
 function setRange(a,b){a=clamp(a,T0,T1-YEAR);b=clamp(b,a+YEAR,T1);S.t0=a;S.t1=b;S.pinned=null;drawAll()}
 document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{S.mode=b.dataset.mode;S.pinned=null;drawAll()});
 document.querySelectorAll('[data-scale]').forEach(b=>b.onclick=()=>{S.scale=b.dataset.scale;drawAll()});
-$('#events-toggle').onchange=e=>{S.events=e.target.checked;if(!S.events){S.evOpen=null;S.pinned=null;clearCursor()}drawAll()};
 
 /* ---------- main chart ---------- */
 let G=null;
@@ -541,7 +538,7 @@ function setCursor(t,pt,pin=false){
   const tw=tip.offsetWidth,th=tip.offsetHeight;let left=px+14;if(left+tw>w-m.r)left=px-14-tw;tip.style.left=Math.max(0,left)+'px';const ay=anchorY==null?(m.t+h-m.b)/2:anchorY;tip.style.top=clamp(ay-th/2,m.t,h-m.b-th)+'px';
 }
 function clearCursor(){S.evHover=null;$('#cursor-main')?.replaceChildren();$('#tip').hidden=true}
-$('#main').addEventListener('keydown',e=>{if(e.key==='Escape'){S.pinned=null;clearCursor()}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){S.pinned=null;clearCursor()}});
 
 /* ---------- milestones UI ---------- */
 function openEvent(e){showEventDialog(e)}
@@ -551,7 +548,6 @@ function showEventDialog(e){const dlg=$('#event-dialog');dlg.replaceChildren();
   const row=el('div','row');const z=el('button','btn','Zoom to this period');z.onclick=()=>{dlg.close();setRange(e.t-4*YEAR,e.t+4*YEAR);S.evOpen=e.id;drawAll()};
   const c=el('button','btn primary','Close');c.onclick=()=>dlg.close();const a=el('a','src','Source ↗');a.href=e.url;a.target='_blank';a.rel='noopener';row.append(c,z,a);
   dlg.append(eb,h,el('p',null,e.text),row);dlg.showModal();dlg.onclick=ev=>{if(ev.target===dlg)dlg.close()}}
-function drawEventList(){const ol=$('#event-list');ol.replaceChildren();for(const e of events){const li=el('li');const b=el('button','ev-chip'+(e.t>=S.t0&&e.t<=S.t1?' in':'')+(S.evOpen===e.id?' on':''));b.append(el('span',null,fmtMY(e.t)),document.createTextNode(e.name));b.onclick=()=>{if(e.t<S.t0||e.t>S.t1)setRange(e.t-4*YEAR,e.t+4*YEAR);showEventDialog(e)};li.append(b);ol.append(li)}}
 
 /* ---------- navigator ---------- */
 let navBuilt=false;
@@ -667,8 +663,8 @@ $('#replay').onclick=()=>{if(replaying)return;replaying=true;S.pinned=null;drawA
 })();
 
 /* ---------- orchestration ---------- */
-function syncControls(){document.querySelectorAll('#ranges .chip').forEach(b=>{const c=rangeChips.find(c=>c.id===b.dataset.id),[a,z]=c.range();b.setAttribute('aria-pressed',Math.abs(a-S.t0)<DAY&&Math.abs(z-S.t1)<DAY)});document.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.mode===S.mode));document.querySelectorAll('[data-scale]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.scale===S.scale));$('#scale-seg').style.display=S.mode==='indexed'?'none':'';$('#events-toggle').checked=S.events}
-function drawAll(){syncControls();drawMain();drawNav();drawEventList()}
+function syncControls(){document.querySelectorAll('#ranges .chip').forEach(b=>{const c=rangeChips.find(c=>c.id===b.dataset.id),[a,z]=c.range();b.setAttribute('aria-pressed',Math.abs(a-S.t0)<DAY&&Math.abs(z-S.t1)<DAY)});document.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.mode===S.mode));document.querySelectorAll('[data-scale]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.scale===S.scale));$('#scale-seg').style.display=S.mode==='indexed'?'none':'';}
+function drawAll(){syncControls();drawMain();drawNav()}
 drawAll();
 let rt;new ResizeObserver(()=>{clearTimeout(rt);rt=setTimeout(drawAll,60)}).observe($('.page'));
 })();

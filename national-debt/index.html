@@ -287,18 +287,16 @@ td .when{display:block;font-size:11.5px;color:var(--muted)}
       <div class="seg" role="group" aria-label="Series"><button data-view="total" aria-pressed="true">Total</button><button data-view="split" aria-pressed="false">Who holds it</button></div>
       <div class="seg" role="group" aria-label="Scale"><button data-scale="linear" aria-pressed="true">Linear</button><button data-scale="log" aria-pressed="false">Log</button></div>
       <label class="check"><input type="checkbox" id="gdp-toggle" checked> GDP line</label>
-      <label class="check"><input type="checkbox" id="events-toggle" checked> Events</label>
     </div>
   </div>
   <div class="chart-wrap">
-    <svg id="main" tabindex="0" role="img" aria-label="Federal debt over time. Arrow keys move the cursor by one reporting day; Escape clears a pinned point."></svg>
+    <svg id="main" role="img" aria-label="Federal debt over time. Arrow keys move the cursor by one reporting day; Escape clears a pinned point."></svg>
     <div class="tooltip" id="tip" hidden></div>
   </div>
   <div class="ind-tabs" id="ind-tabs" role="tablist" aria-label="Comparison panel"><span class="ind-tabs-label">Compare with</span></div>
   <div id="indicators"></div>
   <div class="nav-wrap"><svg id="nav" aria-label="Zoom control: drag to choose a period"></svg></div>
   <div class="hint"><span>Hover to read · click to pin · <kbd>←</kbd> <kbd>→</kbd> step a day · <kbd>Esc</kbd> clears</span><span id="coverage"></span></div>
-  <ol class="events" id="event-list" aria-label="Events"></ol>
   <dialog id="event-dialog" class="event-dialog" aria-labelledby="ev-dlg-title"></dialog>
 </section>
 
@@ -398,7 +396,6 @@ function setRange(a,b){a=clamp(a,T0,T1-30*DAY);b=clamp(b,a+30*DAY,T1);S.t0=a;S.t
 document.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>{S.view=b.dataset.view;if(S.view==='split')S.scale='linear';drawAll()});
 document.querySelectorAll('[data-scale]').forEach(b=>b.onclick=()=>{S.scale=b.dataset.scale;drawAll()});
 $('#gdp-toggle').onchange=e=>{S.gdp=e.target.checked;drawAll()};
-$('#events-toggle').onchange=e=>{S.events=e.target.checked;if(!S.events){closeEvent(false);S.pinned=null;clearCursor()}drawAll()};
 
 /* ---------- scales ---------- */
 let L=null; // layout shared by main + indicators
@@ -551,7 +548,7 @@ function setCursor(d,pin=false){
   const tw=tip.offsetWidth,th=tip.offsetHeight;let left=px+14;if(left+tw>w-m.r)left=px-14-tw;tip.style.left=Math.max(0,left)+'px';tip.style.top=clamp(y(d.v)-th/2,m.t,h-m.b-th)+'px';
 }
 function clearCursor(){S.hover=null;S.evHover=null;$('#cursor-main')?.replaceChildren();for(const ind of IND){$('#cursor-'+ind.key)?.replaceChildren();const latest=[...ind.map].reverse().find(([k,v])=>v!=null);const e=$('#val-'+ind.key);if(e)e.textContent=latest?ind.fmt(latest[1]):''}$('#tip').hidden=true}
-$('#main').addEventListener('keydown',e=>{if(e.key==='Escape'){S.pinned=null;clearCursor();return}if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();let i=S.pinned==null?bisect(S.t1):S.pinned;i=clamp(i+(e.key==='ArrowRight'?1:-1),bisect(S.t0),Math.min(N-1,bisect(S.t1)));S.pinned=i;setCursor(D[i],true)}});
+document.addEventListener('keydown',e=>{if(e.target.matches('input,button,select,textarea'))return;if(e.key==='Escape'){S.pinned=null;clearCursor();return}if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();let i=S.pinned==null?bisect(S.t1):S.pinned;i=clamp(i+(e.key==='ArrowRight'?1:-1),bisect(S.t0),Math.min(N-1,bisect(S.t1)));S.pinned=i;setCursor(D[i],true)}});
 
 /* ---------- events UI ---------- */
 function openEvent(e){showEventDialog(e)}
@@ -563,7 +560,6 @@ function showEventDialog(e){const dlg=$('#event-dialog');dlg.replaceChildren();
   const c=el('button','btn primary','Close');c.onclick=()=>dlg.close();const a=el('a','src','Source ↗');a.href=e.url;a.target='_blank';a.rel='noopener';row.append(c,z,a);
   dlg.append(eb,h,el('p',null,e.text),row);dlg.showModal();
   dlg.onclick=ev=>{if(ev.target===dlg)dlg.close()}}
-function drawEventList(){const ol=$('#event-list');ol.replaceChildren();for(const e of events){const li=el('li');const b=el('button','ev-chip'+(e.t>=S.t0&&e.t<=S.t1?' in':'')+(S.evOpen===e.id?' on':''));b.append(el('span',null,fmtMY(e.t)),document.createTextNode(e.name));b.onclick=()=>{if(e.t<S.t0||e.t>S.t1)setRange(e.t-18*30*DAY,e.t+18*30*DAY);showEventDialog(e)};li.append(b);ol.append(li)}}
 
 /* ---------- navigator (brush) ---------- */
 let navBuilt=false;
@@ -652,9 +648,9 @@ $('#replay').onclick=()=>{if(replaying)return;replaying=true;S.pinned=null;S.t0=
 function syncControls(){document.querySelectorAll('#ranges .chip').forEach(b=>{const c=rangeChips.find(c=>c.id===b.dataset.id),[a,z]=c.range();b.setAttribute('aria-pressed',Math.abs(a-S.t0)<DAY&&Math.abs(z-S.t1)<DAY)});
   document.querySelectorAll('[data-view]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.view===S.view));
   document.querySelectorAll('[data-scale]').forEach(b=>{b.setAttribute('aria-pressed',b.dataset.scale===S.scale);b.disabled=S.view==='split'&&b.dataset.scale==='log'});
-  $('#events-toggle').checked=S.events;$('#gdp-toggle').checked=S.gdp;
+  $('#gdp-toggle').checked=S.gdp;
   document.querySelectorAll('.ind-tab').forEach(b=>b.setAttribute('aria-selected',b.dataset.ind===S.ind))}
-function drawAll(){syncControls();drawMain();drawIndicators();drawNav();drawEventList()}
+function drawAll(){syncControls();drawMain();drawIndicators();drawNav()}
 drawAll();drawTerms();drawMilestones();
 let rt;new ResizeObserver(()=>{clearTimeout(rt);rt=setTimeout(()=>{fitClock();drawAll();drawTerms();drawMilestones()},60)}).observe($('.page'));
 })();
