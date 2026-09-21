@@ -32,6 +32,8 @@ A living record of the design principles and patterns we settle on while buildin
 - A personal beat belongs in a story when it is true and on the data: Luyen's uncle Wen Tsing Chow was the scientific advisor on the Saturn V/Apollo guidance computer, so he sits at the Apollo point on The Curve. Source it like any other fact. *(2026-09-20)*
 - Images on a public page need a license we can name: Wikimedia Commons CC files with attribution in the caption, U.S. government publications (public domain), or press images under their stated terms. A photo found on a blog is not usable until its origin is known. *(2026-09-20)*
 - Drama comes from the data and the framing, not from motion. A replay that draws the line through time is fine; decorative animation is not.
+- A plot with a time control may run itself once on first load, from the start of the record up to today, so the first thing a reader sees is the data moving. It stops at the present, never runs into projections on its own, yields to the first touch of the control, waits for a background tab to be looked at, and is skipped for readers with reduced motion. Drive it from the frame clock, not timers, so the pace holds. The Population Ledger is the first. *(2026-09-21)*
+- Diverging colour on maps: blue for the side a reader would call good (growth, immigration, fertility above replacement), red for the other, neutral grey at the line. Say which is which in words next to the legend. *(2026-09-21)*
 
 ## The landing cards
 
