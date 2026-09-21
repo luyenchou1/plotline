@@ -14,7 +14,7 @@
   --bg:#f1f4f2;--surface:#fbfcfb;--surface-2:#e9eeeb;--ink:#14201a;--ink-2:#4f5c55;--muted:#7f8a84;
   --grid:#e1e7e3;--axis:#c3cbc6;--border:rgba(20,32,26,.11);
   --accent:#1d7a4e;--accent-ink:#17643f;--accent-soft:rgba(29,122,78,.13);--gold:#8a6a24;
-  --neg:#2a78d6;--pos:#e34948;--mid:#e6e4de;--nodata:#dfe3e0;--sea:#f6f8f7;
+  --neg:#e34948;--pos:#2a78d6;--mid:#e6e4de;--nodata:#dfe3e0;--sea:#f6f8f7;
   --tip-bg:#14201a;--tip-ink:#f6f8f7;--tip-muted:#aab5ae;--focus:#1d7a4e;--shadow:0 6px 24px rgba(20,32,26,.10);
   --sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',sans-serif;--mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
 }
@@ -24,7 +24,7 @@
     --bg:#0e1311;--surface:#161c19;--surface-2:#1f2622;--ink:#eef3f0;--ink-2:#b6c1ba;--muted:#86918b;
     --grid:#242c28;--axis:#38423c;--border:rgba(255,255,255,.10);
     --accent:#4cc38a;--accent-ink:#6fd3a1;--accent-soft:rgba(76,195,138,.16);--gold:#d4b36a;
-    --neg:#3987e5;--pos:#e66767;--mid:#3a3f3c;--nodata:#222825;--sea:#12181500;
+    --neg:#e66767;--pos:#3987e5;--mid:#3a3f3c;--nodata:#222825;--sea:#12181500;
     --tip-bg:#eef3f0;--tip-ink:#14201a;--tip-muted:#5c6862;--focus:#4cc38a;--shadow:0 6px 24px rgba(0,0,0,.4);
   }
 }
@@ -33,7 +33,7 @@
   --bg:#0e1311;--surface:#161c19;--surface-2:#1f2622;--ink:#eef3f0;--ink-2:#b6c1ba;--muted:#86918b;
   --grid:#242c28;--axis:#38423c;--border:rgba(255,255,255,.10);
   --accent:#4cc38a;--accent-ink:#6fd3a1;--accent-soft:rgba(76,195,138,.16);--gold:#d4b36a;
-  --neg:#3987e5;--pos:#e66767;--mid:#3a3f3c;--nodata:#222825;--sea:#12181500;
+  --neg:#e66767;--pos:#3987e5;--mid:#3a3f3c;--nodata:#222825;--sea:#12181500;
   --tip-bg:#eef3f0;--tip-ink:#14201a;--tip-muted:#5c6862;--focus:#4cc38a;--shadow:0 6px 24px rgba(0,0,0,.4);
 }
 *{box-sizing:border-box}
@@ -211,13 +211,13 @@ const EX=project(180,0)[0],EY=-project(0,90)[1];
 let READY=false,DATA=null,GEO=null,byId=new Map(),world=null;
 const S={year:2024,metric:'growth',pinned:null,hover:null,playing:false};
 const METRICS={
-  growth:{label:'Growth rate',unit:'% per year',desc:'How fast the population is changing, births minus deaths plus net migration, as a share of the population. Blue is shrinking, red is growing.',kind:'div',scale:3,fmt:fmtPct,
+  growth:{label:'Growth rate',unit:'% per year',desc:'How fast the population is changing, births minus deaths plus net migration, as a share of the population. Blue is growing, red is shrinking.',kind:'div',scale:3,fmt:fmtPct,
     val:(L,i)=>(L.pop[i]&&L.pop[i-1])?(L.pop[i]-L.pop[i-1])/L.pop[i-1]*100:null},
-  natural:{label:'Births minus deaths',unit:'per 1,000 people',desc:'Natural change alone, with migration set aside: births minus deaths for every thousand people. Blue means more deaths than births.',kind:'div',scale:30,fmt:fmtRate,
+  natural:{label:'Births minus deaths',unit:'per 1,000 people',desc:'Natural change alone, with migration set aside: births minus deaths for every thousand people. Red means more deaths than births.',kind:'div',scale:30,fmt:fmtRate,
     val:(L,i)=>(L.pop[i]&&L.births[i]!=null&&L.deaths[i]!=null)?(L.births[i]-L.deaths[i])/L.pop[i]*1000:null},
-  migration:{label:'Net migration',unit:'per 1,000 people',desc:'Arrivals minus departures for every thousand people. Blue is net emigration, red is net immigration.',kind:'div',scale:15,fmt:fmtRate,
+  migration:{label:'Net migration',unit:'per 1,000 people',desc:'Arrivals minus departures for every thousand people. Blue is net immigration, red is net emigration.',kind:'div',scale:15,fmt:fmtRate,
     val:(L,i)=>(L.pop[i]&&L.mig[i]!=null)?L.mig[i]/L.pop[i]*1000:null},
-  tfr:{label:'Fertility',unit:'children per woman',desc:'Total fertility rate. Around 2.1 children per woman keeps a population level without migration; blue is below that line, red above it.',kind:'div',center:2.1,lo:0.7,hi:6,fmt:v=>v.toFixed(2),
+  tfr:{label:'Fertility',unit:'children per woman',desc:'Total fertility rate. Around 2.1 children per woman keeps a population level without migration; red is below that line, blue above it.',kind:'div',center:2.1,lo:0.7,hi:6,fmt:v=>v.toFixed(2),
     val:(L,i)=>L.tfr[i]==null?null:L.tfr[i]/100},
   age:{label:'Median age',unit:'years',desc:'Half the population is older than this, half younger. Darker is older.',kind:'seq',lo:15,hi:55,fmt:v=>v.toFixed(1),
     val:(L,i)=>L.age[i]==null?null:L.age[i]/10},
