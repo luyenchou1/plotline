@@ -39,9 +39,8 @@ a{color:var(--accent-ink)}
 .masthead{display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap;margin-bottom:40px}
 .wordmark{font-family:var(--mono);font-weight:500;font-size:18px;letter-spacing:-.01em;color:var(--ink);text-decoration:none;display:inline-flex;align-items:center;gap:9px}
 .logo{display:inline-block;vertical-align:-5px;overflow:visible}
-.logo .lg-frame{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.6}
-.logo .lg-exp{stroke:var(--muted);stroke-width:1;stroke-dasharray:2 2;opacity:.8}
-.logo .lg-curve{fill:none;stroke:var(--accent);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.logo .lg-tile{fill:var(--accent)}
+.logo .lg-curve{fill:none;stroke:var(--surface);stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
 .logo .lg-dot{fill:var(--event, var(--gold));stroke:var(--surface);stroke-width:1.3}
 .masthead span{font-size:13px;color:var(--muted)}
 .mast-right{display:flex;align-items:center;gap:14px}
@@ -84,7 +83,7 @@ a{color:var(--accent-ink)}
 <body>
 <div class="page">
   <header class="masthead">
-    <a class="wordmark" href="./" aria-label="Plotline home"><svg class="logo" viewBox="0 0 37 30" width="30" height="24" aria-hidden="true"><rect x="1.5" y="6.5" width="25" height="22" rx="5" class="lg-frame"/><line x1="6" y1="23" x2="22.5" y2="11" class="lg-exp"/><path d="M6 23 C 12 23, 15 20.5, 19 16 S 27.5 5.5, 32.5 3" class="lg-curve"/><circle cx="32.5" cy="3" r="3" class="lg-dot"/></svg>Plotline</a>
+    <a class="wordmark" href="./" aria-label="Plotline home"><svg class="logo" viewBox="0 0 37 30" width="30" height="24" aria-hidden="true"><rect x="1.5" y="6.5" width="25" height="22" rx="6" class="lg-tile"/><path d="M6 23 C 12 23, 15 20.5, 19 16 S 27.5 5.5, 32.5 3" class="lg-curve"/><circle cx="32.5" cy="3" r="3" class="lg-dot"/></svg>Plotline</a>
     <div class="mast-right"><span>Current events, drawn from the data</span><button class="icon-btn" id="theme" aria-label="Switch light or dark theme" title="Light / dark">◐</button></div>
   </header>
 
