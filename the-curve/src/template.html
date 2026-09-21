@@ -611,14 +611,14 @@ $('#replay').onclick=()=>{if(replaying)return;replaying=true;S.pinned=null;drawA
       const g=svgEl('g',{class:'grid'});const dec=Math.max(1,Math.ceil((lb-la)/7));for(let e=Math.ceil(la);e<=Math.floor(lb);e++){if(((e%dec)+dec)%dec)continue;const v=Math.pow(10,e);g.append(svgEl('line',{x1:m.l,x2:w-m.r,y1:y(v),y2:y(v)}));g.append(svgEl('text',{x:m.l-8,y:y(v)+4,'text-anchor':'end'},e===0?'1×':fmtPow(v)+'×'))}
       g.append(svgEl('line',{class:'base-line',x1:m.l,x2:w-m.r,y1:y(1),y2:y(1)}));g.append(svgEl('text',{class:'base-label',x:w-m.r-4,y:y(1)-4,'text-anchor':'end'},'2012 level'));if(BASE_T>t0&&BASE_T<t1)g.append(svgEl('line',{class:'base-line',x1:x(BASE_T),x2:x(BASE_T),y1:m.t,y2:h-m.b}));svg.append(g)}
     const ax=svgEl('g',{class:'axis-x'});for(const tk of xTicks(t0,t1,w-m.l-m.r)){ax.append(svgEl('text',{x:x(tk.t),y:h-m.b+16,'text-anchor':'middle'},tk.label))}ax.append(svgEl('line',{x1:m.l,x2:w-m.r,y1:h-m.b,y2:h-m.b,stroke:'var(--axis)'}));svg.append(ax);
-    const ends=[];
-    for(const k of layers){const l=L[k];const val=v=>mode==='linear'?v:idx(l,v);const lpk=(cur.lp&&cur.lp[k]!=null)?cur.lp[k]:prog;if(lpk<=0)continue;const tEnd=t0+(t1-t0)*lpk;
-      const pts=[];const ra=recAt(l,t0);if(ra)pts.push({t:t0,v:ra.v});for(const p of l.rec){if(p.t<=t0||p.t>tEnd)continue;pts.push({t:p.t,v:pts.length?pts[pts.length-1].v:p.v});pts.push(p)}const rb=recAt(l,tEnd);if(rb&&pts.length)pts.push({t:tEnd,v:rb.v});
+    const ends=[];const tEnd=t0+(t1-t0)*prog;
+    for(const k of layers){const l=L[k];const val=v=>mode==='linear'?v:idx(l,v);const lpk=(cur.lp&&cur.lp[k]!=null)?cur.lp[k]:prog;if(lpk<=0)continue;const tEndK=t0+(t1-t0)*lpk;
+      const pts=[];const ra=recAt(l,t0);if(ra)pts.push({t:t0,v:ra.v});for(const p of l.rec){if(p.t<=t0||p.t>tEndK)continue;pts.push({t:p.t,v:pts.length?pts[pts.length-1].v:p.v});pts.push(p)}const rb=recAt(l,tEndK);if(rb&&pts.length)pts.push({t:tEndK,v:rb.v});
       if(!pts.length)continue;const d=pts.map((p,i)=>(i?'L':'M')+x(p.t).toFixed(1)+','+y(val(p.v)).toFixed(1)).join('');
-      if(mode==='linear')svg.append(svgEl('path',{class:'st-area',d:d+`L${x(tEnd).toFixed(1)},${h-m.b}L${x(t0).toFixed(1)},${h-m.b}Z`}));
+      if(mode==='linear')svg.append(svgEl('path',{class:'st-area',d:d+`L${x(tEndK).toFixed(1)},${h-m.b}L${x(t0).toFixed(1)},${h-m.b}Z`}));
       svg.append(svgEl('path',{class:'st-line',d,style:'stroke:'+l.color}));
-      if(mode==='linear'){for(const p of l.rec){if(p.t<t0||p.t>tEnd)continue;svg.append(svgEl('circle',{class:'st-dot',cx:x(p.t),cy:y(p.v),r:3.2,fill:l.color}))}}
-      const last=pts[pts.length-1];ends.push({k,l,x:x(last.t),y:y(val(last.v)),name:rb?rb.name:'',v:rb?rb.v:0,tEnd})}
+      if(mode==='linear'){for(const p of l.rec){if(p.t<t0||p.t>tEndK)continue;svg.append(svgEl('circle',{class:'st-dot',cx:x(p.t),cy:y(p.v),r:3.2,fill:l.color}))}}
+      const last=pts[pts.length-1];ends.push({k,l,x:x(last.t),y:y(val(last.v)),name:rb?rb.name:'',v:rb?rb.v:0,tEnd:tEndK})}
     if(mode==='linear'&&ends.length){const e=ends[0];if(prog>0.05){const anchorEnd=e.x>w-m.r-170;svg.append(svgEl('text',{class:'st-label',x:anchorEnd?e.x-10:e.x+10,y:e.y-8,'text-anchor':anchorEnd?'end':'start'},e.name));svg.append(svgEl('text',{class:'st-sub',x:anchorEnd?e.x-10:e.x+10,y:e.y+8,'text-anchor':anchorEnd?'end':'start'},fmtCount(e.v)+' transistors · '+fmtY(recAt(L.transistors,e.tEnd).t)))}
       if(rec4004.t>=t0&&rec4004.t<=tEnd&&!apollo){svg.append(svgEl('text',{class:'st-sub',x:x(rec4004.t)+8,y:y(rec4004.v)-8},'Intel 4004 · 2,300 · 1971'))}}
     else{ends.sort((a,b)=>a.y-b.y);for(let i=1;i<ends.length;i++)if(ends[i].y-ends[i-1].y<14)ends[i].y=ends[i-1].y+14;for(const e of ends)svg.append(svgEl('text',{class:'st-end',x:e.x-6,y:e.y-7,'text-anchor':'end',style:'fill:'+e.l.color+(cur.hl&&cur.hl!==e.k?';opacity:.55':'')},e.l.short))}
