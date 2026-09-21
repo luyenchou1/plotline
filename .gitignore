@@ -1,3 +1,4 @@
 .DS_Store
 __pycache__/
 the-curve/src/raw/
+population/src/raw/

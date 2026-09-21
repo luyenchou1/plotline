@@ -23,6 +23,10 @@ jobs:
           python3 the-curve/build.py
           if [ -f the-tests/build.py ]; then python3 the-tests/build.py; fi
 
+      - name: Refresh The Population Ledger (UN WPP)
+        run: |
+          bash population/src/fetch.sh && python3 population/build.py
+
       - name: Refresh The National Debt (Treasury, FRED)
         run: |
           if [ -f national-debt/src/fetch.py ]; then

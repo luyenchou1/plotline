@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>The Population Ledger</title>
+<meta name="description" content="Every country's population ledger, births, deaths and migration, from 1950 to the UN's 2100 projection, on a world map you can scrub through time.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 37 30%27%3E%3Crect x=%271.5%27 y=%276.5%27 width=%2725%27 height=%2722%27 rx=%275%27 fill=%27%231d7a4e%27/%3E%3Cpath d=%27M6 23 C 12 23, 15 20.5, 19 16 S 27.5 5.5, 32.5 3%27 fill=%27none%27 stroke=%27%23ffffff%27 stroke-width=%273%27 stroke-linecap=%27round%27/%3E%3Ccircle cx=%2732.5%27 cy=%273%27 r=%273.4%27 fill=%27%238a6a24%27/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  color-scheme:light;
+  --bg:#f1f4f2;--surface:#fbfcfb;--surface-2:#e9eeeb;--ink:#14201a;--ink-2:#4f5c55;--muted:#7f8a84;
+  --grid:#e1e7e3;--axis:#c3cbc6;--border:rgba(20,32,26,.11);
+  --accent:#1d7a4e;--accent-ink:#17643f;--accent-soft:rgba(29,122,78,.13);--gold:#8a6a24;
+  --neg:#2a78d6;--pos:#e34948;--mid:#e6e4de;--nodata:#dfe3e0;--sea:#f6f8f7;
+  --tip-bg:#14201a;--tip-ink:#f6f8f7;--tip-muted:#aab5ae;--focus:#1d7a4e;--shadow:0 6px 24px rgba(20,32,26,.10);
+  --sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',sans-serif;--mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#0e1311;--surface:#161c19;--surface-2:#1f2622;--ink:#eef3f0;--ink-2:#b6c1ba;--muted:#86918b;
+    --grid:#242c28;--axis:#38423c;--border:rgba(255,255,255,.10);
+    --accent:#4cc38a;--accent-ink:#6fd3a1;--accent-soft:rgba(76,195,138,.16);--gold:#d4b36a;
+    --neg:#3987e5;--pos:#e66767;--mid:#3a3f3c;--nodata:#222825;--sea:#12181500;
+    --tip-bg:#eef3f0;--tip-ink:#14201a;--tip-muted:#5c6862;--focus:#4cc38a;--shadow:0 6px 24px rgba(0,0,0,.4);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0e1311;--surface:#161c19;--surface-2:#1f2622;--ink:#eef3f0;--ink-2:#b6c1ba;--muted:#86918b;
+  --grid:#242c28;--axis:#38423c;--border:rgba(255,255,255,.10);
+  --accent:#4cc38a;--accent-ink:#6fd3a1;--accent-soft:rgba(76,195,138,.16);--gold:#d4b36a;
+  --neg:#3987e5;--pos:#e66767;--mid:#3a3f3c;--nodata:#222825;--sea:#12181500;
+  --tip-bg:#eef3f0;--tip-ink:#14201a;--tip-muted:#5c6862;--focus:#4cc38a;--shadow:0 6px 24px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 var(--sans);-webkit-font-smoothing:antialiased}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:var(--accent-ink)}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.page{max-width:1180px;margin:0 auto;padding-block:20px 56px;padding-inline:clamp(16px,3vw,32px)}
+.site-nav{display:flex;align-items:baseline;gap:12px;margin-bottom:14px;font-size:12.5px;color:var(--muted)}
+.site-nav .updated{margin-left:auto;font-variant-numeric:tabular-nums}
+.site-nav .updated b{font-weight:500;color:var(--ink-2)}
+.site-nav a{font-family:var(--mono);font-weight:500;font-size:14px;color:var(--ink);text-decoration:none}
+.site-nav a.home{display:inline-flex;align-items:center;gap:9px}
+.site-nav a.home:hover .lg-tile{fill:var(--accent-ink)}
+.logo{display:inline-block;vertical-align:-5px;overflow:visible}
+.logo .lg-tile{fill:var(--accent)}
+.logo .lg-curve{fill:none;stroke:var(--surface);stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.logo .lg-dot{fill:var(--gold);stroke:var(--surface);stroke-width:1.3}
+.top{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:12px}
+.eyebrow{display:block;font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:500;margin-bottom:6px}
+h1{font-size:clamp(22px,2.6vw,28px);font-weight:600;letter-spacing:-.02em;margin:0;line-height:1.15}
+.top-right{display:flex;align-items:center;gap:14px;color:var(--ink-2);font-size:13px}
+.top-right b{color:var(--ink);font-weight:500}
+.icon-btn{width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:var(--surface);display:grid;place-items:center;font-size:15px;color:var(--ink-2)}
+.lede{max-width:70ch;font-size:15.5px;color:var(--ink-2);line-height:1.6;margin:0 0 16px}
+.lede b{color:var(--ink);font-weight:500}
+
+/* world ledger + year control */
+.hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;margin-bottom:12px}
+.ledger{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 16px 12px}
+.ledger .lab{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:500;display:flex;justify-content:space-between;gap:8px}
+.ledger .lab span{letter-spacing:0;text-transform:none;font-weight:400}
+.ledger table{width:100%;border-collapse:collapse;margin-top:6px;font-size:13.5px}
+.ledger td{padding:4px 0;border-bottom:1px solid var(--grid)}
+.ledger tr:last-child td{border-bottom:none}
+.ledger td.n{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:13px;white-space:nowrap}
+.ledger td.n.pos{color:var(--accent-ink)}.ledger td.n.neg{color:var(--pos)}
+.ledger tr.total td{font-weight:600;color:var(--ink)}
+.ledger td small{color:var(--muted);font-size:11.5px;margin-left:6px}
+.yearbox{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 16px 10px;display:flex;flex-direction:column;justify-content:center;gap:8px}
+.yearrow{display:flex;align-items:baseline;gap:12px}
+.yearrow .yr{font-family:var(--mono);font-size:clamp(30px,3.4vw,42px);font-weight:500;letter-spacing:-.01em;line-height:1}
+.yearrow .proj{font-size:11.5px;color:var(--gold);font-weight:600;letter-spacing:.08em;text-transform:uppercase}
+.yearrow .proj.hidden{display:none}
+.slider{position:relative;padding-top:6px}
+.slider input{width:100%;margin:0;accent-color:var(--accent)}
+.slider .marks{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);font-family:var(--mono);margin-top:2px}
+.slider .band{position:absolute;left:0;right:0;top:0;height:4px;border-radius:2px;background:linear-gradient(90deg,var(--accent-soft) 0 var(--split),rgba(138,106,36,.22) var(--split) 100%)}
+.yearctl{display:flex;gap:8px;align-items:center;font-size:12.5px;color:var(--muted)}
+.btn{border:1px solid var(--border);background:var(--surface);border-radius:8px;padding:5px 11px;font-size:12.5px;color:var(--ink)}
+.btn:hover{border-color:var(--axis)}
+
+/* map */
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 20px 14px;margin-bottom:16px}
+.panel-head{display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap;margin-bottom:8px}
+.panel h2{font-size:17px;font-weight:600;margin:0;letter-spacing:-.01em}
+.panel-head p{margin:0;color:var(--ink-2);font-size:13px;max-width:72ch}
+.controls{display:flex;justify-content:space-between;align-items:center;gap:10px 20px;flex-wrap:wrap;margin-bottom:8px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:1px solid var(--border);background:transparent;border-radius:999px;padding:4px 11px;font-size:12.5px;color:var(--ink-2);line-height:1.3}
+.chip:hover{border-color:var(--axis);color:var(--ink)}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.legend{display:flex;align-items:center;gap:10px;font-size:11.5px;color:var(--ink-2)}
+.legend .bar{width:180px;height:10px;border-radius:5px;border:1px solid var(--border)}
+.legend .mid{font-family:var(--mono);font-size:11px}
+.map-wrap{position:relative}
+svg{display:block;width:100%;overflow:visible}
+.country{stroke:var(--surface);stroke-width:.5;cursor:pointer;transition:fill .25s}
+.country:hover{stroke:var(--ink);stroke-width:1.2}
+.country.on{stroke:var(--ink);stroke-width:1.4}
+.country.nodata{fill:var(--nodata);cursor:default}
+.sphere{fill:var(--sea);stroke:var(--axis);stroke-width:.6}
+.tooltip{position:absolute;z-index:4;background:var(--tip-bg);color:var(--tip-ink);border-radius:10px;padding:10px 12px 9px;font-size:12.5px;line-height:1.45;pointer-events:none;box-shadow:var(--shadow);width:max-content;max-width:290px}
+.tooltip.pinned{pointer-events:auto}
+.tip-date{font-size:11px;color:var(--tip-muted);letter-spacing:.04em;text-transform:uppercase;font-weight:500;margin-bottom:4px;padding-right:20px}
+.tip-name{font-size:14px;font-weight:600;color:var(--tip-ink);margin:0 0 6px}
+.tip-row{display:flex;justify-content:space-between;gap:16px;align-items:baseline}
+.tip-row+.tip-row{margin-top:2px}
+.tip-row .k{color:var(--tip-muted)}
+.tip-row b{font-family:var(--mono);font-weight:500;font-variant-numeric:tabular-nums;color:var(--tip-ink);font-size:13px}
+.tip-row b.pos{color:#8fd4b0}.tip-row b.neg{color:#f0a3a3}
+:root[data-theme="dark"] .tip-row b.pos,:root:not([data-theme="light"]) .tip-row b.pos{color:#17643f}
+:root[data-theme="dark"] .tip-row b.neg,:root:not([data-theme="light"]) .tip-row b.neg{color:#b3212b}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .tip-row b.pos{color:#8fd4b0}:root:not([data-theme="dark"]) .tip-row b.neg{color:#f0a3a3}}
+.tip-close{position:absolute;right:6px;top:4px;background:none;border:none;color:var(--tip-muted);font-size:16px;line-height:1;padding:2px 5px}
+.tip-cue{margin-top:6px;font-size:11px;color:var(--tip-muted)}
+.hint{font-size:12px;color:var(--muted);margin-top:8px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+
+/* extremes */
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px 28px}
+.two h3{font-size:13px;font-weight:600;margin:0 0 4px;letter-spacing:.02em}
+.two table{width:100%;border-collapse:collapse;font-size:13px}
+.two td{padding:4px 0;border-bottom:1px solid var(--grid)}
+.two tr:last-child td{border-bottom:none}
+.two td.n{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.two td.n small{color:var(--muted);font-family:var(--sans);font-size:11px;margin-left:4px}
+.two td a{color:inherit;text-decoration:none;border-bottom:1px dotted var(--axis)}
+.note{font-size:12.5px;color:var(--muted);margin:10px 0 0;line-height:1.5}
+.foot{color:var(--ink-2);font-size:13px;line-height:1.6}
+.foot h2{font-size:15px;margin:0 0 6px;color:var(--ink)}
+.foot p{margin:0 0 10px;max-width:78ch}
+.loading{padding:60px 0;text-align:center;color:var(--muted);font-size:13px}
+@media (max-width:820px){.hero{grid-template-columns:1fr}.two{grid-template-columns:1fr}}
+@media (max-width:520px){.page{padding-block:16px 40px}.panel{padding:14px 12px 12px;border-radius:12px}.legend .bar{width:120px}}
+</style>
+</head>
+<body>
+<div class="page">
+<nav class="site-nav"><a class="home" href="../" aria-label="Plotline home" title="Plotline home"><svg class="logo" viewBox="0 0 37 30" width="30" height="24" aria-hidden="true"><rect x="1.5" y="6.5" width="25" height="22" rx="6" class="lg-tile"/><path d="M6 23 C 12 23, 15 20.5, 19 16 S 27.5 5.5, 32.5 3" class="lg-curve"/><circle cx="32.5" cy="3" r="3" class="lg-dot"/></svg>Plotline</a><span class="updated">Auto-updated <b id="updated"></b></span></nav>
+<header class="top">
+  <div><span class="eyebrow">Culture · people, by country · 1950 to 2100</span><h1>The Population Ledger</h1></div>
+  <div class="top-right"><span>UN estimates through <b id="asof"></b>, projections after</span><button class="icon-btn" id="theme" aria-label="Switch light or dark theme" title="Light / dark">◐</button></div>
+</header>
+
+<p class="lede">Two arguments run at the same time about the world's population: that there are far too many of us, and that the rich world is running out of people. Both sides quote the same United Nations tables. So here are the tables - <b>every country, every year since 1950, and the UN's projection to 2100</b> - drawn as a ledger of births, deaths and migration, so you can see which countries each side is looking at.</p>
+
+<section class="hero" aria-label="World ledger and year">
+  <div class="ledger" id="world-ledger"></div>
+  <div class="yearbox">
+    <div class="yearrow"><span class="yr" id="year-label">2024</span><span class="proj hidden" id="proj-label">UN projection · medium variant</span></div>
+    <div class="slider"><div class="band" id="band"></div><input type="range" id="year" min="1950" max="2100" value="2024" step="1" aria-label="Year"><div class="marks"><span>1950</span><span>1975</span><span>2000</span><span>2025</span><span>2050</span><span>2075</span><span>2100</span></div></div>
+    <div class="yearctl"><button class="btn" id="play">▶ Play</button><button class="btn" id="now">Latest estimate</button><span>Drag the slider or press play. Estimates through <span id="est-year"></span>, projections after.</span></div>
+  </div>
+</section>
+
+<section class="panel" aria-labelledby="map-h">
+  <div class="panel-head"><h2 id="map-h">Every country, one year at a time</h2><p id="map-desc"></p></div>
+  <div class="controls">
+    <div class="chips" id="metrics" role="group" aria-label="Map colouring"></div>
+    <div class="legend" id="legend"></div>
+  </div>
+  <div class="map-wrap"><svg id="map" role="img" aria-label="World map coloured by the chosen population measure"></svg><div class="tooltip" id="tip" hidden></div><div class="loading" id="loading">Loading the UN tables…</div></div>
+  <div class="hint"><span>Hover a country for its ledger · click to pin</span><span id="coverage"></span></div>
+</section>
+
+<section class="panel" aria-labelledby="ext-h">
+  <div class="panel-head"><h2 id="ext-h">The two ends of the table</h2><p id="ext-desc"></p></div>
+  <div class="two"><div><h3 id="ext-top-h"></h3><table id="ext-top"></table></div><div><h3 id="ext-bot-h"></h3><table id="ext-bot"></table></div></div>
+  <p class="note">Countries with at least one million people. Click a name to pin it on the map.</p>
+</section>
+
+<section class="foot" aria-labelledby="src-h">
+  <h2 id="src-h">Reading this page</h2>
+  <p>All figures are from the United Nations' <a href="https://population.un.org/wpp/" target="_blank" rel="noopener">World Population Prospects 2024</a>, medium variant: mid-year population, births, deaths and net migration for every country and area, estimated through <span id="est-year-2"></span> and projected to 2100. The UN revises the whole series every two years, and this page refreshes from the published files on a schedule; the stamp at the top is the last run.</p>
+  <p>The ledger balances by construction: last year's population plus births, minus deaths, plus net migration, gives this year's, with small differences from rounding and mid-year timing. Net migration is inflows minus outflows; the UN does not publish the two separately for every country. At the world level migration sums to zero, so the world's line is births minus deaths alone. Growth is the change in mid-year population from one year to the next. Fertility is the total fertility rate, the number of children a woman would have at that year's age-specific rates; about 2.1 keeps a population level without migration. Projections are the UN's medium variant, one of several scenarios; the further out, the wider the range around them.</p>
+</section>
+</div>
+
+<script>
+/*__DATA__*/
+(function(){
+'use strict';
+const $=s=>document.querySelector(s);
+const el=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!=null)n.textContent=text;return n};
+const svgEl=(tag,attrs,text)=>{const n=document.createElementNS('http://www.w3.org/2000/svg',tag);for(const k in attrs)n.setAttribute(k,attrs[k]);if(text!=null)n.textContent=text;return n};
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const fmtPeople=k=>{const v=k*1000;if(Math.abs(v)>=1e9)return (v/1e9).toFixed(Math.abs(v)>=1e10?1:2)+' billion';if(Math.abs(v)>=1e6)return (v/1e6).toFixed(Math.abs(v)>=1e7?0:1)+' million';return Math.round(v).toLocaleString('en-US')};
+const fmtSigned=k=>(k>0?'+':k<0?'−':'')+fmtPeople(Math.abs(k));
+const fmtPct=v=>(v>0?'+':v<0?'−':'')+Math.abs(v).toFixed(2)+'%';
+const fmtRate=v=>(v>0?'+':v<0?'−':'')+Math.abs(v).toFixed(1);
+const root=document.documentElement;
+try{const s=localStorage.getItem('plotline-theme');if(s)root.dataset.theme=s}catch(e){}
+$('#theme').onclick=()=>{const dark=getComputedStyle(root).colorScheme==='dark';root.dataset.theme=dark?'light':'dark';try{localStorage.setItem('plotline-theme',root.dataset.theme)}catch(e){}if(READY)drawAll()};
+
+/* ---------- Equal Earth projection (Šavrič, Patterson, Jenny 2018) ---------- */
+const A1=1.340264,A2=-0.081106,A3=0.000893,A4=0.003796,M=Math.sqrt(3)/2;
+function project(lon,lat){const l=lon*Math.PI/180,p=lat*Math.PI/180;const th=Math.asin(M*Math.sin(p)),t2=th*th,t6=t2*t2*t2;
+  const x=2*Math.sqrt(3)/3*l*Math.cos(th)/(A1+3*A2*t2+t6*(7*A3+9*A4*t2));const y=th*(A1+A2*t2+t6*(A3+A4*t2));return [x,-y]}
+const EX=project(180,0)[0],EY=-project(0,90)[1];
+
+/* ---------- state + data ---------- */
+let READY=false,DATA=null,GEO=null,byId=new Map(),world=null;
+const S={year:2024,metric:'growth',pinned:null,hover:null,playing:false};
+const METRICS={
+  growth:{label:'Growth rate',unit:'% per year',desc:'How fast the population is changing, births minus deaths plus net migration, as a share of the population. Blue is shrinking, red is growing.',kind:'div',scale:3,fmt:fmtPct,
+    val:(L,i)=>(L.pop[i]&&L.pop[i-1])?(L.pop[i]-L.pop[i-1])/L.pop[i-1]*100:null},
+  natural:{label:'Births minus deaths',unit:'per 1,000 people',desc:'Natural change alone, with migration set aside: births minus deaths for every thousand people. Blue means more deaths than births.',kind:'div',scale:30,fmt:fmtRate,
+    val:(L,i)=>(L.pop[i]&&L.births[i]!=null&&L.deaths[i]!=null)?(L.births[i]-L.deaths[i])/L.pop[i]*1000:null},
+  migration:{label:'Net migration',unit:'per 1,000 people',desc:'Arrivals minus departures for every thousand people. Blue is net emigration, red is net immigration.',kind:'div',scale:15,fmt:fmtRate,
+    val:(L,i)=>(L.pop[i]&&L.mig[i]!=null)?L.mig[i]/L.pop[i]*1000:null},
+  tfr:{label:'Fertility',unit:'children per woman',desc:'Total fertility rate. Around 2.1 children per woman keeps a population level without migration; blue is below that line, red above it.',kind:'div',center:2.1,lo:0.7,hi:6,fmt:v=>v.toFixed(2),
+    val:(L,i)=>L.tfr[i]==null?null:L.tfr[i]/100},
+  age:{label:'Median age',unit:'years',desc:'Half the population is older than this, half younger. Darker is older.',kind:'seq',lo:15,hi:55,fmt:v=>v.toFixed(1),
+    val:(L,i)=>L.age[i]==null?null:L.age[i]/10},
+};
+function mix(a,b,t){const pa=a.match(/\d+/g).map(Number),pb=b.match(/\d+/g).map(Number);return `rgb(${pa.map((v,i)=>Math.round(v+(pb[i]-v)*t)).join(',')})`}
+function css(v){return getComputedStyle(root).getPropertyValue(v).trim()}
+function toRgb(c){const d=document.createElement('div');d.style.color=c;document.body.append(d);const r=getComputedStyle(d).color;d.remove();return r}
+let PAL=null;function palette(){PAL={neg:toRgb(css('--neg')),pos:toRgb(css('--pos')),mid:toRgb(css('--mid')),lo:toRgb(css('--mid')),hi:toRgb(css('--accent-ink'))}}
+function color(m,v){if(v==null)return null;if(m.kind==='div'){const c=m.center||0,t=clamp(v<c?(v-c)/(c-(m.lo!=null?m.lo:c-m.scale)):(v-c)/((m.hi!=null?m.hi:c+m.scale)-c),-1,1);return t<0?mix(PAL.mid,PAL.neg,-t):mix(PAL.mid,PAL.pos,t)}const t=clamp((v-m.lo)/(m.hi-m.lo),0,1);return mix(PAL.lo,PAL.hi,t)}
+const yi=y=>y-1950;
+
+/* ---------- load ---------- */
+Promise.all([fetch('data.json').then(r=>r.json()),fetch('geo.json').then(r=>r.json())]).then(([d,g])=>{
+  DATA=d;GEO=g;for(const L of d.locations)byId.set(L.id,L);world=d.locations.find(L=>L.type==='world');
+  $('#updated').textContent=new Date(d.retrieved+'T12:00:00Z').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric',timeZone:'UTC'});
+  $('#asof').textContent=d.lastEstimate;$('#est-year').textContent=d.lastEstimate;$('#est-year-2').textContent=d.lastEstimate;
+  S.year=Math.min(2100,+d.retrieved.slice(0,4));$('#year').value=S.year;$('#loading').remove();READY=true;buildControls();drawAll();
+}).catch(e=>{$('#loading').textContent='The data could not be loaded: '+e.message});
+
+/* ---------- controls ---------- */
+function buildControls(){
+  const box=$('#metrics');for(const k in METRICS){const b=el('button','chip',METRICS[k].label);b.dataset.m=k;b.setAttribute('aria-pressed',k===S.metric);b.onclick=()=>{S.metric=k;drawAll()};box.append(b)}
+  const yr=$('#year');yr.oninput=()=>{S.year=+yr.value;drawAll()};
+  $('#now').onclick=()=>{S.year=DATA.lastEstimate;yr.value=S.year;drawAll()};
+  let timer=null;$('#play').onclick=()=>{if(S.playing){clearInterval(timer);S.playing=false;$('#play').textContent='▶ Play';return}S.playing=true;$('#play').textContent='❚❚ Pause';if(S.year>=2100)S.year=1950;timer=setInterval(()=>{S.year+=1;if(S.year>2100){clearInterval(timer);S.playing=false;$('#play').textContent='▶ Play';S.year=2100}yr.value=S.year;drawAll()},reduced?400:180)};
+  $('#band').style.setProperty('--split',((DATA.lastEstimate+1-1950)/150*100).toFixed(1)+'%');
+  document.addEventListener('keydown',e=>{if(e.target&&e.target.matches&&e.target.matches('input,button'))return;if(e.key==='Escape'){S.pinned=null;drawMap()}if(e.key==='ArrowRight'){S.year=Math.min(2100,S.year+1);yr.value=S.year;drawAll()}if(e.key==='ArrowLeft'){S.year=Math.max(1950,S.year-1);yr.value=S.year;drawAll()}});
+}
+
+/* ---------- world ledger ---------- */
+function drawLedger(){
+  const i=yi(S.year),W=world,box=$('#world-ledger');box.replaceChildren();
+  const lab=el('div','lab');lab.append(document.createTextNode('World ledger · '+S.year),el('span',null,S.year>DATA.lastEstimate?'UN projection':'UN estimate'));box.append(lab);
+  const t=el('table');
+  const row=(k,v,cls,small)=>{const tr=el('tr',cls||'');const a=el('td',null,k);if(small)a.append(el('small',null,small));const b=el('td','n'+(v&&v.cls?' '+v.cls:''),v&&v.text!=null?v.text:v);tr.append(a,b);t.append(tr)};
+  const prev=W.pop[i-1],pop=W.pop[i],b=W.births[i],d=W.deaths[i];
+  if(prev!=null)row('Population, '+(S.year-1),fmtPeople(prev));
+  if(b!=null)row('Births',{text:'+'+fmtPeople(b),cls:'pos'});
+  if(d!=null)row('Deaths',{text:'−'+fmtPeople(d),cls:'neg'});
+  row('Net migration','0','','the world has no elsewhere');
+  row('Population, '+S.year,fmtPeople(pop),'total');
+  const g=METRICS.growth.val(W,i);if(g!=null)row('Growth',{text:fmtPct(g)+' a year',cls:g>0?'pos':g<0?'neg':''});
+  box.append(t);
+  $('#year-label').textContent=S.year;$('#proj-label').classList.toggle('hidden',S.year<=DATA.lastEstimate);
+}
+
+/* ---------- map ---------- */
+let mapBuilt=false,pathById=new Map();
+function drawMap(){
+  const svg=$('#map'),w=svg.clientWidth||900,h=Math.round(w*0.52),m=6;
+  const sx=(w-2*m)/(2*EX),sy=(h-2*m)/(2*EY),sc=Math.min(sx,sy);const px=([x,y])=>[(w/2+x*sc).toFixed(1),(h/2+y*sc).toFixed(1)];
+  const M=METRICS[S.metric],i=yi(S.year);palette();
+  if(!mapBuilt||svg.dataset.w!==String(w)){svg.replaceChildren();svg.setAttribute('viewBox',`0 0 ${w} ${h}`);svg.setAttribute('height',h);svg.dataset.w=String(w);
+    // sphere outline
+    let d='';for(let k=0;k<=180;k++){const lat=-90+k;d+=(k?'L':'M')+px(project(-180,lat)).join(',')}for(let k=0;k<=180;k++){const lat=90-k;d+='L'+px(project(180,lat)).join(',')}svg.append(svgEl('path',{class:'sphere',d:d+'Z'}));
+    pathById=new Map();for(const f of GEO.features){const polys=f.geometry.type==='Polygon'?[f.geometry.coordinates]:f.geometry.coordinates;let d='';for(const poly of polys)for(const ring of poly){ring.forEach((c,k)=>{d+=(k?'L':'M')+px(project(c[0],c[1])).join(',')});d+='Z'}
+      const p=svgEl('path',{class:'country',d});p.dataset.id=f.id||'';p.dataset.name=f.properties.name;svg.append(p);if(f.id)pathById.set(f.id,p);
+      p.addEventListener('pointerenter',e=>{if(S.pinned)return;showTip(f.id,e)});p.addEventListener('pointermove',e=>{if(S.pinned)return;showTip(f.id,e)});p.addEventListener('pointerleave',()=>{if(!S.pinned)hideTip()});
+      p.addEventListener('click',e=>{if(!byId.has(f.id))return;if(S.pinned===f.id){S.pinned=null;hideTip();drawMap()}else{S.pinned=f.id;drawMap();showTip(f.id,e,true)}})}
+    mapBuilt=true}
+  let n=0;for(const [id,p] of pathById){const L=byId.get(id);const v=L?M.val(L,i):null;const c=color(M,v);if(c){p.style.fill=c;p.classList.remove('nodata');n++}else{p.style.fill='';p.classList.add('nodata')}p.classList.toggle('on',S.pinned===id)}
+  // legend
+  const lg=$('#legend');lg.replaceChildren();const bar=el('div','bar');
+  if(M.kind==='div'){const c=M.center||0;bar.style.background=`linear-gradient(90deg,${PAL.neg},${PAL.mid} 50%,${PAL.pos})`;lg.append(el('span',null,M.fmt(M.lo!=null?M.lo:c-M.scale)),bar,el('span',null,M.fmt(M.hi!=null?M.hi:c+M.scale)));const mid=el('span','mid',(M.center?'· '+M.fmt(M.center)+' = level':'· 0 = level'));lg.append(mid)}
+  else{bar.style.background=`linear-gradient(90deg,${PAL.lo},${PAL.hi})`;lg.append(el('span',null,M.fmt(M.lo)),bar,el('span',null,M.fmt(M.hi)))}
+  lg.append(el('span',null,M.unit));
+  $('#map-desc').textContent=M.desc;$('#coverage').textContent=n+' countries and areas coloured · '+(S.year>DATA.lastEstimate?'UN projection':'UN estimate');
+  document.querySelectorAll('#metrics .chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===S.metric));
+  if(S.pinned){const p=pathById.get(S.pinned);if(p)showTip(S.pinned,null,true)}
+}
+function showTip(id,e,pin=false){const L=byId.get(id);const tip=$('#tip');if(!L){hideTip();return}const i=yi(S.year);tip.hidden=false;tip.classList.toggle('pinned',pin);tip.replaceChildren();
+  if(pin){const c=el('button','tip-close','×');c.onclick=()=>{S.pinned=null;hideTip();drawMap()};tip.append(c)}
+  tip.append(el('div','tip-date',S.year+(S.year>DATA.lastEstimate?' · projection':'')),el('div','tip-name',L.name));
+  const row=(k,v,cls)=>{const r=el('div','tip-row');r.append(el('span','k',k));r.append(el('b',cls||'',v));tip.append(r)};
+  if(L.pop[i-1]!=null)row('Population, '+(S.year-1),fmtPeople(L.pop[i-1]));
+  if(L.births[i]!=null)row('Births','+'+fmtPeople(L.births[i]),'pos');if(L.deaths[i]!=null)row('Deaths','−'+fmtPeople(L.deaths[i]),'neg');
+  if(L.mig[i]!=null)row('Net migration',fmtSigned(L.mig[i]),L.mig[i]>0?'pos':L.mig[i]<0?'neg':'');
+  row('Population, '+S.year,fmtPeople(L.pop[i]));
+  const g=METRICS.growth.val(L,i);if(g!=null)row('Growth',fmtPct(g)+' a year',g>0?'pos':g<0?'neg':'');
+  if(L.tfr[i]!=null)row('Fertility',(L.tfr[i]/100).toFixed(2)+' per woman');if(L.age[i]!=null)row('Median age',(L.age[i]/10).toFixed(1));if(L.lex[i]!=null)row('Life expectancy',(L.lex[i]/10).toFixed(1));
+  if(!pin)tip.append(el('div','tip-cue','Click to pin'));
+  const wrap=$('.map-wrap').getBoundingClientRect();let x,y;if(e){x=e.clientX-wrap.left+14;y=e.clientY-wrap.top-10}else{const b=pathById.get(id).getBoundingClientRect();x=b.left+b.width/2-wrap.left+14;y=b.top+b.height/2-wrap.top}
+  const tw=tip.offsetWidth,th=tip.offsetHeight;if(x+tw>wrap.width-8)x=x-28-tw;tip.style.left=Math.max(0,x)+'px';tip.style.top=clamp(y-th/2,0,wrap.height-th)+'px'}
+function hideTip(){$('#tip').hidden=true}
+
+/* ---------- extremes ---------- */
+function drawExtremes(){
+  const M=METRICS[S.metric],i=yi(S.year);const rows=DATA.locations.filter(L=>L.type==='country'&&L.pop[i]>=1000&&pathById.has(L.id)).map(L=>({L,v:M.val(L,i)})).filter(r=>r.v!=null).sort((a,b)=>b.v-a.v);
+  const fill=(tbl,list)=>{tbl.replaceChildren();for(const r of list){const tr=el('tr');const a=el('td');const link=el('a',null,r.L.name);link.href='#';link.onclick=ev=>{ev.preventDefault();S.pinned=r.L.id;drawMap();$('#map').scrollIntoView({block:'center',behavior:reduced?'auto':'smooth'})};a.append(link);const n=el('td','n',M.fmt(r.v));n.append(el('small',null,fmtPeople(r.L.pop[i])));tr.append(a,n);tbl.append(tr)}};
+  fill($('#ext-top'),rows.slice(0,8));fill($('#ext-bot'),rows.slice(-8).reverse());
+  const hiWord={growth:'Fastest growing',natural:'Most births over deaths',migration:'Most net immigration',tfr:'Highest fertility',age:'Oldest'}[S.metric],loWord={growth:'Fastest shrinking',natural:'Most deaths over births',migration:'Most net emigration',tfr:'Lowest fertility',age:'Youngest'}[S.metric];
+  $('#ext-top-h').textContent=hiWord+' · '+S.year;$('#ext-bot-h').textContent=loWord+' · '+S.year;$('#ext-desc').textContent=M.label+', '+M.unit+'. Both ends of the same table for the year you chose.';
+}
+function drawAll(){drawLedger();drawMap();drawExtremes()}
+let rt;new ResizeObserver(()=>{if(!READY)return;clearTimeout(rt);rt=setTimeout(()=>{mapBuilt=false;drawMap()},80)}).observe($('.page'));
+})();
+</script>
+</body>
+</html>
