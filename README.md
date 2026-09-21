@@ -22,4 +22,4 @@ The landing page at the repo root lists the plots by hand; add a card when a plo
 
 ## Deploying
 
-Push to `main`. GitHub Pages serves the repo root. A weekly GitHub Action (`.github/workflows/refresh.yml`) re-fetches the data, rebuilds every plot and commits; each plot shows the run date as "Auto-updated". See `PRINCIPLES.md` for the design principles. A custom domain is a `CNAME` file at the root plus DNS.
+Push to `main`. GitHub Pages serves the repo root. A weekly GitHub Action (`.github/workflows/refresh.yml`) re-fetches the data, rebuilds every plot and commits; each plot shows the run date as "Auto-updated". See `PRINCIPLES.md` for the design principles and `ROADMAP.md` for what's next. A custom domain is a `CNAME` file at the root plus DNS.
