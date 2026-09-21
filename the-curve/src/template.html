@@ -458,25 +458,30 @@ function drawMain(){
   const svg=$('#main'),w=svg.clientWidth||800,mobile=w<640;
   const single=S.mode!=='indexed',logY=!single||S.scale==='log';
   // milestone strip under the axis: lay labels out in lanes first so the chart can reserve the space
-  const t0_=S.t0,t1_=S.t1,xs_=t=>(mobile?54:(logY?66:76))+(t-t0_)/(t1_-t0_)*(w-(mobile?54:(logY?66:76))-(mobile?14:20));
-  const msLanes=[],msPlaced=[];if(S.events)for(const e of events){if(e.t<t0_||e.t>t1_)continue;const px=xs_(e.t),width=e.name.length*7.2+12,anchorEnd=px+width>w-(mobile?14:20),left=anchorEnd?px-width:px,right=left+width;let lane=-1;for(let k=0;k<4;k++){if((msLanes[k]??-1e9)+8<=left){lane=k;break}}if(lane>=0){msLanes[lane]=right;msPlaced.push({e,lane,anchorEnd})}else msPlaced.push({e,lane:-1})}
+  const layoutMs=(ml,mr)=>{const t0_=S.t0,t1_=S.t1,xs_=t=>ml+(t-t0_)/(t1_-t0_)*(w-ml-mr);const lanes=[],placed=[];for(const e of events){if(e.t<t0_||e.t>t1_)continue;const px=xs_(e.t),width=e.name.length*7.2+12,anchorEnd=px+width>w-mr,left=anchorEnd?px-width:px,right=left+width;let lane=-1;for(let k=0;k<4;k++){if((lanes[k]??-1e9)+8<=left){lane=k;break}}if(lane>=0){lanes[lane]=right;placed.push({e,lane,anchorEnd})}else placed.push({e,lane:-1})}return {lanes,placed}};
+  let {lanes:msLanes,placed:msPlaced}=layoutMs(mobile?54:76,mobile?14:20);
   const stripH=S.events?(msLanes.length*14+14):0;const h=(mobile?360:520)+stripH;
-  const m={l:mobile?54:(logY?66:76),r:mobile?14:20,t:single?28:(mobile?24:28),b:30+stripH};
-  const t0=S.t0,t1=S.t1,span=t1-t0,x=t=>m.l+(t-t0)/span*(w-m.l-m.r);
+  const t0=S.t0,t1=S.t1,span=t1-t0;
   const layers=single?[L[S.mode]]:KEYS.map(k=>L[k]);
   const val=(l,v)=>single?v:idx(l,v);
   let lo=Infinity,hi=-Infinity;
   for(const l of layers){for(const p of (single?l.pts:l.rec)){if(p.t<t0||p.t>t1)continue;const v=val(l,p.v);if(v<lo)lo=v;if(v>hi)hi=v}
     const ra=recAt(l,t0);if(ra){const v=val(l,ra.v);if(v<lo)lo=v;if(v>hi)hi=v}const rb=recAt(l,t1);if(rb){const v=val(l,rb.v);if(v>hi)hi=v}}
   if(!isFinite(lo)){lo=1;hi=10}
-  let y,ticks=[];G={};
-  if(logY){let la=Math.log10(lo)-0.2,lb=Math.log10(hi)+0.3;if(lb-la<1){la-=0.5;lb+=0.5}y=v=>h-m.b-(Math.log10(v)-la)/(lb-la)*(h-m.b-m.t);const dec=Math.max(1,Math.ceil((lb-la)/(mobile?5:9)));for(let e=Math.ceil(la);e<=Math.floor(lb);e++){if(((e%dec)+dec)%dec)continue;ticks.push(Math.pow(10,e))}G.la=la;G.lb=lb}
-  else{const top=hi*1.06;y=v=>h-m.b-v/top*(h-m.b-m.t);const step=niceStep(top,mobile?4:6);for(let v=0;v<=top;v+=step)ticks.push(v);G.top=top}
+  let ticks=[];G={};
+  if(logY){let la=Math.log10(lo)-0.2,lb=Math.log10(hi)+0.3;if(lb-la<1){la-=0.5;lb+=0.5}const dec=Math.max(1,Math.ceil((lb-la)/(mobile?5:9)));for(let e=Math.ceil(la);e<=Math.floor(lb);e++){if(((e%dec)+dec)%dec)continue;ticks.push(Math.pow(10,e))}G.la=la;G.lb=lb}
+  else{const top=hi*1.06;const step=niceStep(top,mobile?4:6);for(let v=0;v<=top;v+=step)ticks.push(v);G.top=top}
+  const tickText=v=>logY?(single?fmtPow(v):(Math.round(Math.log10(v))===0?'1×':fmtPow(v)+'×')):(v===0?'0':fmtShort(v,layers[0].unit));
+  const widest=Math.max(...ticks.map(v=>tickText(v).length));
+  const m={l:Math.max(mobile?44:56,Math.round(widest*6.8)+26),r:mobile?14:20,t:single?28:(mobile?24:28),b:30+stripH};
+  const x=t=>m.l+(t-t0)/span*(w-m.l-m.r);
+  const y=logY?(v=>h-m.b-(Math.log10(v)-G.la)/(G.lb-G.la)*(h-m.b-m.t)):(v=>h-m.b-v/G.top*(h-m.b-m.t));
+  ({lanes:msLanes,placed:msPlaced}=layoutMs(m.l,m.r));
   Object.assign(G,{x,y,w,h,m,t0,t1,single,layers,mobile,logY});
   svg.setAttribute('viewBox',`0 0 ${w} ${h}`);svg.setAttribute('height',h);svg.replaceChildren();
   const defs=svgEl('defs',{});const cp=svgEl('clipPath',{id:'clip-main'});cp.append(svgEl('rect',{id:'clip-rect',x:m.l,y:0,width:w-m.l-m.r,height:h}));defs.append(cp);svg.append(defs);
   const grid=svgEl('g',{class:'grid'}),ay=svgEl('g',{class:'axis-y'});
-  for(const v of ticks){grid.append(svgEl('line',{x1:m.l,x2:w-m.r,y1:y(v),y2:y(v)}));const lab=logY?(single?fmtPow(v):(Math.round(Math.log10(v))===0?'1×':fmtPow(v)+'×')):(v===0?'0':fmtShort(v,layers[0].unit));ay.append(svgEl('text',{x:m.l-8,y:y(v)+4,'text-anchor':'end'},lab))}
+  for(const v of ticks){grid.append(svgEl('line',{x1:m.l,x2:w-m.r,y1:y(v),y2:y(v)}));ay.append(svgEl('text',{x:m.l-8,y:y(v)+4,'text-anchor':'end'},tickText(v)))}
   if(!single&&G.la<0&&G.lb>0){grid.append(svgEl('line',{class:'base-line',x1:m.l,x2:w-m.r,y1:y(1),y2:y(1)}));grid.append(svgEl('text',{class:'base-label',x:w-m.r-4,y:y(1)-4,'text-anchor':'end'},'2012 level'))}
   const title=single?layers[0].label+' ('+layers[0].unit+(logY?', log scale':'')+')':'× the 2012 record, log scale';
   ay.append(svgEl('text',{class:'axis-title',transform:`translate(${mobile?12:16},${(m.t+h-m.b)/2}) rotate(-90)`,'text-anchor':'middle'},title));
@@ -492,7 +497,7 @@ function drawMain(){
     const f=doubling(l,t0,t1);l.fitNow=f;
     if(f&&single){let d='';for(let i=0;i<=80;i++){const t=t0+span*i/80;const v=Math.pow(2,f.intercept+f.slope*(t/YEAR));if(logY&&v<Math.pow(10,G.la))continue;if(!logY&&v>G.top*1.02)break;d+=(d?'L':'M')+x(t).toFixed(1)+','+y(v).toFixed(1)}plot.append(svgEl('path',{class:'fitline',d,style:'stroke:'+l.color}))}
     if(rb&&!single)endLabels.push({y:y(val(l,rb.v))-6,text:l.short,color:l.color});
-    if(single){const slots=Math.max(4,Math.floor((w-m.l-m.r)/(mobile?110:95)));const gap=(w-m.l-m.r)/slots;let lastX=-1e9;const chosen=[];for(const p of recIn){const px=x(p.t);if(px-lastX<gap)continue;lastX=px;chosen.push(p)}if(recIn.length&&!chosen.includes(recIn[recIn.length-1])){chosen.pop();chosen.push(recIn[recIn.length-1])}
+    if(single){const slots=Math.max(4,Math.floor((w-m.l-m.r)/(mobile?110:95)));const gap=(w-m.l-m.r)/slots;let lastX=-1e9,lastW=0;const chosen=[];for(const p of recIn){const px=x(p.t),py=y(p.v);if(h-m.b-py<16)continue;if(px-lastX<Math.max(gap,lastW+10))continue;lastX=px;lastW=p.name.length*6.2;chosen.push(p)}const lastRec=recIn[recIn.length-1];if(lastRec&&!chosen.includes(lastRec)&&h-m.b-y(lastRec.v)>=16){if(chosen.length&&x(lastRec.t)-x(chosen[chosen.length-1].t)<Math.max(gap,lastW+10))chosen.pop();chosen.push(lastRec)}
       for(const p of chosen){const px=x(p.t),py=y(p.v);const rightSide=px>m.l+(w-m.l-m.r)*0.62;const tx=rightSide?px-9:px+9,ty=rightSide?py+4:py-9;labelsG.append(svgEl('text',{class:'pt-label',x:tx,y:ty,'text-anchor':rightSide?'end':'start'},p.name))}}
   }
   svg.append(plot);svg.append(labelsG);
