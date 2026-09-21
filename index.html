@@ -6,7 +6,7 @@
 <title>Plotline</title>
 <meta name="description" content="Current events, drawn from the data. Interactive visualizers built from primary sources.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 34 22%27%3E%3Cpath d=%27M3 17 C 10 17, 13.5 15.5, 17.5 12 S 25 5.5, 28 3.5%27 fill=%27none%27 stroke=%27%231d7a4e%27 stroke-width=%273%27 stroke-linecap=%27round%27/%3E%3Ccircle cx=%2728%27 cy=%273.5%27 r=%273.2%27 fill=%27%238a6a24%27/%3E%3C/svg%3E">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 37 30%27%3E%3Crect x=%271.5%27 y=%276.5%27 width=%2725%27 height=%2722%27 rx=%275%27 fill=%27%231d7a4e%27/%3E%3Cpath d=%27M6 23 C 12 23, 15 20.5, 19 16 S 27.5 5.5, 32.5 3%27 fill=%27none%27 stroke=%27%23ffffff%27 stroke-width=%273%27 stroke-linecap=%27round%27/%3E%3Ccircle cx=%2732.5%27 cy=%273%27 r=%273.4%27 fill=%27%238a6a24%27/%3E%3C/svg%3E">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
 :root{
@@ -38,11 +38,11 @@ a{color:var(--accent-ink)}
 .page{max-width:960px;margin:0 auto;padding-block:28px 64px;padding-inline:clamp(16px,3vw,32px)}
 .masthead{display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap;margin-bottom:40px}
 .wordmark{font-family:var(--mono);font-weight:500;font-size:18px;letter-spacing:-.01em;color:var(--ink);text-decoration:none;display:inline-flex;align-items:center;gap:9px}
-.logo{display:inline-block;vertical-align:-4px;overflow:visible}
-.logo .lg-base{stroke:var(--axis);stroke-width:1}
+.logo{display:inline-block;vertical-align:-5px;overflow:visible}
+.logo .lg-frame{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.6}
 .logo .lg-exp{stroke:var(--muted);stroke-width:1;stroke-dasharray:2 2;opacity:.8}
-.logo .lg-curve{fill:none;stroke:var(--accent);stroke-width:2.3;stroke-linecap:round;stroke-linejoin:round}
-.logo .lg-dot{fill:var(--event, var(--gold));stroke:var(--surface);stroke-width:1.2}
+.logo .lg-curve{fill:none;stroke:var(--accent);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.logo .lg-dot{fill:var(--event, var(--gold));stroke:var(--surface);stroke-width:1.3}
 .masthead span{font-size:13px;color:var(--muted)}
 .mast-right{display:flex;align-items:center;gap:14px}
 .icon-btn{width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:var(--surface);display:grid;place-items:center;font-size:15px;color:var(--ink-2);cursor:pointer;font:inherit}
@@ -84,7 +84,7 @@ a{color:var(--accent-ink)}
 <body>
 <div class="page">
   <header class="masthead">
-    <a class="wordmark" href="./" aria-label="Plotline home"><svg class="logo" viewBox="0 0 34 22" width="34" height="22" aria-hidden="true"><line x1="1.5" y1="20" x2="32.5" y2="20" class="lg-base"/><line x1="3" y1="17" x2="28" y2="3.5" class="lg-exp"/><path d="M3 17 C 10 17, 13.5 15.5, 17.5 12 S 25 5.5, 28 3.5" class="lg-curve"/><circle cx="28" cy="3.5" r="2.7" class="lg-dot"/></svg>Plotline</a>
+    <a class="wordmark" href="./" aria-label="Plotline home"><svg class="logo" viewBox="0 0 37 30" width="30" height="24" aria-hidden="true"><rect x="1.5" y="6.5" width="25" height="22" rx="5" class="lg-frame"/><line x1="6" y1="23" x2="22.5" y2="11" class="lg-exp"/><path d="M6 23 C 12 23, 15 20.5, 19 16 S 27.5 5.5, 32.5 3" class="lg-curve"/><circle cx="32.5" cy="3" r="3" class="lg-dot"/></svg>Plotline</a>
     <div class="mast-right"><span>Current events, drawn from the data</span><button class="icon-btn" id="theme" aria-label="Switch light or dark theme" title="Light / dark">◐</button></div>
   </header>
 
