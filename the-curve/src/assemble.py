@@ -55,7 +55,9 @@ for t,kind in zip(tables[:2],['cpu','gpu']):
         if len(row)<4: continue
         c=num(row[1]); y=year(row[2])
         if not c or not y: continue
-        chips.append({'name':short_chip(clean(row[0])),'full':clean(row[0]),'count':c,'year':y,'designer':clean(row[3]),'kind':kind})
+        full=clean(row[0])
+        if re.search(r'\b\d+-chip\b',full) and 'module' not in full.lower(): continue   # chipsets counted across several chips
+        chips.append({'name':short_chip(full),'full':full,'count':c,'year':y,'designer':clean(row[3]),'kind':kind})
 chips.sort(key=lambda r:(r['year'],r['count']))
 # frontier per year (max count that year across both kinds), plus keep every chip for hover
 out['transistors']={'chips':chips,'note':'Per-chip transistor counts from public specifications as compiled on Wikipedia "Transistor count" (CPUs/SoCs and GPUs); the frontier line follows the highest count released each year.'}
