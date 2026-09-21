@@ -44,11 +44,52 @@ def ring(arcs):
         if pts and pts[-1]==seg[0]: seg=seg[1:]
         pts+=seg
     return pts
+def unwrap(pts):
+    """Walk a ring keeping each longitude step under 180 degrees, so a ring that Natural Earth closes across the
+    antimeridian (Russia's Chukotka tip, Wrangel Island, Fiji's Vanua Levu) becomes continuous, running past 180."""
+    out=[pts[0][:]]; off=0.0
+    for k in range(1,len(pts)):
+        lon=pts[k][0]+off; prev=out[-1][0]
+        if lon-prev>180: off-=360; lon-=360
+        elif prev-lon>180: off+=360; lon+=360
+        out.append([lon,pts[k][1]])
+    return out
+def clip(ring,X,keep_left):
+    """Sutherland-Hodgman clip of a ring against the vertical line lon=X; keep the side asked for."""
+    inside=(lambda p:p[0]<=X) if keep_left else (lambda p:p[0]>=X)
+    def inter(p,q):
+        t=(X-p[0])/(q[0]-p[0]); return [X,p[1]+(q[1]-p[1])*t]
+    out=[]
+    for i in range(len(ring)):
+        p,q=ring[i-1],ring[i]; pin,qin=inside(p),inside(q)
+        if qin:
+            if not pin: out.append(inter(p,q))
+            out.append(q)
+        elif pin: out.append(inter(p,q))
+    return out if len(out)>=4 else None
+def polygons(rings):
+    """Decode one polygon (outer ring + holes) into one or two GeoJSON polygons within [-180, 180]."""
+    rs=[unwrap(ring(r)) for r in rings]
+    lo=min(q[0] for r in rs for q in r); hi=max(q[0] for r in rs for q in r)
+    if hi-lo>=350:                                     # Antarctica: spans the whole width, leave it
+        return [[[[round(max(-180.0,min(180.0,q[0])),2),q[1]] for q in r] for r in rs]]
+    if hi>180 or lo<-180:
+        X=180.0 if hi>180 else -180.0; shift=-360.0 if hi>180 else 360.0
+        a=[clip(r,X,True) if X>0 else clip(r,X,False) for r in rs]
+        b=[clip(r,X,False) if X>0 else clip(r,X,True) for r in rs]
+        b=[[[q[0]+shift,q[1]] for q in r] for r in b if r]
+        a=[r for r in a if r]
+        outp=[]
+        for poly in (a,b):
+            if poly: outp.append([[[round(max(-180.0,min(180.0,q[0])),2),round(q[1],2)] for q in r] for r in poly])
+        return outp
+    return [[[[round(q[0],2),q[1]] for q in r] for r in rs]]
 feats=[]
 for g in topo['objects']['countries']['geometries']:
     gid=str(int(g['id'])) if g.get('id') else None; name=g['properties']['name']
-    if g['type']=='Polygon': coords=[ring(r) for r in g['arcs']]; geom={'type':'Polygon','coordinates':coords}
-    else: coords=[[ring(r) for r in poly] for poly in g['arcs']]; geom={'type':'MultiPolygon','coordinates':coords}
+    polys=[g['arcs']] if g['type']=='Polygon' else g['arcs']
+    coords=[q for poly in polys for q in polygons(poly)]
+    geom={'type':'Polygon','coordinates':coords[0]} if len(coords)==1 else {'type':'MultiPolygon','coordinates':coords}
     feats.append({'type':'Feature','id':gid,'properties':{'name':name},'geometry':geom})
 json.dump({'type':'FeatureCollection','features':feats},open(root/'geo.json','w'),separators=(',',':'))
 countries=[l for l in out['locations'] if l['type']=='country']
