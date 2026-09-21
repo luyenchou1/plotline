@@ -146,7 +146,8 @@ svg text{font-family:var(--sans);font-size:11.5px;fill:var(--muted)}
 .ev-dot{fill:var(--surface);stroke:var(--event);stroke-width:2;cursor:pointer}
 .ev-dot:hover,.ev-dot.on{fill:var(--event)}
 .ev-label{font-size:11px;fill:var(--event);cursor:pointer}
-.ev-label:hover{text-decoration:underline}
+.ev-label:hover,.ev-label.on{text-decoration:underline;fill:var(--event)}
+.ev-line.on{opacity:.9;stroke-dasharray:none}
 .ms-dot{fill:var(--debt);stroke:var(--surface);stroke-width:1.5}
 .ms-label{font-size:10.5px;fill:var(--debt-ink);font-weight:500;font-variant-numeric:tabular-nums}
 .axis-note{font-size:10.5px;fill:var(--muted);font-style:italic}
@@ -404,8 +405,12 @@ function xTicks(t0,t1,w){const months=[1,2,3,6,12,24,60,120],target=Math.max(3,M
 
 /* ---------- main chart ---------- */
 function drawMain(){
-  const svg=$('#main'),w=svg.clientWidth||800,mobile=w<640,h=mobile?300:400;
-  const m={l:mobile?50:62,r:mobile?12:18,t:mobile?46:52,b:26};
+  const svg=$('#main'),w=svg.clientWidth||800,mobile=w<640;
+  // milestone strip under the axis: lay labels out in lanes first so the chart can reserve the space
+  const ml_=mobile?50:62,mr_=mobile?12:18,xs_=t=>ml_+(t-S.t0)/(S.t1-S.t0)*(w-ml_-mr_);
+  const msLanes=[],msPlaced=[];for(const e of events){if(e.t<S.t0||e.t>S.t1)continue;const px=xs_(e.t),width=e.name.length*6.4+10,anchorEnd=px+width>w-mr_,left=anchorEnd?px-width:px,right=left+width;let lane=-1;for(let k=0;k<4;k++){if((msLanes[k]??-1e9)+8<=left){lane=k;break}}if(lane>=0){msLanes[lane]=right;msPlaced.push({e,lane,anchorEnd})}else msPlaced.push({e,lane:-1})}
+  const stripH=msLanes.length*14+14;const h=(mobile?300:400)+stripH;
+  const m={l:ml_,r:mr_,t:mobile?34:40,b:26+stripH};
   const t0=S.t0,t1=S.t1,span=t1-t0;
   const i0=Math.max(0,bisect(t0)-1),i1=Math.min(N-1,bisect(t1)+1),vis=D.slice(i0,i1+1);
   const x=t=>m.l+(t-t0)/span*(w-m.l-m.r);
@@ -466,12 +471,11 @@ function drawMain(){
   hit.addEventListener('click',e=>{const d=nearest(clamp(tAt(e),t0,t1));if(S.pinned===d.i){S.pinned=null;clearCursor()}else{S.pinned=d.i;setCursor(d,true)}});
   // events
   const evg=svgEl('g',{class:'events-layer'});
-  if(S.events){const lanes=[];const inRange=events.filter(e=>e.t>=t0&&e.t<=t1);
-    for(const e of inRange){const px=x(e.t),d=nearest(e.t),py=y(d.v);
-      evg.append(svgEl('line',{class:'ev-line',x1:px,x2:px,y1:m.t,y2:h-m.b}));
-      const width=e.name.length*6.2+8,anchorEnd=px+width>w-m.r,left=anchorEnd?px-width:px,right=left+width;let lane=-1;for(let k=0;k<3;k++){if((lanes[k]??-1e9)+8<=left){lane=k;break}}
-      if(lane>=0){lanes[lane]=right;const tx=svgEl('text',{class:'ev-label',x:anchorEnd?px-5:px+5,y:m.t+12+lane*14,'text-anchor':anchorEnd?'end':'start'},e.name);tx.onclick=()=>showEventDialog(e);evg.append(tx)}
-      const dot=svgEl('circle',{class:'ev-dot'+(S.evOpen===e.id?' on':''),cx:px,cy:py,r:mobile?3.5:5});dot.setAttribute('aria-label',e.name+' · '+fmtDate(e.t));dot.onclick=ev=>{ev.stopPropagation();showEventDialog(e)};evg.append(dot)}
+  if(S.events){for(const {e,lane,anchorEnd} of msPlaced){const px=x(e.t),d=nearest(e.t),py=y(d.v);
+      const vline=svgEl('line',{class:'ev-line',x1:px,x2:px,y1:m.t,y2:h-m.b});evg.append(vline);
+      const dot=svgEl('circle',{class:'ev-dot'+(S.evOpen===e.id?' on':''),cx:px,cy:py,r:mobile?3.5:5});dot.setAttribute('aria-label',e.name+' · '+fmtDate(e.t));dot.onclick=ev=>{ev.stopPropagation();showEventDialog(e)};evg.append(dot);
+      if(lane>=0){const tx=svgEl('text',{class:'ev-label',x:anchorEnd?px-4:px+4,y:h-m.b+30+lane*14,'text-anchor':anchorEnd?'end':'start'},e.name);tx.onclick=()=>showEventDialog(e);
+        const link=on=>{dot.classList.toggle('on',on);tx.classList.toggle('on',on);vline.classList.toggle('on',on)};tx.onpointerenter=()=>link(true);tx.onpointerleave=()=>link(false);dot.onpointerenter=()=>link(true);dot.onpointerleave=()=>link(false);evg.append(tx)}}
   }
   svg.append(evg);
   svg.append(svgEl('g',{id:'cursor-main','pointer-events':'none'}));
