@@ -22,7 +22,8 @@ card = {'kind': 'crossover',
         'a': [[X(y), round(0.15 + 0.75 * (v - spmin) / (spmax - spmin), 4)] for y, v in sp],
         'b': [[X(y), round(0.15 + 0.75 * (v - 260) / 30, 4)] for y, v in m8],
         'cross': None,
-        'figure': f'{round(m8_2000)} → {round(m8_last)}', 'label': f'8th-grade math score, 2000 and {m8[-1][0]}, while real spending per pupil rose',
+        'figure': (f"{round(d['naep']['mathematics8_prof'][-1][1])}%" if d['naep'].get('mathematics8_prof') else f'{round(m8_2000)} → {round(m8_last)}'),
+        'label': (f"of 8th graders proficient in math, {d['naep']['mathematics8_prof'][-1][0]}, after a third more real spending per pupil since 2000" if d['naep'].get('mathematics8_prof') else f'8th-grade math score, 2000 and {m8[-1][0]}, while real spending per pupil rose'),
         'updated': d['retrieved']}
 json.dump(card, open(root/'card.json', 'w'), separators=(',', ':'))
 print('index.html', len(out.encode())//1024, 'KB; through', naep_through, pisa_through, '; card', card['figure'])

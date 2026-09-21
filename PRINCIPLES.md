@@ -50,7 +50,7 @@ A living record of the design principles and patterns we settle on while buildin
 
 ## Themes
 
-- Plots are grouped by theme: Economy, Technology, Politics, Culture, Warfare. Each theme has a color (Economy green, Technology blue, Politics red, Culture purple, Warfare rust, validated for both themes) used sparingly on the landing cards: the kicker, the sparkline and the top edge, never the whole card. Themes appear as card kickers now; a visual grouping (a map view rather than a Venn diagram) is planned once there are enough plots to warrant it. *(2026-09-20)*
+- Plots are grouped by theme: Economy, Technology, Politics, Culture, Warfare, Education. Each theme has a color (Economy green, Technology blue, Politics red, Culture purple, Warfare rust, Education teal, validated for both themes) used sparingly on the landing cards: the kicker, the sparkline and the top edge, never the whole card. Themes appear as card kickers now; a visual grouping (a map view rather than a Venn diagram) is planned once there are enough plots to warrant it. *(2026-09-20)* Education became its own theme rather than a corner of Culture, since it is Luyen's own field and will carry several plots. *(2026-09-21)*
 
 ## Voice
 

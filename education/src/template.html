@@ -14,7 +14,7 @@
   --bg:#f1f4f2;--surface:#fbfcfb;--surface-2:#e9eeeb;--ink:#14201a;--ink-2:#4f5c55;--muted:#7f8a84;
   --grid:#e1e7e3;--axis:#c3cbc6;--border:rgba(20,32,26,.11);
   --accent:#1d7a4e;--accent-ink:#17643f;--accent-soft:rgba(29,122,78,.13);--event:#8a6a24;
-  --line-faint:rgba(20,32,26,.13);--line-oecd:rgba(20,32,26,.28);--blue:#2a78d6;
+  --line-faint:rgba(20,32,26,.13);--line-oecd:rgba(20,32,26,.28);--blue:#2a78d6;--red:#d0393e;
   --tip-bg:#14201a;--tip-ink:#f6f8f7;--tip-muted:#aab5ae;--focus:#1d7a4e;--shadow:0 6px 24px rgba(20,32,26,.10);
   --sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',sans-serif;--mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
 }
@@ -24,7 +24,7 @@
     --bg:#0e1311;--surface:#161c19;--surface-2:#1f2622;--ink:#eef3f0;--ink-2:#b6c1ba;--muted:#86918b;
     --grid:#242c28;--axis:#38423c;--border:rgba(255,255,255,.10);
     --accent:#4cc38a;--accent-ink:#6fd3a1;--accent-soft:rgba(76,195,138,.16);--event:#d4b36a;
-    --line-faint:rgba(238,243,240,.13);--line-oecd:rgba(238,243,240,.30);--blue:#5aa0f2;
+    --line-faint:rgba(238,243,240,.13);--line-oecd:rgba(238,243,240,.30);--blue:#5aa0f2;--red:#ef6b70;
     --tip-bg:#eef3f0;--tip-ink:#14201a;--tip-muted:#5c6862;--focus:#4cc38a;--shadow:0 6px 24px rgba(0,0,0,.4);
   }
 }
@@ -33,7 +33,7 @@
   --bg:#0e1311;--surface:#161c19;--surface-2:#1f2622;--ink:#eef3f0;--ink-2:#b6c1ba;--muted:#86918b;
   --grid:#242c28;--axis:#38423c;--border:rgba(255,255,255,.10);
   --accent:#4cc38a;--accent-ink:#6fd3a1;--accent-soft:rgba(76,195,138,.16);--event:#d4b36a;
-  --line-faint:rgba(238,243,240,.13);--line-oecd:rgba(238,243,240,.30);--blue:#5aa0f2;
+  --line-faint:rgba(238,243,240,.13);--line-oecd:rgba(238,243,240,.30);--blue:#5aa0f2;--red:#ef6b70;
   --tip-bg:#eef3f0;--tip-ink:#14201a;--tip-muted:#5c6862;--focus:#4cc38a;--shadow:0 6px 24px rgba(0,0,0,.4);
 }
 *{box-sizing:border-box}
@@ -73,7 +73,7 @@ h1{font-size:clamp(22px,2.6vw,28px);font-weight:600;letter-spacing:-.02em;margin
 
 /* panels */
 .panel{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 20px 12px;margin-bottom:14px}
-.panel-head{display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap;margin-bottom:6px}
+.panel-head{display:flex;flex-direction:column;align-items:flex-start;gap:4px;margin-bottom:8px}
 .panel h2{font-size:17px;font-weight:600;margin:0;letter-spacing:-.01em}
 .panel-head p{margin:0;color:var(--ink-2);font-size:13px;max-width:78ch}
 .panel .explain{margin:0 0 10px;color:var(--ink-2);font-size:13.5px;line-height:1.55;max-width:90ch}
@@ -88,6 +88,8 @@ h1{font-size:clamp(22px,2.6vw,28px);font-weight:600;letter-spacing:-.02em;margin
 .legend i.oecd{border-top:2px dashed var(--ink)}
 .legend i.faint{border-top:1.5px solid var(--line-oecd)}
 .legend i.pick{border-top:2.5px solid var(--blue)}
+.legend i.gain{border-top:2px solid var(--blue)}
+.legend i.loss{border-top:2px solid var(--red)}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:16px 26px}
 .chart-wrap{position:relative}
 svg{display:block;width:100%;overflow:visible}
@@ -102,6 +104,9 @@ svg{display:block;width:100%;overflow:visible}
 .ln.faint{stroke:var(--line-faint);stroke-width:1.2}
 .ln.member{stroke:var(--line-oecd);stroke-width:1.2}
 .ln.pick{stroke:var(--blue);stroke-width:2.4}
+.ln.gain{stroke:var(--blue);stroke-width:1.6;opacity:.75}
+.ln.loss{stroke:var(--red);stroke-width:1.6;opacity:.75}
+.ln.dim{stroke:var(--line-faint);stroke-width:1}
 .ln.hit{stroke:transparent;stroke-width:12;cursor:pointer}
 .dot{fill:var(--accent);stroke:var(--surface);stroke-width:1.5}
 .dot.g4{opacity:.6}
@@ -127,6 +132,9 @@ svg{display:block;width:100%;overflow:visible}
 .tip-row .k{color:var(--tip-muted)}
 .tip-row b{font-family:var(--mono);font-weight:500;font-variant-numeric:tabular-nums}
 .tip-cue{margin-top:5px;font-size:11px;color:var(--tip-muted)}
+.tooltip.mini{padding:6px 10px 5px}
+.tooltip.mini .tip-head{margin:0 0 1px;font-size:13px}
+.tooltip.mini .tip-row{font-size:12px}
 .tip-close{position:absolute;right:6px;top:4px;background:none;border:none;color:var(--tip-muted);font-size:16px;line-height:1;padding:2px 5px}
 .hint{font-size:12px;color:var(--muted);margin-top:6px}
 .event-dialog{border:1px solid var(--border);border-left:4px solid var(--event);border-radius:12px;background:var(--surface);color:var(--ink);padding:20px 24px 18px;max-width:min(560px,calc(100vw - 32px));box-shadow:var(--shadow)}
@@ -145,11 +153,12 @@ table.rank{width:100%;border-collapse:collapse;font-size:13px}
 table.rank td{padding:4px 0;border-bottom:1px solid var(--grid);vertical-align:baseline}
 table.rank tr:last-child td{border-bottom:none}
 table.rank td.n{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
-table.rank td.r{color:var(--muted);width:2.4em;font-family:var(--mono);font-size:12px}
+table.rank td.r{color:var(--muted);font-family:var(--mono);font-size:12px;padding-right:12px;white-space:nowrap}
 table.rank tr.us td{color:var(--accent-ink);font-weight:600}
 table.rank tr.gap td{color:var(--muted);text-align:center;padding:2px 0;font-size:11px;letter-spacing:.2em}
 table.rank a{color:inherit;text-decoration:none;border-bottom:1px dotted var(--axis);cursor:pointer}
-.bars{display:grid;grid-template-columns:auto 1fr auto;gap:5px 10px;align-items:center;font-size:12.5px}
+.bars{display:grid;grid-template-columns:auto auto 1fr auto;gap:5px 10px;align-items:center;font-size:12.5px}
+.bars .r{color:var(--muted);font-family:var(--mono);font-size:12px}
 .bars .nm{white-space:nowrap}
 .bars .bar{height:10px;border-radius:3px;background:var(--line-oecd)}
 .bars .bar.us{background:var(--accent)}
@@ -167,7 +176,7 @@ h3.sub{font-size:13px;font-weight:600;margin:0 0 4px}
 <div class="page">
 <nav class="site-nav"><a class="home" href="../" aria-label="Plotline home" title="Plotline home"><svg class="logo" viewBox="0 0 37 30" width="30" height="24" aria-hidden="true"><rect x="1.5" y="6.5" width="25" height="22" rx="6" class="lg-tile"/><path d="M6 23 C 12 23, 15 20.5, 19 16 S 27.5 5.5, 32.5 3" class="lg-curve"/><circle cx="32.5" cy="3" r="3" class="lg-dot"/></svg>Plotline</a><span class="updated">Auto-updated <b id="updated"></b></span></nav>
 <header class="top">
-  <div><span class="eyebrow">Culture · American schools · 1990 to today</span><h1>The Report Card</h1></div>
+  <div><span class="eyebrow">Education · American schools · 1990 to today</span><h1>The Report Card</h1></div>
   <div class="top-right"><span>NAEP through <b id="naep-through"></b> · PISA through <b id="pisa-through"></b></span><button class="icon-btn" id="theme" aria-label="Switch light or dark theme" title="Light / dark">◐</button></div>
 </header>
 
@@ -175,12 +184,12 @@ h3.sub{font-size:13px;font-weight:600;margin:0 0 4px}
 
 <section class="marks" aria-label="Three numbers">
   <div class="mark"><div class="lab">Spending per pupil, real terms</div><div class="big" id="m1"></div><div class="sub" id="m1s"></div></div>
-  <div class="mark"><div class="lab">8th-grade math, the nation's own test</div><div class="big flat" id="m2"></div><div class="sub" id="m2s"></div></div>
+  <div class="mark"><div class="lab">8th graders proficient in math</div><div class="big flat" id="m2"></div><div class="sub" id="m2s"></div></div>
   <div class="mark"><div class="lab">Against the rich world</div><div class="big" id="m3"></div><div class="sub" id="m3s"></div></div>
 </section>
 
 <section class="panel" aria-labelledby="naep-h">
-  <div class="panel-head"><h2 id="naep-h">The nation's own test</h2><p>NAEP, the National Assessment of Educational Progress, is the one test given the same way to a national sample of students since 1990. Scores run from 0 to 500; a ten-point move is about a year of learning.</p></div>
+  <div class="panel-head"><h2 id="naep-h">The nation's own test</h2><p>NAEP, the National Assessment of Educational Progress, is the national test: the one assessment given the same way to a national sample of students since 1990, and the benchmark for how U.S. student performance is tracked over time and read against students in other countries. Scores run from 0 to 500; a ten-point move is about a year of learning. The tooltips also give the share of students at or above the Proficient standard.</p></div>
   <p class="explain" id="naep-explain"></p>
   <div class="two">
     <div><h3 class="sub">Mathematics</h3><div class="chart-wrap"><svg id="naep-math" role="img" aria-label="NAEP mathematics, grades 4 and 8, 1990 to today"></svg><div class="tooltip" id="tip-naep-math" hidden></div></div></div>
@@ -194,13 +203,14 @@ h3.sub{font-size:13px;font-weight:600;margin:0 0 4px}
   <p class="explain" id="pisa-explain"></p>
   <div class="controls">
     <div class="chips" id="subjects" role="group" aria-label="Subject"></div>
-    <div class="legend"><span><i></i>United States</span><span><i class="oecd"></i>OECD average</span><span><i class="faint"></i>Other OECD members</span><span><i class="pick"></i>Picked country</span></div>
+    <div class="chips" id="views" role="group" aria-label="Highlight"></div>
+    <div class="legend" id="pisa-legend"></div>
   </div>
   <div class="two" style="grid-template-columns:minmax(0,2.1fr) minmax(0,1fr)">
     <div class="chart-wrap"><svg id="pisa" role="img" aria-label="PISA mean scores by country"></svg><div class="tooltip" id="tip-pisa" hidden></div></div>
     <div><h3 class="sub" id="rank-h"></h3><table class="rank" id="rank"></table></div>
   </div>
-  <div class="hint">Hover a line for its scores · click to keep it · click a country in the table to pick it</div>
+  <div class="hint">Hover a line for the country and its change over the period · click to keep it · click a country in the table to pick it</div>
 </section>
 
 <section class="panel" aria-labelledby="spend-h">
@@ -239,7 +249,7 @@ const root=document.documentElement;
 try{const s=localStorage.getItem('plotline-theme');if(s)root.dataset.theme=s}catch(e){}
 $('#theme').onclick=()=>{const dark=getComputedStyle(root).colorScheme==='dark';root.dataset.theme=dark?'light':'dark';try{localStorage.setItem('plotline-theme',root.dataset.theme)}catch(e){}};
 const MS=DATA.milestones.map(m=>({...m,t:+m.date.slice(0,4)+(+m.date.slice(5,7)-1)/12+(+m.date.slice(8,10)-1)/365}));
-const S={subject:'math',pick:null,pinned:false,pisaThrough:null};
+const S={subject:'math',pick:null,pinned:false,pisaThrough:null,view:'all'};
 const lastOf=a=>a[a.length-1];
 
 /* ---------- headline numbers ---------- */
@@ -254,50 +264,52 @@ const spendPct=Math.round((spLast[1]/sp2000[1]-1)*100);
 $('#updated').textContent=new Date(DATA.retrieved+'T12:00:00Z').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric',timeZone:'UTC'});
 $('#naep-through').textContent=m8_last[0];$('#pisa-through').textContent=pisaLastYear;
 $('#m1').textContent='+'+spendPct+'%';$('#m1s').textContent=`${sy(sp2000[0])} to ${sy(spLast[0])}, per pupil, constant ${DATA.spend.base} dollars: $${fmtN(sp2000[1])} to $${fmtN(spLast[1])}.`;
-$('#m2').textContent=`${Math.round(m8_2000[1])} → ${Math.round(m8_last[1])}`;$('#m2s').textContent=`NAEP scale score, ${m8_2000[0]} and ${m8_last[0]}. It reached ${Math.round(m8_peak[1])} in ${m8_peak[0]}, then gave it all back.`;
+const prof=DATA.naep.mathematics8_prof||[];const pr2000=prof.find(r=>r[0]===2000),prLast=lastOf(prof),prPeak=prof.length?prof.reduce((a,b)=>b[1]>a[1]?b:a):null;
+if(prof.length&&pr2000){$('#m2').textContent=`${Math.round(prLast[1])}%`;$('#m2s').textContent=`At or above NAEP's Proficient standard in ${prLast[0]}. It was ${Math.round(pr2000[1])}% in 2000 and ${Math.round(prPeak[1])}% at the peak in ${prPeak[0]}.`}
+else{$('#m2').textContent=`${Math.round(m8_2000[1])} → ${Math.round(m8_last[1])}`;$('#m2s').textContent=`NAEP scale score, ${m8_2000[0]} and ${m8_last[0]}. It reached ${Math.round(m8_peak[1])} in ${m8_peak[0]}, then gave it all back.`}
 $('#m3').textContent=`${ord(rk.us)} of ${rk.n}`;$('#m3s').textContent=`U.S. rank among OECD countries in PISA mathematics, ${pisaLastYear}: ${fmt1(usM.find(s=>s[0]===pisaLastYear)[1])} against an OECD average of ${fmt1(oaM.find(s=>s[0]===pisaLastYear)[1])}.`;
 const lede=$('#lede');lede.replaceChildren();
-lede.append(`Every few years a new set of test scores lands and the argument starts again: the schools are failing, or the tests are wrong, or the money never arrived. I wanted the three numbers on one page. Since the turn of the century the country has raised what it spends per public-school pupil by about `,Object.assign(el('b'),{textContent:`a third in real terms`}),`. Over the same years the nation's own 8th-grade math score climbed for a decade, then fell back to `,Object.assign(el('b'),{textContent:`exactly where it started`}),`. And against the rest of the rich world, American 15-year-olds sit ${third(rk)} in math and ${third(rkR)} in reading. Spending, scores, and the world: here they are, and they update as each new round arrives.`);
+lede.append(`Much has been written in the last few decades about the academic performance of U.S. students. For comparison with the rest of the developed world, the OECD's PISA test is considered the gold standard for assessing mathematics, reading and science proficiency among school students across OECD countries. The graphs below explore the change in U.S. student proficiency over the last ${m8_last[0]-1990} years against major historical events and the trend lines of students from other countries. Since the turn of the century the U.S. has raised per-pupil spending in its public schools by about `,Object.assign(el('b'),{textContent:`a third in real terms`}),`. Over the same years the nation's own 8th-grade math score climbed for a decade, then fell back to `,Object.assign(el('b'),{textContent:`exactly where it started`}),`. Against other OECD nations, American 15-year-olds sit ${third(rk)} in math and ${third(rkR)} in reading.`);
 
 /* ---------- shared drawing bits ---------- */
 function frame(svg,w,h,m,x0,x1,y0,y1){const x=v=>m.l+(v-x0)/(x1-x0)*(w-m.l-m.r),y=v=>h-m.b-(v-y0)/(y1-y0)*(h-m.t-m.b);return {x,y}}
 function milestones(svg,x,h,m,w,t0,t1,lanes){const g=svgEl('g',{class:'ms'});svg.append(g);const evs=MS.filter(e=>e.t>=t0&&e.t<=t1);const placed=[[],[],[],[]];
   for(const e of evs){const px=x(e.t);const line=svgEl('line',{class:'ms-line',x1:px,x2:px,y1:m.t,y2:h-m.b});g.append(line);const tick=svgEl('path',{class:'ms-tick',d:`M${px},${h-m.b+2} l4,5 l-4,5 l-4,-5 Z`});tick.onclick=()=>showEvent(e);g.append(tick);
     if(!lanes){tick.setAttribute('aria-label',e.name);continue}
-    const tx=svgEl('text',{class:'ms-label',x:px,y:h-m.b+24,'text-anchor':'middle'},e.name);g.append(tx);
+    const tx=svgEl('text',{class:'ms-label',x:px,y:h-m.b+38,'text-anchor':'middle'},e.name);g.append(tx);
     // measure the real label, clamp it inside the plot, then take the first lane where it does not touch a placed label
     const tw=tx.getBBox().width||e.name.length*6.5;const cx=clamp(px,m.l+tw/2,w-m.r-tw/2);const a=cx-tw/2-5,b=cx+tw/2+5;
     let lane=0;while(lane<3&&placed[lane].some(([pa,pb])=>a<pb&&pa<b))lane++;placed[lane].push([a,b]);
-    tx.setAttribute('x',cx);tx.setAttribute('y',h-m.b+24+lane*14);tx.onclick=()=>showEvent(e);
+    tx.setAttribute('x',cx);tx.setAttribute('y',h-m.b+38+lane*15);tx.onclick=()=>showEvent(e);
     const link=on=>{tick.classList.toggle('on',on);tx.classList.toggle('on',on);line.classList.toggle('on',on)};tx.onpointerenter=()=>link(true);tx.onpointerleave=()=>link(false);tick.onpointerenter=()=>link(true);tick.onpointerleave=()=>link(false)}}
 function showEvent(e){const dlg=$('#event-dialog');dlg.replaceChildren();const eb=el('div','eyebrow');eb.append(el('span','tag','Milestone'),document.createTextNode(fmtDate(e.date)));const h=el('h3',null,e.title);h.id='ev-dlg-title';const row=el('div','row');const c=el('button','btn primary','Close');c.onclick=()=>dlg.close();const a=el('a','src','Source ↗');a.href=e.url;a.target='_blank';a.rel='noopener';row.append(c,a);dlg.append(eb,h,el('p',null,e.text),row);dlg.showModal()}
 function placeTip(tip,wrap,px,py){const tw=tip.offsetWidth,th=tip.offsetHeight;let left=px+14;if(left+tw>wrap.clientWidth-4)left=px-14-tw;tip.style.left=Math.max(0,left)+'px';tip.style.top=clamp(py-th/2,0,Math.max(0,wrap.clientHeight-th))+'px'}
 
 /* ---------- NAEP ---------- */
-function drawNaep(id,g8,g4,label){const svg=$('#'+id);svg.replaceChildren();const w=svg.clientWidth||520,h=Math.round(Math.max(220,w*0.5)),m={l:40,r:34,t:14,b:52};svg.setAttribute('viewBox',`0 0 ${w} ${h}`);svg.setAttribute('height',h);
+function drawNaep(id,g8,g4,label,keys){const svg=$('#'+id);svg.replaceChildren();const w=svg.clientWidth||520,h=Math.round(Math.max(240,w*0.52)),m={l:40,r:34,t:14,b:86};svg.setAttribute('viewBox',`0 0 ${w} ${h}`);svg.setAttribute('height',h);
   const x0=1989,x1=Math.max(lastOf(g8)[0],lastOf(g4)[0])+1,y0=200,y1=300;const {x,y}=frame(svg,w,h,m,x0,x1,y0,y1);
   for(let v=y0;v<=y1;v+=20){svg.append(svgEl('line',{class:'grid',x1:m.l,x2:w-m.r,y1:y(v),y2:y(v)}));svg.append(svgEl('text',{class:'tick',x:m.l-6,y:y(v)+4,'text-anchor':'end'},v))}
   for(let yr=1990;yr<=x1;yr+=5)svg.append(svgEl('text',{class:'tick',x:x(yr),y:h-m.b+14,'text-anchor':'middle'},yr));
   svg.append(svgEl('line',{class:'axis',x1:m.l,x2:w-m.r,y1:h-m.b,y2:h-m.b}));
   milestones(svg,x,h,m,w,x0,x1,true);
   const tip=$('#tip-'+id),wrap=svg.parentElement;
-  const series=[['g8',g8,'Grade 8'],['g4',g4,'Grade 4']];
-  for(const [cls,pts,name] of series){const d=pts.map((p,i)=>(i?'L':'M')+x(p[0]).toFixed(1)+','+y(p[1]).toFixed(1)).join('');svg.append(svgEl('path',{class:'ln '+(cls==='g8'?'us':'g4'),d}));
+  const series=[['g8',g8,'Grade 8',keys[0]],['g4',g4,'Grade 4',keys[1]]];
+  for(const [cls,pts,name,key] of series){const d=pts.map((p,i)=>(i?'L':'M')+x(p[0]).toFixed(1)+','+y(p[1]).toFixed(1)).join('');svg.append(svgEl('path',{class:'ln '+(cls==='g8'?'us':'g4'),d}));
     for(const p of pts){const c=svgEl('circle',{class:'dot '+(cls==='g4'?'g4':''),cx:x(p[0]),cy:y(p[1]),r:3.2});svg.append(c);const hit=svgEl('circle',{cx:x(p[0]),cy:y(p[1]),r:9,fill:'transparent'});hit.style.cursor='default';
-      hit.onpointerenter=()=>{tip.hidden=false;tip.replaceChildren(el('div','tip-head',`${name} ${label}, ${p[0]}`));const r=el('div','tip-row');r.append(el('span','k','Mean score'),el('b',null,fmt1(p[1])));tip.append(r);const first=pts[0];const r2=el('div','tip-row');r2.append(el('span','k','Since '+first[0]),el('b',null,(p[1]-first[1]>=0?'+':'−')+fmt1(Math.abs(p[1]-first[1]))));tip.append(r2);const b=svg.getBoundingClientRect(),wb=wrap.getBoundingClientRect();placeTip(tip,wrap,x(p[0])*(b.width/w)+b.left-wb.left,y(p[1])*(b.height/h)+b.top-wb.top)};hit.onpointerleave=()=>{tip.hidden=true};svg.append(hit)}
+      hit.onpointerenter=()=>{tip.hidden=false;tip.replaceChildren(el('div','tip-head',`${name} ${label}, ${p[0]}`));const r=el('div','tip-row');r.append(el('span','k','Mean score'),el('b',null,fmt1(p[1])));tip.append(r);const first=pts[0];const r2=el('div','tip-row');r2.append(el('span','k','Since '+first[0]),el('b',null,(p[1]-first[1]>=0?'+':'−')+fmt1(Math.abs(p[1]-first[1]))));tip.append(r2);const pf=(DATA.naep[key+'_prof']||[]).find(r=>r[0]===p[0]);if(pf){const r3=el('div','tip-row');r3.append(el('span','k','At or above Proficient'),el('b',null,Math.round(pf[1])+'%'));tip.append(r3)}const b=svg.getBoundingClientRect(),wb=wrap.getBoundingClientRect();placeTip(tip,wrap,x(p[0])*(b.width/w)+b.left-wb.left,y(p[1])*(b.height/h)+b.top-wb.top)};hit.onpointerleave=()=>{tip.hidden=true};svg.append(hit)}
     const first=pts[0],last=lastOf(pts),peak=pts.reduce((a,b)=>b[1]>a[1]?b:a);
     svg.append(svgEl('text',{class:'lab val',x:x(last[0])+7,y:y(last[1])+4},Math.round(last[1])));
     svg.append(svgEl('text',{class:'lab val',x:x(first[0])-6,y:y(first[1])+4,'text-anchor':'end'},Math.round(first[1])));
     if(peak[0]!==last[0]&&peak[0]!==first[0])svg.append(svgEl('text',{class:'lab val',x:x(peak[0]),y:y(peak[1])-9,'text-anchor':'middle'},Math.round(peak[1])+' · '+peak[0]));
   }
 }
-function drawNaepAll(){drawNaep('naep-math',DATA.naep.mathematics8,DATA.naep.mathematics4,'math');drawNaep('naep-reading',DATA.naep.reading8,DATA.naep.reading4,'reading');
+function drawNaepAll(){drawNaep('naep-math',DATA.naep.mathematics8,DATA.naep.mathematics4,'math',['mathematics8','mathematics4']);drawNaep('naep-reading',DATA.naep.reading8,DATA.naep.reading4,'reading',['reading8','reading4']);
   const r8=DATA.naep.reading8,r8f=r8[0],r8l=lastOf(r8),r8p=r8.reduce((a,b)=>b[1]>a[1]?b:a);const m4=DATA.naep.mathematics4,m4f=m4[0],m4l=lastOf(m4),m4p=m4.reduce((a,b)=>b[1]>a[1]?b:a);
   $('#naep-explain').replaceChildren(`Math rose steadily from 1990, the years of state standards and then No Child Left Behind, and peaked in ${m8_peak[0]}: `,Object.assign(el('b'),{textContent:`${Math.round(m8_peak[1])} in 8th grade, ${Math.round(m4p[1])} in 4th`}),`. It drifted down after that and dropped hard in 2022, the first result after the closures. Reading never moved much: 8th grade was ${Math.round(r8f[1])} in ${r8f[0]}, ${Math.round(r8p[1])} at its best in ${r8p[0]}, and `,Object.assign(el('b'),{textContent:`${Math.round(r8l[1])} in ${r8l[0]}`}),`, the lowest since the test began. The latest 8th-grade math score of ${Math.round(m8_last[1])} is the ${m8_2000[1]<=m8_last[1]?'same as':'below'} the score of ${m8_2000[0]}.`)}
 
 /* ---------- PISA ---------- */
 const PICK_DEFAULT={math:['Singapore','Japan','Estonia'],reading:['Singapore','Ireland','Japan'],science:['Singapore','Japan','Estonia']};
-function drawPisa(){const subject=S.subject,D=DATA.pisa[subject];const svg=$('#pisa');svg.replaceChildren();const w=svg.clientWidth||700,h=Math.round(Math.max(300,w*0.5)),m={l:40,r:112,t:14,b:52};svg.setAttribute('viewBox',`0 0 ${w} ${h}`);svg.setAttribute('height',h);
+function drawPisa(){const subject=S.subject,D=DATA.pisa[subject];const svg=$('#pisa');svg.replaceChildren();const w=svg.clientWidth||700,h=Math.round(Math.max(320,w*0.52)),m={l:40,r:112,t:14,b:86};svg.setAttribute('viewBox',`0 0 ${w} ${h}`);svg.setAttribute('height',h);
   const years=[...new Set(Object.values(D).flatMap(e=>e.scores.map(s=>s[0])))].sort();const yLast=lastOf(years);
   const x0=years[0]-1,x1=yLast+1,y0=340,y1=600;const {x,y}=frame(svg,w,h,m,x0,x1,y0,y1);
   for(let v=y0+20;v<=y1;v+=40){svg.append(svgEl('line',{class:'grid',x1:m.l,x2:w-m.r,y1:y(v),y2:y(v)}));svg.append(svgEl('text',{class:'tick',x:m.l-6,y:y(v)+4,'text-anchor':'end'},v))}
@@ -307,15 +319,21 @@ function drawPisa(){const subject=S.subject,D=DATA.pisa[subject];const svg=$('#p
   const tip=$('#tip-pisa'),wrap=svg.parentElement;
   const path=pts=>pts.map((p,i)=>(i?'L':'M')+x(p[0]).toFixed(1)+','+y(p[1]).toFixed(1)).join('');
   const entries=Object.entries(D).filter(([n,e])=>e.scores.length>=2||n==='United States');
+  const change=e=>lastOf(e.scores)[1]-e.scores[0][1];
   const order=n=>n==='United States'?3:n==='OECD average'?2:n===S.pick?4:D[n].oecd?1:0;
   entries.sort((a,b)=>order(a[0])-order(b[0]));
   const labels=[];
-  for(const [name,e] of entries){const cls=name==='United States'?'us':name==='OECD average'?'oecd':name===S.pick?'pick':e.oecd?'member':'faint';
+  for(const [name,e] of entries){let cls=name==='United States'?'us':name==='OECD average'?'oecd':name===S.pick?'pick':e.oecd?'member':'faint';
+    if(S.view!=='all'&&cls!=='us'&&cls!=='oecd'&&cls!=='pick'){const ch=change(e);cls=(S.view==='gain'&&ch>0)||(S.view==='loss'&&ch<0)?(ch>0?'gain':'loss'):'dim'}
     const p=svgEl('path',{class:'ln '+cls,d:path(e.scores)});svg.append(p);
     if(cls==='us'||cls==='oecd'||cls==='pick')for(const s of e.scores)svg.append(svgEl('circle',{class:'dot '+cls,cx:x(s[0]),cy:y(s[1]),r:3}));
     const hit=svgEl('path',{class:'ln hit',d:path(e.scores)});
-    const show=(ev,pin)=>{tip.hidden=false;tip.classList.toggle('pinned',pin);tip.replaceChildren();if(pin){const c=el('button','tip-close','×');c.onclick=()=>{S.pinned=false;tip.hidden=true};tip.append(c)}tip.append(el('div','tip-head',name+(e.oecd?'':name==='OECD average'?'':' · not an OECD member')));for(const s of e.scores){const r=el('div','tip-row');r.append(el('span','k',s[0]),el('b',null,fmt1(s[1])));tip.append(r)}if(!pin)tip.append(el('div','tip-cue','Click to keep'));const wb=wrap.getBoundingClientRect();placeTip(tip,wrap,ev.clientX-wb.left,ev.clientY-wb.top);p.style.strokeWidth=cls==='faint'||cls==='member'?2.4:'';p.style.stroke=cls==='faint'||cls==='member'?'var(--ink)':''};
-    hit.onpointerenter=ev=>{if(!S.pinned)show(ev,false)};hit.onpointermove=ev=>{if(!S.pinned)show(ev,false)};hit.onpointerleave=()=>{if(!S.pinned){tip.hidden=true;p.style.strokeWidth='';p.style.stroke=''}};hit.onclick=ev=>{S.pinned=true;show(ev,true)};svg.append(hit);
+    const show=(ev,pin)=>{tip.hidden=false;tip.classList.add('mini');tip.classList.toggle('pinned',pin);tip.replaceChildren();if(pin){const c=el('button','tip-close','×');c.onclick=()=>{S.pinned=false;tip.hidden=true};tip.append(c)}
+      const f=e.scores[0],l=lastOf(e.scores),ch=l[1]-f[1];tip.append(el('div','tip-head',name+(e.oecd||name==='OECD average'?'':' · not in the OECD')));
+      const r=el('div','tip-row');r.append(el('span','k',`${f[0]} → ${l[0]}`),el('b',null,`${fmt1(f[1])} → ${fmt1(l[1])}`));tip.append(r);
+      const r2=el('div','tip-row');r2.append(el('span','k','Change'),el('b',null,(ch>0?'+':ch<0?'−':'')+fmt1(Math.abs(ch))+' points'));tip.append(r2);
+      const wb=wrap.getBoundingClientRect();placeTip(tip,wrap,ev.clientX-wb.left,ev.clientY-wb.top);if(cls==='faint'||cls==='member'||cls==='dim'||cls==='gain'||cls==='loss'){p.style.strokeWidth='2.4';p.style.stroke='var(--ink)';p.style.opacity='1'}};
+    hit.onpointerenter=ev=>{if(!S.pinned)show(ev,false)};hit.onpointermove=ev=>{if(!S.pinned)show(ev,false)};hit.onpointerleave=()=>{if(!S.pinned){tip.hidden=true;p.style.strokeWidth='';p.style.stroke='';p.style.opacity=''}};hit.onclick=ev=>{S.pinned=true;show(ev,true)};svg.append(hit);
     if(cls==='us'||cls==='oecd'||cls==='pick'){const last=lastOf(e.scores);labels.push({name:name==='United States'?'United States':name,cls,y:y(last[1]),x:x(last[0])+8,val:fmt1(last[1])})}}
   // top-3 labels for the latest round, then spread labels so they do not overlap
   const top=Object.entries(D).filter(([n,e])=>n!=='OECD average'&&lastOf(e.scores)[0]===yLast).sort((a,b)=>lastOf(b[1].scores)[1]-lastOf(a[1].scores)[1]).slice(0,3);
@@ -326,14 +344,15 @@ function drawPisa(){const subject=S.subject,D=DATA.pisa[subject];const svg=$('#p
   const r=rankIn(subject,yLast);const tbl=$('#rank');tbl.replaceChildren();$('#rank-h').textContent=`OECD members, ${({math:'mathematics',reading:'reading',science:'science'})[subject]} ${yLast}`;
   const add=(i,row)=>{const tr=el('tr',row[0]==='United States'?'us':'');const a=el('a',null,row[0]);a.onclick=()=>{S.pick=row[0]==='United States'?null:row[0];drawPisa()};const td=el('td');td.append(a);tr.append(el('td','r',ord(i+1)),td,el('td','n',fmt1(row[1])));tbl.append(tr)};
   const usI=r.us-1;const shown=new Set([0,1,2,3,4,5,6,7,usI-1,usI,usI+1,r.n-2,r.n-1].filter(i=>i>=0&&i<r.n));let prev=-1;for(let i=0;i<r.n;i++){if(!shown.has(i))continue;if(i-prev>1){const tr=el('tr','gap');const td=el('td','',null);td.colSpan=3;td.textContent='···';tr.append(td);tbl.append(tr)}add(i,r.rows[i]);prev=i}
-  document.querySelectorAll('#subjects .chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.s===subject));
+  document.querySelectorAll('#subjects .chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.s===subject));document.querySelectorAll('#views .chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===S.view));
+  const lg=$('#pisa-legend');lg.replaceChildren();const li=(cls,t)=>{const sp=el('span');const i=el('i');if(cls)i.className=cls;sp.append(i,t);lg.append(sp)};li('','United States');li('oecd','OECD average');if(S.view==='all')li('faint','Other OECD members');else{li('gain','Gained since its first round');li('loss','Declined')}li('pick','Picked country');
   const us=D['United States'].scores,oa=D['OECD average'].scores;const usF=us[0],usL=lastOf(us),oaL=oa.find(s=>s[0]===yLast)||lastOf(oa);const topN=top[0];
   const subjName=({math:'math',reading:'reading',science:'science'})[subject];
   $('#pisa-explain').replaceChildren(`In ${subjName} the United States scored ${fmt1(usF[1])} in ${usF[0]} and ${fmt1(usL[1])} in ${usL[0]}, against an OECD average of ${fmt1(oaL[1])}; that puts it `,Object.assign(el('b'),{textContent:`${ord(r.us)} of ${r.n} OECD countries`}),`. ${topN[0]} leads at ${fmt1(lastOf(topN[1].scores)[1])}, about ${Math.round((lastOf(topN[1].scores)[1]-usL[1])/30*10)/10} school years ahead. `+(subject==='science'?'Science is shown through 2018; the 2022 round is not yet in a source this page can read.':subject==='reading'?'Reading is the one subject where the United States has held its ground: at or above the OECD average in every round.':'Every round since 2012 has moved the OECD average down as well, so part of the American slide is a rich-world slide; the gap to the average has still widened.'));
 }
 
 /* ---------- spending ---------- */
-function drawSpend(){const svg=$('#spend');svg.replaceChildren();const w=svg.clientWidth||600,h=Math.round(Math.max(240,w*0.48)),m={l:52,r:60,t:14,b:52};svg.setAttribute('viewBox',`0 0 ${w} ${h}`);svg.setAttribute('height',h);
+function drawSpend(){const svg=$('#spend');svg.replaceChildren();const w=svg.clientWidth||600,h=Math.round(Math.max(260,w*0.5)),m={l:52,r:60,t:14,b:86};svg.setAttribute('viewBox',`0 0 ${w} ${h}`);svg.setAttribute('height',h);
   const pts=sp.filter(r=>r[0]>=1970);const x0=1969,x1=lastOf(pts)[0]+1,y0=0,y1=Math.ceil(Math.max(...pts.map(p=>p[1]))/4000)*4000;const {x,y}=frame(svg,w,h,m,x0,x1,y0,y1);
   for(let v=0;v<=y1;v+=4000){svg.append(svgEl('line',{class:'grid',x1:m.l,x2:w-m.r,y1:y(v),y2:y(v)}));svg.append(svgEl('text',{class:'tick',x:m.l-6,y:y(v)+4,'text-anchor':'end'},v?'$'+(v/1000)+'k':'0'))}
   for(let yr=1970;yr<=x1;yr+=10)svg.append(svgEl('text',{class:'tick',x:x(yr),y:h-m.b+14,'text-anchor':'middle'},yr));
@@ -351,11 +370,12 @@ function drawSpend(){const svg=$('#spend');svg.replaceChildren();const w=svg.cli
   const O=DATA.oecdSpend;const box=$('#oecd-spend');box.replaceChildren();$('#oecd-spend-h').textContent=`Per student, ${O.year}, OECD countries`;
   const NM={LUX:'Luxembourg',KOR:'South Korea',AUT:'Austria',BEL:'Belgium',NLD:'Netherlands',USA:'United States',ISL:'Iceland',DEU:'Germany',SWE:'Sweden',GBR:'United Kingdom',DNK:'Denmark',FRA:'France',AUS:'Australia',ITA:'Italy',IRL:'Ireland',FIN:'Finland',SVN:'Slovenia',NOR:'Norway',PRT:'Portugal',JPN:'Japan',CZE:'Czechia',ESP:'Spain',ISR:'Israel',NZL:'New Zealand',EST:'Estonia',POL:'Poland',SVK:'Slovakia',LTU:'Lithuania',LVA:'Latvia',GRC:'Greece',HUN:'Hungary',CHL:'Chile',CAN:'Canada',CHE:'Switzerland',MEX:'Mexico',TUR:'Türkiye',COL:'Colombia',CRI:'Costa Rica'};
   const usI=O.rows.findIndex(r=>r[0]==='USA');const max=O.rows[0][1];const show=[...O.rows.slice(0,8)];if(usI>=8)show.push(O.rows[usI]);const med=O.rows[Math.floor(O.rows.length/2)][1];
-  for(const [c,v] of show){const us=c==='USA';box.append(el('span','nm'+(us?' us':''),NM[c]||c));const bar=el('div','bar'+(us?' us':''));bar.style.width=(v/max*100)+'%';box.append(bar);box.append(el('span','v'+(us?' us':''),'$'+fmtN(v)))}
+  for(const [c,v] of show){const us=c==='USA';box.append(el('span','r'+(us?' us':''),ord(O.rows.findIndex(r=>r[0]===c)+1)));box.append(el('span','nm'+(us?' us':''),NM[c]||c));const bar=el('div','bar'+(us?' us':''));bar.style.width=(v/max*100)+'%';box.append(bar);box.append(el('span','v'+(us?' us':''),'$'+fmtN(v)))}
   $('#oecd-spend-note').textContent=`The United States ranks ${ord(usI+1)} of ${O.rows.length} OECD countries with data, at $${fmtN(O.rows[usI][1])} against a median of $${fmtN(med)}. Constant 2020 prices, purchasing-power parity, primary through post-secondary non-tertiary education.`;
 }
 
 /* ---------- controls ---------- */
+const vbox=$('#views');for(const [k,lab] of [['all','All countries'],['gain','Net gainers'],['loss','Net decliners']]){const b=el('button','chip',lab);b.dataset.v=k;b.onclick=()=>{S.view=k;drawPisa()};vbox.append(b)}
 const box=$('#subjects');for(const [k,lab] of [['math','Mathematics'],['reading','Reading'],['science','Science, to 2018']]){const b=el('button','chip',lab);b.dataset.s=k;b.onclick=()=>{S.subject=k;S.pick=null;S.pinned=false;$('#tip-pisa').hidden=true;drawPisa()};box.append(b)}
 document.addEventListener('keydown',e=>{if(e.target&&e.target.matches&&e.target.matches('input,button,select,textarea'))return;if(e.key==='Escape'){S.pinned=false;$('#tip-pisa').hidden=true}});
 function drawAll(){drawNaepAll();drawPisa();drawSpend()}

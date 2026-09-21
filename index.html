@@ -13,7 +13,7 @@
   color-scheme:light;
   --bg:#f1f4f2;--surface:#fbfcfb;--surface-2:#e9eeeb;--ink:#14201a;--ink-2:#4f5c55;--muted:#7f8a84;
   --border:rgba(20,32,26,.11);--accent:#1d7a4e;--accent-ink:#17643f;--accent-soft:rgba(29,122,78,.13);--gold:#8a6a24;
-  --t-economy:#167a50;--t-technology:#1d4fcb;--t-politics:#b3212b;--t-culture:#6b3ab8;--t-warfare:#a4471a;
+  --t-economy:#167a50;--t-technology:#1d4fcb;--t-politics:#b3212b;--t-culture:#6b3ab8;--t-warfare:#a4471a;--t-education:#0f7f8c;
   --sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',sans-serif;--mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
 }
 @media (prefers-color-scheme:dark){
@@ -21,14 +21,14 @@
     color-scheme:dark;
     --bg:#0e1311;--surface:#161c19;--surface-2:#1f2622;--ink:#eef3f0;--ink-2:#b6c1ba;--muted:#86918b;
     --border:rgba(255,255,255,.10);--accent:#4cc38a;--accent-ink:#6fd3a1;--accent-soft:rgba(76,195,138,.16);--gold:#d4b36a;
-    --t-economy:#2fa56f;--t-technology:#4f82ee;--t-politics:#e84e58;--t-culture:#9a6ef0;--t-warfare:#db7330;
+    --t-economy:#2fa56f;--t-technology:#4f82ee;--t-politics:#e84e58;--t-culture:#9a6ef0;--t-warfare:#db7330;--t-education:#3cc0cf;
   }
 }
 :root[data-theme="dark"]{
   color-scheme:dark;
   --bg:#0e1311;--surface:#161c19;--surface-2:#1f2622;--ink:#eef3f0;--ink-2:#b6c1ba;--muted:#86918b;
   --border:rgba(255,255,255,.10);--accent:#4cc38a;--accent-ink:#6fd3a1;--accent-soft:rgba(76,195,138,.16);--gold:#d4b36a;
-  --t-economy:#2fa56f;--t-technology:#4f82ee;--t-politics:#e84e58;--t-culture:#9a6ef0;--t-warfare:#db7330;
+  --t-economy:#2fa56f;--t-technology:#4f82ee;--t-politics:#e84e58;--t-culture:#9a6ef0;--t-warfare:#db7330;--t-education:#3cc0cf;
 }
 *{box-sizing:border-box}
 html,body{margin:0}
@@ -61,6 +61,7 @@ a{color:var(--accent-ink)}
 .story[data-theme="politics"]{--tc:var(--t-politics)}
 .story[data-theme="culture"]{--tc:var(--t-culture)}
 .story[data-theme="warfare"]{--tc:var(--t-warfare)}
+.story[data-theme="education"]{--tc:var(--t-education)}
 .story .kicker span:first-child{color:var(--tc);font-weight:600}
 .story .kicker{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:500;display:flex;justify-content:space-between;gap:8px}
 .story h2{font-size:19px;font-weight:600;margin:0;letter-spacing:-.01em;line-height:1.25}
@@ -147,11 +148,11 @@ a{color:var(--accent-ink)}
       </a>
     </li>
     <li>
-      <a class="story" href="education/" data-theme="culture" data-card="education">
-        <span class="kicker"><span>Culture</span><span class="pill live">Live</span></span>
+      <a class="story" href="education/" data-theme="education" data-card="education">
+        <span class="kicker"><span>Education</span><span class="pill live">Live</span></span>
         <h2>The Report Card</h2>
         <div class="viz"><svg viewBox="0 0 300 72" preserveAspectRatio="none" aria-hidden="true"><path class="v-b" d="M0,52 L90,40 L200,32 L260,44 L300,46"/><path class="v-a" d="M0,60 L60,50 L120,38 L200,22 L260,12 L300,8"/></svg></div>
-        <div class="fig"><b>272 → 272</b><span>8th-grade math score, 2000 and 2024, while real spending per pupil rose</span></div>
+        <div class="fig"><b>27%</b><span>of 8th graders proficient in math, 2024, after a third more real spending per pupil since 2000</span></div>
         <p>American school results since 1990 against what the country spends per pupil, and against the rest of the world. A third more money in real terms, and the nation's own math score back where it started.</p>
         <span class="meta"><span data-updated="education">Auto-updated Sep 21, 2026</span></span>
       </a>

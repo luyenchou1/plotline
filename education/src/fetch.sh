@@ -20,9 +20,9 @@ get "https://sdmx.oecd.org/public/rest/data/OECD.EDU.IMEP,DSD_EAG_UOE_FIN@DF_UOE
 python3 - <<'PY'
 import json,subprocess,os
 UA=os.environ.get('UA','Mozilla/5.0 (Plotline)')
-def get(subject,grade,subscale,y):
+def get(subject,grade,subscale,y,stat='MN:MN'):
     for suf in ('','R3','R2'):
-        u=f"https://www.nationsreportcard.gov/DataService/GetAdhocData.aspx?type=data&subject={subject}&grade={grade}&subscale={subscale}&variable=TOTAL&jurisdiction=NP&stattype=MN:MN&Year={y}{suf}"
+        u=f"https://www.nationsreportcard.gov/DataService/GetAdhocData.aspx?type=data&subject={subject}&grade={grade}&subscale={subscale}&variable=TOTAL&jurisdiction=NP&stattype={stat}&Year={y}{suf}"
         s=subprocess.run(['curl','-sL','-A',UA,u],capture_output=True,text=True).stdout
         try:
             d=json.loads(s)
@@ -35,6 +35,8 @@ for subject,subscale in (('mathematics','MRPCM'),('reading','RRPCM')):
     for grade in (4,8):
         res={y:get(subject,grade,subscale,y) for y in years}
         out[f'{subject}{grade}']={y:v for y,v in res.items() if v is not None}
+        prof={y:get(subject,grade,subscale,y,'ALC:AP') for y in out[f'{subject}{grade}']}   # percent at or above Proficient
+        out[f'{subject}{grade}_prof']={y:v for y,v in prof.items() if v is not None}
 old=json.load(open('naep.json')) if os.path.exists('naep.json') else {}
 if sum(len(v) for v in out.values())>=sum(len(v) for v in old.values()): json.dump(out,open('naep.json','w')); print('ok  naep.json',{k:len(v) for k,v in out.items()})
 else: print('KEPT naep.json (fewer rows came back)')
