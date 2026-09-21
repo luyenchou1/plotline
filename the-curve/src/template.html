@@ -81,7 +81,9 @@ h1{font-size:clamp(22px,2.6vw,28px);font-weight:600;letter-spacing:-.02em;margin
 .otext .eyebrow{color:rgba(255,255,255,.65)}
 .otext h2{font-size:clamp(26px,3.6vw,44px);font-weight:600;line-height:1.2;letter-spacing:-.015em;margin:6px 0 14px;text-wrap:balance}
 .otext p{margin:0 0 8px;font-size:clamp(15px,1.4vw,18px);line-height:1.6;color:rgba(255,255,255,.85)}
-.otext .big{font-size:clamp(24px,3.2vw,40px);font-weight:600;color:#fff;line-height:1.2;margin-bottom:10px}
+.otext .olead{font-size:clamp(24px,3.2vw,40px);font-weight:600;color:#fff;line-height:1.2;margin-bottom:10px}
+.otext a{color:#fff;text-decoration:underline;text-underline-offset:3px;text-decoration-color:rgba(255,255,255,.5)}
+.step .card a{color:var(--accent-ink)}
 .cue{display:inline-block;margin-top:14px;font-size:18px;color:rgba(255,255,255,.7);animation:cue 2.2s ease-in-out infinite}
 @keyframes cue{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
 .scrolly{position:relative}
@@ -276,8 +278,8 @@ td .when{display:block;font-size:11.5px;color:var(--muted)}
 <section class="story" id="story" aria-label="The story">
   <div class="opener">
     <div class="opener-bg"><img src="assets/moore-noyce-1970.jpg" alt="Gordon Moore, seated, with Robert Noyce at Intel in 1970"><div class="opener-shade"></div><span class="opener-credit">Gordon Moore and Robert Noyce at Intel, 1970. Photo: Intel Free Press, CC BY-SA 2.0.</span></div>
-    <div class="ostep"><div class="otext"><span class="eyebrow">1965</span><h2>"The number of transistors on a chip will double every two years."</h2><p>Gordon Moore, writing in Electronics magazine, working from five data points. He called it a guess.</p></div></div>
-    <div class="ostep"><div class="otext"><p class="big">It has held for sixty years.</p><p>It is the floor the rest of this story stands on. Scroll on.</p><span class="cue">↓</span></div></div>
+    <div class="ostep"><div class="otext"><span class="eyebrow">1965</span><h2>"The number of transistors on a chip will double every two years."</h2><p><a href="https://en.wikipedia.org/wiki/Gordon_Moore" target="_blank" rel="noopener">Gordon Moore</a>, writing in Electronics magazine, working from five data points. He called it a guess.</p></div></div>
+    <div class="ostep"><div class="otext"><p class="olead">It has held for sixty years.</p><p>It is the floor the rest of this story stands on. Scroll on.</p><span class="cue">↓</span></div></div>
   </div>
   <div class="scrolly">
     <div class="stage" id="stage"><svg id="story-chart" role="img" aria-label="Animated chart that builds as you scroll"></svg><div class="stage-note" id="stage-note"></div></div>
@@ -285,7 +287,7 @@ td .when{display:block;font-size:11.5px;color:var(--muted)}
       <div class="step" data-step="0"><div class="card">
         <img class="uncle" src="assets/wen-tsing-chow.png" alt="Wen Tsing Chow, portrait from the Air Force Space and Missile Pioneers biography">
         <p class="k">July 1969</p>
-        <p>The Saturn V that carried Apollo 11 was steered by an IBM computer in the rocket's instrument ring. My uncle, Wen Tsing Chow, was the scientific advisor on its design. He had already invented programmable read-only memory and built the first solid-state computer to fly in space, for the Atlas missile. I grew up hearing about this, and it still amazes me.</p>
+        <p>The Saturn V that carried Apollo 11 was steered by an IBM computer in the rocket's instrument ring. My uncle, <a href="https://en.wikipedia.org/wiki/Wen_Tsing_Chow" target="_blank" rel="noopener">Wen Tsing Chow</a>, was the scientific advisor on its design. He had already invented programmable read-only memory and built the first solid-state computer to fly in space, for the Atlas missile. I grew up hearing about this, and it still amazes me.</p>
         <p>The guidance computer inside the spacecraft itself ran on integrated circuits carrying <b>six transistors each</b>. That is the dot on the left.</p>
         <span class="credit">Portrait: U.S. Air Force, Space and Missile Pioneers, 2004.</span>
       </div></div>
@@ -312,7 +314,7 @@ td .when{display:block;font-size:11.5px;color:var(--muted)}
       </div></div>
       <div class="step" data-step="6"><div class="card">
         <p class="k">Parameters</p>
-        <p>Parameters are the learned numbers inside a model, its size. GPT-3 had 175 billion; the largest open models today have a few trillion. The record has doubled every <b id="st-params"></b> since 2012. With all four lines in place the picture is complete: <b>Moore's Law, the exponential everyone knows, is the slowest line on the chart.</b></p>
+        <p>Parameters are the basic units of learning in a large language model, the numbers it adjusts as it trains, and they are often compared to the synaptic connections in a brain. Many things determine how capable a model is, but parameter count is the figure most often used to compare the relative power of models: GPT-3 had 175 billion, the largest open models today have a few trillion, and the record has doubled every <b id="st-params"></b> since 2012. With all four lines in place the picture is complete: <b>Moore's Law, the exponential everyone knows, is the slowest line on the chart.</b></p>
       </div></div>
       <div class="step" data-step="7"><div class="card">
         <p class="k">Explore it</p>
@@ -435,7 +437,7 @@ $('#asof').textContent=fmtMY(T1);$('#updated').textContent=fmtDate(Date.parse(DA
 const ratio=(RATE('transistors')/RATE('compute')).toFixed(1);
 const EXPLAIN={
  indexed:()=>`Four exponentials, each divided by its own 2012 record so the lines pass through one point and their slopes can be compared. Transistors per chip double every <span class="rate">${RATE('transistors')} months</span>, accelerator throughput every <span class="rate">${RATE('hardware')}</span>, model size every <span class="rate">${RATE('params')}</span>, and AI training compute every <span class="rate">${RATE('compute')}</span>. <b>Moore's Law, the exponential everyone knows, is the slowest line on the chart.</b> A straight line here is a constant doubling time; steeper is faster.`,
- transistors:()=>`In 1965 Gordon Moore, then at Fairchild and soon a founder of Intel, noticed that the number of components on a chip had doubled every year and guessed the pace would hold. He had five data points. The guess held, at about <span class="rate">${RATE('transistors')} months</span> per doubling, for six decades, and became Moore's Law. For scale: the Apollo Guidance Computer that landed on the Moon in 1969 was built from about 2,800 chips carrying six transistors each. The record chip today, <b>${rec('transistors').name}</b>, carries ${fmtCount(rec('transistors').v)}. Every dot is a named chip; the line follows the record.`,
+ transistors:()=>`In 1965 <a href="https://en.wikipedia.org/wiki/Gordon_Moore" target="_blank" rel="noopener">Gordon Moore</a>, then at Fairchild and soon a founder of Intel, noticed that the number of components on a chip had doubled every year and guessed the pace would hold. He had five data points. The guess held, at about <span class="rate">${RATE('transistors')} months</span> per doubling, for six decades, and became Moore's Law. For scale: the Apollo Guidance Computer that landed on the Moon in 1969 was built from about 2,800 chips carrying six transistors each. The record chip today, <b>${rec('transistors').name}</b>, carries ${fmtCount(rec('transistors').v)}. Every dot is a named chip; the line follows the record.`,
  compute:()=>`Training compute is the total number of arithmetic operations used to train a model, estimated by Epoch AI from what labs publish or, increasingly, from the hardware, duration and cost of the run. Since 2012 the frontier has doubled every <span class="rate">${RATE('compute')} months</span>: about <b>${ratio} doublings for every one the chips manage</b>. The rest is money and scale, more accelerators running for longer. The largest run on record is <b>${rec('compute').name}</b> at ${fmtSci(rec('compute').v,'FLOP')}.`,
  hardware:()=>`Accelerator throughput is how many operations a single training chip can do per second at the precision used for training. It has doubled every <span class="rate">${RATE('hardware')} months</span> since ${fmtY(L.hardware.t0)}, faster than transistor counts because chips also grew larger, more specialized and better fed with memory, but nowhere near the pace of training compute. The current record is <b>${rec('hardware').name}</b> at ${fmtFlops(rec('hardware').v)}.`,
  params:()=>`Parameters are the learned numbers inside a model, its size. The record has doubled every <span class="rate">${RATE('params')} months</span> since 2012. Frontier labs stopped publishing counts around 2023, so the recent record holders are open-weight models whose sizes are known: <b>${rec('params').name}</b> at ${fmtCount(rec('params').v)}. A human brain has on the order of 10¹⁴ synapses, which is a loose analogy rather than an equivalence.`,
@@ -455,9 +457,13 @@ let G=null;
 function xTicks(t0,t1,w){const span=(t1-t0)/YEAR,target=Math.max(3,Math.floor(w/90));const steps=[1,2,5,10,20];let step=steps.find(s=>span/s<=target)||20;const out=[];for(let y=Math.ceil(fmtY(t0)/step)*step;;y+=step){const t=Date.UTC(y,0,1);if(t>t1)break;out.push({t,label:String(y)})}return out}
 function niceStep(range,target){const raw=range/target,p=Math.pow(10,Math.floor(Math.log10(raw)));for(const m of [1,2,2.5,5,10]){if(m*p>=raw)return m*p}return 10*p}
 function drawMain(){
-  const svg=$('#main'),w=svg.clientWidth||800,mobile=w<640,h=mobile?360:520;
+  const svg=$('#main'),w=svg.clientWidth||800,mobile=w<640;
   const single=S.mode!=='indexed',logY=!single||S.scale==='log';
-  const m={l:mobile?54:(logY?66:76),r:mobile?14:20,t:single?28:(mobile?46:52),b:30};
+  // milestone strip under the axis: lay labels out in lanes first so the chart can reserve the space
+  const t0_=S.t0,t1_=S.t1,xs_=t=>(mobile?54:(logY?66:76))+(t-t0_)/(t1_-t0_)*(w-(mobile?54:(logY?66:76))-(mobile?14:20));
+  const msLanes=[],msPlaced=[];if(S.events)for(const e of events){if(e.t<t0_||e.t>t1_)continue;const px=xs_(e.t),width=e.name.length*6.4+10,anchorEnd=px+width>w-(mobile?14:20),left=anchorEnd?px-width:px,right=left+width;let lane=-1;for(let k=0;k<4;k++){if((msLanes[k]??-1e9)+8<=left){lane=k;break}}if(lane>=0){msLanes[lane]=right;msPlaced.push({e,lane,anchorEnd})}else msPlaced.push({e,lane:-1})}
+  const stripH=S.events?(msLanes.length*14+14):0;const h=(mobile?360:520)+stripH;
+  const m={l:mobile?54:(logY?66:76),r:mobile?14:20,t:single?28:(mobile?24:28),b:30+stripH};
   const t0=S.t0,t1=S.t1,span=t1-t0,x=t=>m.l+(t-t0)/span*(w-m.l-m.r);
   const layers=single?[L[S.mode]]:KEYS.map(k=>L[k]);
   const val=(l,v)=>single?v:idx(l,v);
@@ -505,10 +511,10 @@ function drawMain(){
   hit.addEventListener('pointerleave',e=>{if(S.pinned==null&&!(e.relatedTarget&&e.relatedTarget.closest&&e.relatedTarget.closest('.events-layer')))clearCursor()});
   hit.addEventListener('click',e=>{const k=pick(e);if(S.pinned&&S.pinned.pt===k.pt&&Math.abs(S.pinned.t-k.t)<DAY){S.pinned=null;clearCursor()}else{S.pinned={t:k.t,pt:k.pt};setCursor(k.t,k.pt,true)}});
   const evg=svgEl('g',{class:'events-layer'});
-  if(S.events){const lanes=[];for(const e of events){if(e.t<t0||e.t>t1)continue;const px=x(e.t);
-      if(!single){evg.append(svgEl('line',{class:'ev-line',x1:px,x2:px,y1:m.t,y2:h-m.b}));const width=e.name.length*6.6+8,anchorEnd=px+width>w-m.r,left=anchorEnd?px-width:px,right=left+width;let lane=-1;for(let k=0;k<3;k++){if((lanes[k]??-1e9)+8<=left){lane=k;break}}
-        if(lane>=0){lanes[lane]=right;const tx=svgEl('text',{class:'ev-label',x:anchorEnd?px-5:px+5,y:m.t+12+lane*14,'text-anchor':anchorEnd?'end':'start'},e.name);tx.onclick=()=>showEventDialog(e);evg.append(tx)}}
-      const dot=svgEl('circle',{class:'ev-dot'+(S.evOpen===e.id?' on':''),cx:px,cy:h-m.b,r:mobile?3.5:5});dot.setAttribute('aria-label',e.name+' · '+fmtDate(e.t));dot.onclick=ev=>{ev.stopPropagation();showEventDialog(e)};evg.append(dot)}}
+  if(S.events){for(const {e,lane,anchorEnd} of msPlaced){const px=x(e.t);
+      evg.append(svgEl('line',{class:'ev-line',x1:px,x2:px,y1:m.t,y2:h-m.b}));
+      const dot=svgEl('circle',{class:'ev-dot'+(S.evOpen===e.id?' on':''),cx:px,cy:h-m.b,r:mobile?3.5:5});dot.setAttribute('aria-label',e.name+' · '+fmtDate(e.t));dot.onclick=ev=>{ev.stopPropagation();showEventDialog(e)};evg.append(dot);
+      if(lane>=0){evg.append(svgEl('line',{class:'ev-line',x1:px,x2:px,y1:h-m.b+5,y2:h-m.b+30+lane*14-9}));const tx=svgEl('text',{class:'ev-label',x:anchorEnd?px-4:px+4,y:h-m.b+30+lane*14,'text-anchor':anchorEnd?'end':'start'},e.name);tx.onclick=()=>showEventDialog(e);evg.append(tx)}}}
   svg.append(evg);svg.append(svgEl('g',{id:'cursor-main','pointer-events':'none'}));
   if(S.pinned&&S.pinned.t>=t0&&S.pinned.t<=t1)setCursor(S.pinned.t,S.pinned.pt,true);else{S.pinned=null;clearCursor()}
 }
