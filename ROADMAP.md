@@ -5,7 +5,6 @@ Living list. Ordered roughly by what's next; dated when added. Done items move t
 ## Next
 
 - **Auto-refresh for The National Debt.** Write `national-debt/src/fetch.py` (Treasury Debt to the Penny API, FRED CSVs for GDP, unemployment, CPI, fed funds) so the weekly workflow covers all three plots. *(added 2026-09-20)*
-- **Ledes in Luyen's voice** for The National Debt and the landing intro. The Curve and the Tests have theirs. *(2026-09-20)*
 - **The Mamdani Scorecard** (Politics). No prior copy exists on this machine; rebuild from city sources or locate the earlier work. *(2026-09-20)*
 - **Custom domain.** `CNAME` at the repo root plus DNS once a domain is chosen; the Plotline name has no clean .com, .io or .news. *(2026-09-20)*
 
@@ -18,4 +17,4 @@ Living list. Ordered roughly by what's next; dated when added. Done items move t
 
 ## Done
 
-- Landing page, The National Debt, The Curve, How Fast the Tests Fall; design comps reviewed and current design kept; theme colors on cards; Plotline mark and favicon; "Auto-updated" stamps with `meta.json`; weekly refresh workflow for the Epoch-based plots; `PRINCIPLES.md`. *(2026-09-20)*
+- Ledes on all three plots and the landing intro, from Luyen's own drafts. Landing page, The National Debt, The Curve, How Fast the Tests Fall; design comps reviewed and current design kept; theme colors on cards; Plotline mark and favicon; "Auto-updated" stamps with `meta.json`; weekly refresh workflow for the Epoch-based plots; `PRINCIPLES.md`. *(2026-09-20)*
