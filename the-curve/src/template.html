@@ -459,7 +459,7 @@ function drawMain(){
   const single=S.mode!=='indexed',logY=!single||S.scale==='log';
   // milestone strip under the axis: lay labels out in lanes first so the chart can reserve the space
   const t0_=S.t0,t1_=S.t1,xs_=t=>(mobile?54:(logY?66:76))+(t-t0_)/(t1_-t0_)*(w-(mobile?54:(logY?66:76))-(mobile?14:20));
-  const msLanes=[],msPlaced=[];if(S.events)for(const e of events){if(e.t<t0_||e.t>t1_)continue;const px=xs_(e.t),width=e.name.length*6.4+10,anchorEnd=px+width>w-(mobile?14:20),left=anchorEnd?px-width:px,right=left+width;let lane=-1;for(let k=0;k<4;k++){if((msLanes[k]??-1e9)+8<=left){lane=k;break}}if(lane>=0){msLanes[lane]=right;msPlaced.push({e,lane,anchorEnd})}else msPlaced.push({e,lane:-1})}
+  const msLanes=[],msPlaced=[];if(S.events)for(const e of events){if(e.t<t0_||e.t>t1_)continue;const px=xs_(e.t),width=e.name.length*7.2+12,anchorEnd=px+width>w-(mobile?14:20),left=anchorEnd?px-width:px,right=left+width;let lane=-1;for(let k=0;k<4;k++){if((msLanes[k]??-1e9)+8<=left){lane=k;break}}if(lane>=0){msLanes[lane]=right;msPlaced.push({e,lane,anchorEnd})}else msPlaced.push({e,lane:-1})}
   const stripH=S.events?(msLanes.length*14+14):0;const h=(mobile?360:520)+stripH;
   const m={l:mobile?54:(logY?66:76),r:mobile?14:20,t:single?28:(mobile?24:28),b:30+stripH};
   const t0=S.t0,t1=S.t1,span=t1-t0,x=t=>m.l+(t-t0)/span*(w-m.l-m.r);

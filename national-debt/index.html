@@ -145,7 +145,7 @@ svg text{font-family:var(--sans);font-size:11.5px;fill:var(--muted)}
 .ev-line{stroke:var(--event);stroke-dasharray:2 4;opacity:.45}
 .ev-dot{fill:var(--surface);stroke:var(--event);stroke-width:2;cursor:pointer}
 .ev-dot:hover,.ev-dot.on{fill:var(--event)}
-.ev-label{font-size:11px;fill:var(--event);cursor:pointer}
+.ev-label{font-size:10px;fill:var(--event);cursor:pointer;letter-spacing:.06em;text-transform:uppercase;font-weight:500}
 .ev-label:hover,.ev-label.on{text-decoration:underline;fill:var(--event)}
 .ev-line.on{opacity:.9;stroke-dasharray:none}
 .ms-dot{fill:var(--debt);stroke:var(--surface);stroke-width:1.5}
@@ -408,7 +408,7 @@ function drawMain(){
   const svg=$('#main'),w=svg.clientWidth||800,mobile=w<640;
   // milestone strip under the axis: lay labels out in lanes first so the chart can reserve the space
   const ml_=mobile?50:62,mr_=mobile?12:18,xs_=t=>ml_+(t-S.t0)/(S.t1-S.t0)*(w-ml_-mr_);
-  const msLanes=[],msPlaced=[];for(const e of events){if(e.t<S.t0||e.t>S.t1)continue;const px=xs_(e.t),width=e.name.length*6.4+10,anchorEnd=px+width>w-mr_,left=anchorEnd?px-width:px,right=left+width;let lane=-1;for(let k=0;k<4;k++){if((msLanes[k]??-1e9)+8<=left){lane=k;break}}if(lane>=0){msLanes[lane]=right;msPlaced.push({e,lane,anchorEnd})}else msPlaced.push({e,lane:-1})}
+  const msLanes=[],msPlaced=[];for(const e of events){if(e.t<S.t0||e.t>S.t1)continue;const px=xs_(e.t),width=e.name.length*7.2+12,anchorEnd=px+width>w-mr_,left=anchorEnd?px-width:px,right=left+width;let lane=-1;for(let k=0;k<4;k++){if((msLanes[k]??-1e9)+8<=left){lane=k;break}}if(lane>=0){msLanes[lane]=right;msPlaced.push({e,lane,anchorEnd})}else msPlaced.push({e,lane:-1})}
   const stripH=msLanes.length*14+14;const h=(mobile?300:400)+stripH;
   const m={l:ml_,r:mr_,t:mobile?34:40,b:26+stripH};
   const t0=S.t0,t1=S.t1,span=t1-t0;
