@@ -31,6 +31,15 @@ def get(subject,grade,subscale,y,stat='MN:MN'):
             if d.get('status')==200 and d['result']: return round(d['result'][0]['value'],1)
         except Exception: pass
     return None
+def getmulti(subject,grade,subscale,y,variable,stat,key):
+    for suf in ('','R3','R2'):
+        u=f"https://www.nationsreportcard.gov/DataService/GetAdhocData.aspx?type=data&subject={subject}&grade={grade}&subscale={subscale}&variable={variable}&jurisdiction=NP&stattype={stat}&Year={y}{suf}"
+        s=subprocess.run(['curl','-sL','-A',UA,u],capture_output=True,text=True).stdout
+        try:
+            d=json.loads(s)
+            if d.get('status')==200 and d['result']: return {r[key]:round(r['value'],1) for r in d['result'] if r.get('value') is not None and r[key]!='Information not available' and r[key]!='Unknown'}
+        except Exception: pass
+    return None
 years=[1990,1992,1994,1996,1998,2000,2002]+list(range(2003,2020,2))+[2022,2024,2026,2028,2030]
 out={}
 for subject,subscale in (('mathematics','MRPCM'),('reading','RRPCM')):
@@ -39,6 +48,11 @@ for subject,subscale in (('mathematics','MRPCM'),('reading','RRPCM')):
         out[f'{subject}{grade}']={y:v for y,v in res.items() if v is not None}
         prof={y:get(subject,grade,subscale,y,'ALC:AP') for y in out[f'{subject}{grade}']}   # percent at or above Proficient
         out[f'{subject}{grade}_prof']={y:v for y,v in prof.items() if v is not None}
+        # breakdowns, 2013 on: percentiles, parents' education (grade 8 only), school-lunch eligibility (served through 2022)
+        yrs=[y for y in out[f'{subject}{grade}'] if y>=2013]
+        out[f'{subject}{grade}_pct']={y:v for y in yrs if (v:=getmulti(subject,grade,subscale,y,'TOTAL','PC:P1,PC:P2,PC:P5,PC:P7,PC:P9','stattype'))}
+        out[f'{subject}{grade}_lunch']={y:v for y in yrs if (v:=getmulti(subject,grade,subscale,y,'SLUNCH3','MN:MN','varValueLabel'))}
+        if grade==8: out[f'{subject}{grade}_pared']={y:v for y in yrs if (v:=getmulti(subject,grade,subscale,y,'PARED','MN:MN','varValueLabel'))}
 old=json.load(open('naep.json')) if os.path.exists('naep.json') else {}
 if sum(len(v) for v in out.values())>=sum(len(v) for v in old.values()): json.dump(out,open('naep.json','w')); print('ok  naep.json',{k:len(v) for k,v in out.items()})
 else: print('KEPT naep.json (fewer rows came back)')

@@ -12,6 +12,8 @@ src/fetch.sh        pulls the raw sources into src/raw/ (git-ignored), then runs
                     - PISA science fallback: World Bank API, indicator LO.PISA.SCI (through 2018)
                     - NAEP: nationsreportcard.gov data service, one request per assessment year
                       (the API rejects year lists; years before 1996 need the R2 sample suffix)
+                      mean (MN:MN), share at/above Proficient (ALC:AP), and from 2013 the percentiles (PC:P1..P9),
+                      parents' education (variable PARED, grade 8) and lunch eligibility (SLUNCH3, served through 2022)
                     - Spending per pupil: NCES Digest table 236.55, HTML (newest edition that exists)
                     - Spending per student, OECD countries: OECD SDMX API, DF_UOE_INDIC_FIN_PERSTUD
 src/assemble.py     -> src/data.json

@@ -12,6 +12,7 @@ Living list. Ordered roughly by what's next; dated when added. Done items move t
 ## Later
 
 - **Report Card, next layer.** State-level NAEP (the API takes a jurisdiction code), spending by state, and the long-term-trend NAEP back to 1971 for the longer view. *(2026-09-21)*
+- **Report Card, school-lunch series after 2022.** NCES dropped the lunch-eligibility flag in 2024; watch for whatever income proxy replaces it in the data service. *(2026-09-21)*
 - **Views and likes, and ordering by them.** An indicator of how often each plot is viewed (and possibly liked), so the landing page can surface the most-viewed plots and offer sorting and filtering by theme, views and publication date. Constraint: the site promises no accounts and no tracking, so counting has to be aggregate and cookie-free (a privacy-preserving counter such as a Cloudflare Worker with KV, or a service like GoatCounter), and likes need the same kind of tiny backend. Decide the counter before building the sort. *(2026-09-20)*
 - **Theme map view.** Once there are eight to ten plots, a visual grouping by theme (a map, not a Venn diagram) alongside the card list. *(2026-09-20)*
 - **Official leaderboards for the Tests.** Epoch lags official boards by a few weeks; a per-benchmark fetch of the official leaderboard where one is machine-readable (Scale AI for HLE, ARC Prize, swebench.com) would close the gap. *(2026-09-20)*
@@ -32,6 +33,7 @@ Ranked by how sharp the aha is, how clean and self-updating the data is, and how
 
 ## Done
 
+- The Report Card, "Since the peak" panel: NAEP from 2013 as change in points by percentile, parents' education and school-lunch eligibility, with subject and grade chips; one added milestone, Pew's 2013 smartphone majority, stated as a fact with the caveat in its note. *(2026-09-21)*
 - The Report Card: PISA 2025 (published 2026-09-08) wired in from the OECD's own Annex B1 trend tables, all three subjects through 2025, with the OECD's U.S. sampling caveat shown; NAEP proficiency shares; Education theme. *(2026-09-21)*
 - The Report Card, first draft: NAEP math and reading (grades 4 and 8, 1990 to 2024) from the Nation's Report Card API, PISA by country with subject chips, hover and pin, and an OECD rank table, spending per pupil in constant dollars from NCES with the OECD per-student comparison, three headline marks, shared milestones (NCLB, Common Core, ESSA, COVID, ARP). *(2026-09-21)*
 - The Population Ledger, version 1: world choropleth (Equal Earth, no library) coloured by growth, natural change, net migration, fertility or median age; year slider 1950 to 2100 with play; world ledger for the chosen year; hover / pinned country ledger; both ends of the table. UN WPP 2024 medium variant, refreshed weekly. *(2026-09-21)*

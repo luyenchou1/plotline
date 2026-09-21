@@ -70,7 +70,7 @@ for subj in pisa:
     for e in pisa[subj].values(): e['scores'] = [[y, s] for y, s in sorted(e['scores'].items())]
 
 # ---- NAEP: {series: [[year, score], ...]}
-naep = {k: [[int(y), v] for y, v in sorted(d.items(), key=lambda kv: int(kv[0]))] for k, d in json.load(open(raw/'naep.json')).items()}
+naep = {k: [[int(y), v] for y, v in sorted(d.items(), key=lambda kv: int(kv[0]))] for k, d in json.load(open(raw/'naep.json')).items()}   # values are numbers, or dicts for the breakdowns
 
 # ---- NCES per-pupil current expenditure, fall enrollment, constant dollars
 s = open(raw/'nces_236_55.html', encoding='iso-8859-1').read()
