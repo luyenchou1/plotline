@@ -463,7 +463,7 @@ function drawMain(){
       evg.append(svgEl('line',{class:'ev-line',x1:px,x2:px,y1:m.t,y2:h-m.b}));
       const width=e.name.length*6.2+8,anchorEnd=px+width>w-m.r,left=anchorEnd?px-width:px,right=left+width;let lane=-1;for(let k=0;k<3;k++){if((lanes[k]??-1e9)+8<=left){lane=k;break}}
       if(lane>=0){lanes[lane]=right;const tx=svgEl('text',{class:'ev-label',x:anchorEnd?px-5:px+5,y:m.t+12+lane*14,'text-anchor':anchorEnd?'end':'start'},e.name);tx.onclick=()=>showEventDialog(e);evg.append(tx)}
-      const dot=svgEl('circle',{class:'ev-dot'+(S.evOpen===e.id?' on':''),cx:px,cy:py,r:mobile?3.5:5});dot.setAttribute('aria-label',e.name+' · '+fmtDate(e.t));dot.onclick=ev=>{ev.stopPropagation();S.evOpen=e.id;drawAll()};evg.append(dot)}
+      const dot=svgEl('circle',{class:'ev-dot'+(S.evOpen===e.id?' on':''),cx:px,cy:py,r:mobile?3.5:5});dot.setAttribute('aria-label',e.name+' · '+fmtDate(e.t));dot.onclick=ev=>{ev.stopPropagation();showEventDialog(e)};evg.append(dot)}
   }
   svg.append(evg);
   svg.append(svgEl('g',{id:'cursor-main','pointer-events':'none'}));
