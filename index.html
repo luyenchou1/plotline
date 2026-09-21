@@ -36,8 +36,10 @@ body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--sans);-webkit-fo
 a{color:var(--accent-ink)}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .page{max-width:960px;margin:0 auto;padding-block:28px 64px;padding-inline:clamp(16px,3vw,32px)}
-.masthead{display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap;margin-bottom:40px}
-.wordmark{font-family:var(--mono);font-weight:500;font-size:18px;letter-spacing:-.01em;color:var(--ink);text-decoration:none;display:inline-flex;align-items:center;gap:9px}
+.masthead{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:40px}
+.brand{display:flex;flex-direction:column;gap:2px}
+.tagline{font-size:13px;color:var(--muted);padding-left:39px}
+.wordmark{font-family:var(--mono);font-weight:500;font-size:19px;letter-spacing:-.01em;color:var(--ink);text-decoration:none;display:inline-flex;align-items:center;gap:9px}
 .logo{display:inline-block;vertical-align:-5px;overflow:visible}
 .logo .lg-tile{fill:var(--accent)}
 .logo .lg-curve{fill:none;stroke:var(--surface);stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
@@ -83,8 +85,8 @@ a{color:var(--accent-ink)}
 <body>
 <div class="page">
   <header class="masthead">
-    <a class="wordmark" href="./" aria-label="Plotline home"><svg class="logo" viewBox="0 0 37 30" width="30" height="24" aria-hidden="true"><rect x="1.5" y="6.5" width="25" height="22" rx="6" class="lg-tile"/><path d="M6 23 C 12 23, 15 20.5, 19 16 S 27.5 5.5, 32.5 3" class="lg-curve"/><circle cx="32.5" cy="3" r="3" class="lg-dot"/></svg>Plotline</a>
-    <div class="mast-right"><span>Current events, drawn from the data</span><button class="icon-btn" id="theme" aria-label="Switch light or dark theme" title="Light / dark">◐</button></div>
+    <div class="brand"><a class="wordmark" href="./" aria-label="Plotline home"><svg class="logo" viewBox="0 0 37 30" width="30" height="24" aria-hidden="true"><rect x="1.5" y="6.5" width="25" height="22" rx="6" class="lg-tile"/><path d="M6 23 C 12 23, 15 20.5, 19 16 S 27.5 5.5, 32.5 3" class="lg-curve"/><circle cx="32.5" cy="3" r="3" class="lg-dot"/></svg>Plotline</a><span class="tagline">Current events, drawn from the data</span></div>
+    <div class="mast-right"><button class="icon-btn" id="theme" aria-label="Switch light or dark theme" title="Light / dark">◐</button></div>
   </header>
 
   <section class="intro">
