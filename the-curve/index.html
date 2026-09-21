@@ -289,7 +289,7 @@ td .when{display:block;font-size:11.5px;color:var(--muted)}
       </div></div>
       <div class="step" data-step="1"><div class="card">
         <p class="k">1971 to 2019</p>
-        <p>Two years after the Moon landing, Intel shipped the 4004 with 2,300 transistors on one chip. Then Moore's guess simply kept coming true: every named chip here is a real record, and the line through them doubles about every two years for five decades.</p>
+        <p>Two years after the Moon landing, Intel shipped the 4004, 2,300 transistors on one chip and the first microprocessor anyone could buy. Then Moore's guess simply kept coming true: the line follows the record holder, chip by chip, and doubles about every two years for five decades.</p>
       </div></div>
       <div class="step" data-step="2"><div class="card">
         <p class="k">Zoom out</p>
@@ -580,7 +580,7 @@ $('#replay').onclick=()=>{if(replaying)return;replaying=true;S.pinned=null;drawA
   const stage=$('#stage'),svg=$('#story-chart'),note=$('#stage-note');if(!svg)return;
   const steps=[...document.querySelectorAll('.step')];const mobile=()=>innerWidth<820;
   const APOLLO_T=Date.UTC(1969,6,20),APOLLO_V=6;
-  const rec4004=L.transistors.rec.find(p=>/4004/.test(p.name))||L.transistors.rec[0];
+  const rec4004=L.transistors.pts.find(p=>/Intel 4004/.test(p.name))||L.transistors.rec[0];
   const rec2019=recAt(L.transistors,Date.UTC(2019,11,31)),recNow=rec('transistors');
   $('#st-compute').textContent=RATE('compute')+' months';$('#st-trans').textContent=RATE('transistors')+' months';$('#st-ratio').textContent=ratio;
   // step targets
@@ -593,7 +593,9 @@ $('#replay').onclick=()=>{if(replaying)return;replaying=true;S.pinned=null;drawA
     {t0:Date.UTC(1971,0,1),t1:T1,mode:'indexed',layers:['transistors','compute','hardware','params'],prog:1,apollo:false,box:null,noteLines:true,hlFinal:'transistors'},
     {t0:Date.UTC(1971,0,1),t1:T1,mode:'indexed',layers:['transistors','compute','hardware','params'],prog:1,apollo:false,box:null,note:''},
   ];
-  let cur={t0:TARGET[0].t0,t1:TARGET[0].t1,mode:'linear',layers:['transistors'],prog:1,apollo:true,box:null,note:TARGET[0].note,lp:{},hl:null},active=-1,raf=null,token=0;
+  let cur={t0:TARGET[0].t0,t1:TARGET[0].t1,mode:'linear',layers:['transistors'],prog:1,apollo:true,box:null,note:TARGET[0].note,lp:{},hl:null},active=-1,raf=null,token=0,animating=false,lastFrame=0;
+  const atTarget=i=>{const t=TARGET[i];if(!t)return true;return cur.mode===t.mode&&cur.t0===t.t0&&cur.t1===t.t1&&cur.prog===1&&!!cur.apollo===!!t.apollo&&cur.layers.length===t.layers.length&&t.layers.every(k=>cur.layers.includes(k))&&Object.values(cur.lp||{}).every(v=>v===1)};
+  const settle=i=>{cur={...TARGET[i],lp:{},hl:TARGET[i].hlFinal||null};animating=false;svg.style.opacity='1';render()};
   const RATE_LINE=k=>({transistors:'Transistors',compute:'Training compute',hardware:'Accelerators',params:'Parameters'})[k]+' ×2 / '+RATE(k)+' mo';
   const noteFor=()=>{if(!cur.noteLines)return cur.note||'';const order=['compute','params','hardware','transistors'];return order.filter(k=>cur.layers.includes(k)&&(cur.lp[k]??1)>0).map(k=>(k===cur.hl?'<b>':'<span style="opacity:.55">')+RATE_LINE(k)+(k===cur.hl?'</b>':'</span>')).join('\n')};
   const ease=u=>u<.5?2*u*u:1-Math.pow(-2*u+2,2)/2;
@@ -619,30 +621,32 @@ $('#replay').onclick=()=>{if(replaying)return;replaying=true;S.pinned=null;drawA
       svg.append(svgEl('path',{class:'st-line',d,style:'stroke:'+l.color}));
       if(mode==='linear'){for(const p of l.rec){if(p.t<t0||p.t>tEndK)continue;svg.append(svgEl('circle',{class:'st-dot',cx:x(p.t),cy:y(p.v),r:3.2,fill:l.color}))}}
       const last=pts[pts.length-1];ends.push({k,l,x:x(last.t),y:y(val(last.v)),name:rb?rb.name:'',v:rb?rb.v:0,tEnd:tEndK})}
-    if(mode==='linear'&&ends.length){const e=ends[0];if(prog>0.05){const anchorEnd=e.x>w-m.r-170;svg.append(svgEl('text',{class:'st-label',x:anchorEnd?e.x-10:e.x+10,y:e.y-8,'text-anchor':anchorEnd?'end':'start'},e.name));svg.append(svgEl('text',{class:'st-sub',x:anchorEnd?e.x-10:e.x+10,y:e.y+8,'text-anchor':anchorEnd?'end':'start'},fmtCount(e.v)+' transistors · '+fmtY(recAt(L.transistors,e.tEnd).t)))}
-      if(rec4004.t>=t0&&rec4004.t<=tEnd&&!apollo){svg.append(svgEl('text',{class:'st-sub',x:x(rec4004.t)+8,y:y(rec4004.v)-8},'Intel 4004 · 2,300 · 1971'))}}
+    if(mode==='linear'&&ends.length&&!apollo){const e=ends[0];if(prog>0.05){const anchorEnd=e.x>w-m.r-170;svg.append(svgEl('text',{class:'st-label',x:anchorEnd?e.x-10:e.x+10,y:e.y-8,'text-anchor':anchorEnd?'end':'start'},e.name));svg.append(svgEl('text',{class:'st-sub',x:anchorEnd?e.x-10:e.x+10,y:e.y+8,'text-anchor':anchorEnd?'end':'start'},fmtCount(e.v)+' transistors · '+fmtY(recAt(L.transistors,e.tEnd).t)))}
+      if(rec4004.t>=t0&&rec4004.t<=tEnd&&!apollo){svg.append(svgEl('text',{class:'st-sub',x:x(rec4004.t)+8,y:y(rec4004.v)-8},rec4004.name+' · '+fmtCount(rec4004.v)+' · '+fmtY(rec4004.t)))}}
     else{ends.sort((a,b)=>a.y-b.y);for(let i=1;i<ends.length;i++)if(ends[i].y-ends[i-1].y<14)ends[i].y=ends[i-1].y+14;for(const e of ends)svg.append(svgEl('text',{class:'st-end',x:e.x-6,y:e.y-7,'text-anchor':'end',style:'fill:'+e.l.color+(cur.hl&&cur.hl!==e.k?';opacity:.55':'')},e.l.short))}
     if(apollo){const ax2=x(APOLLO_T),ay2=y(APOLLO_V);svg.append(svgEl('circle',{class:'st-dot',cx:ax2,cy:ay2,r:5,fill:'var(--event)'}));svg.append(svgEl('text',{class:'st-label',x:ax2+10,y:ay2-10},'Apollo 11 · July 1969'));svg.append(svgEl('text',{class:'st-sub',x:ax2+10,y:ay2+6},'6 transistors per chip'));
-      if(rec4004.t<=t1){svg.append(svgEl('circle',{class:'st-dot',cx:x(rec4004.t),cy:y(rec4004.v),r:4,fill:L.transistors.color}));svg.append(svgEl('text',{class:'st-label',x:x(rec4004.t)+10,y:y(rec4004.v)-10},'Intel 4004 · 1971'));svg.append(svgEl('text',{class:'st-sub',x:x(rec4004.t)+10,y:y(rec4004.v)+6},'2,300 transistors'))}}
+      if(rec4004.t<=t1){svg.append(svgEl('circle',{class:'st-dot',cx:x(rec4004.t),cy:y(rec4004.v),r:4,fill:L.transistors.color}));svg.append(svgEl('text',{class:'st-label',x:x(rec4004.t)+10,y:y(rec4004.v)-10},rec4004.name+' · '+fmtY(rec4004.t)));svg.append(svgEl('text',{class:'st-sub',x:x(rec4004.t)+10,y:y(rec4004.v)+6},fmtCount(rec4004.v)+' transistors'))}}
     if(box&&mode==='linear'){const bx=x(t0),bw=x(Math.min(box.t1,t1))-bx,by=y(box.v);svg.append(svgEl('rect',{class:'st-box',x:bx,y:by,width:bw,height:h-m.b-by}));svg.append(svgEl('text',{class:'st-boxlabel',x:bx+bw/2,y:by-8,'text-anchor':'middle'},'the chart you just saw fits in this box'))}
     note.innerHTML=noteFor();
   }
-  function goTo(i){if(i===active)return;active=i;steps.forEach((s,k)=>s.classList.toggle('active',k===i));const to=TARGET[i];const from={...cur};const my=++token;
+  function goTo(i){if(i===active&&(animating||atTarget(i)))return;active=i;steps.forEach((s,k)=>s.classList.toggle('active',k===i));const to=TARGET[i];const from={...cur};const my=++token;animating=true;lastFrame=performance.now();
     const modeChange=from.mode!==to.mode;const dur=reduced?0:(i===1?2600:1100);const start=performance.now();if(raf)cancelAnimationFrame(raf);
     const added=to.mode==='indexed'&&!modeChange?to.layers.filter(k=>!from.layers.includes(k)):[];
     if(added.length){const lp={};for(const k of to.layers)lp[k]=added.includes(k)?0:1;cur={...to,lp,hl:null};render();
       const per=reduced?0:1500;let idx2=0;
-      const drawNext=()=>{if(my!==token)return;if(idx2>=added.length){cur={...to,lp:{},hl:to.hlFinal||null};render();return}const k=added[idx2++];const s0=performance.now();cur.hl=k;
-        (function fr(now){if(my!==token)return;const u=per?Math.min(1,(now-s0)/per):1;cur.lp[k]=ease(u);render();if(u<1)raf=requestAnimationFrame(fr);else{cur.lp[k]=1;drawNext()}})(s0)};
+      const drawNext=()=>{if(my!==token)return;if(idx2>=added.length){settle(i);return}const k=added[idx2++];const s0=performance.now();cur.hl=k;
+        (function fr(now){if(my!==token)return;lastFrame=now;const u=per?Math.min(1,(now-s0)/per):1;cur.lp[k]=ease(u);render();if(u<1)raf=requestAnimationFrame(fr);else{cur.lp[k]=1;drawNext()}})(s0)};
       drawNext();return}
     const fromProg=(i===1&&from.mode==='linear'&&Math.abs(from.t1-Date.UTC(1976,0,1))<DAY)?0:from.prog;
-    (function frame(now){const u=dur?Math.min(1,(now-start)/dur):1,e=ease(u);
+    (function frame(now){if(my!==token)return;lastFrame=now;const u=dur?Math.min(1,(now-start)/dur):1,e=ease(u);
       if(modeChange){cur={...to,prog:1,lp:{},hl:null};svg.style.opacity=u<0.5?String(1-u*2):String((u-0.5)*2);if(u<0.5){cur={...from};}}
       else{cur={...to,t0:from.t0+(to.t0-from.t0)*e,t1:from.t1+(to.t1-from.t1)*e,prog:fromProg+(to.prog-fromProg)*e,apollo:to.apollo||(from.apollo&&u<0.4),box:u>0.6?to.box:null,lp:{},hl:null};svg.style.opacity='1'}
-      render();if(u<1)raf=requestAnimationFrame(frame);else{cur={...to,lp:{},hl:to.hlFinal||null};svg.style.opacity='1';render()}})(start)}
+      render();if(u<1)raf=requestAnimationFrame(frame);else settle(i)})(start)}
+  // watchdog: if an animation stalls (a frame more than a second old) or a step is active but not at its target, snap to the target
+  setInterval(()=>{if(active<0)return;if(animating&&performance.now()-lastFrame>1000){token++;settle(active)}else if(!animating&&!atTarget(active)){settle(active)}},600);
   const io=new IntersectionObserver(entries=>{for(const en of entries){if(en.isIntersecting)goTo(+en.target.dataset.step)}},{rootMargin:'-45% 0px -45% 0px',threshold:0});
   steps.forEach(s=>io.observe(s));
-  render();window.__story={goTo,state:()=>cur,jump:i=>{if(raf)cancelAnimationFrame(raf);token++;active=i;steps.forEach((s,k)=>s.classList.toggle('active',k===i));cur={...TARGET[i],lp:{},hl:TARGET[i].hlFinal||null};svg.style.opacity='1';render()}};
+  render();window.__story={goTo,state:()=>cur,jump:i=>{if(raf)cancelAnimationFrame(raf);token++;active=i;steps.forEach((s,k)=>s.classList.toggle('active',k===i));settle(i)}};
   new ResizeObserver(()=>render()).observe(stage);
 })();
 
