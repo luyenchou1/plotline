@@ -242,13 +242,19 @@ function buildControls(){
   const box=$('#metrics');for(const k in METRICS){const b=el('button','chip',METRICS[k].label);b.dataset.m=k;b.setAttribute('aria-pressed',k===S.metric);b.onclick=()=>{S.metric=k;drawAll()};box.append(b)}
   const yr=$('#year');yr.oninput=()=>{S.year=+yr.value;drawAll()};
   $('#now').onclick=()=>{S.year=DATA.lastEstimate;yr.value=S.year;drawAll()};
-  let timer=null;
-  const stopPlay=()=>{clearInterval(timer);timer=null;S.playing=false;$('#play').textContent='▶ Play'};
-  const startPlay=(to,ms)=>{stopPlay();S.playing=true;$('#play').textContent='❚❚ Pause';timer=setInterval(()=>{S.year+=1;if(S.year>=to){S.year=to;stopPlay()}yr.value=S.year;drawAll()},ms)};
+  let raf=null;
+  const stopPlay=()=>{if(raf)cancelAnimationFrame(raf);raf=null;S.playing=false;$('#play').textContent='▶ Play'};
+  // time-based stepping on requestAnimationFrame: the pace holds whatever the browser does to timers, and a hidden tab simply pauses
+  const startPlay=(to,ms)=>{stopPlay();S.playing=true;$('#play').textContent='❚❚ Pause';let last=performance.now(),acc=0;
+    const tick=now=>{acc+=now-last;last=now;let moved=false;while(acc>=ms&&S.year<to){acc-=ms;S.year+=1;moved=true}if(moved){yr.value=S.year;drawAll()}if(S.year>=to){S.year=to;stopPlay();return}raf=requestAnimationFrame(tick)};
+    raf=requestAnimationFrame(tick)};
   $('#play').onclick=()=>{if(S.playing){stopPlay();return}if(S.year>=2100)S.year=1950;startPlay(2100,reduced?400:180)};
   yr.addEventListener('pointerdown',()=>{if(S.playing)stopPlay()});
-  // first load: run the years from 1950 up to today, so the first thing a reader sees is the century moving
-  if(!reduced){const to=S.year;S.year=1950;yr.value=1950;drawAll();startPlay(to,70)}
+  // first load: run the years from 1950 up to today, so the first thing a reader sees is the century moving.
+  // If the tab is in the background, wait until it is looked at.
+  if(!reduced){const to=S.year;S.year=1950;yr.value=1950;drawAll();
+    const go=()=>{if(S.year!==1950||S.playing)return;startPlay(to,70)};
+    if(document.hidden)document.addEventListener('visibilitychange',()=>{if(!document.hidden)go()},{once:true});else go()}
   $('#band').style.setProperty('--split',((DATA.lastEstimate+1-1950)/150*100).toFixed(1)+'%');
   document.addEventListener('keydown',e=>{if(e.target&&e.target.matches&&e.target.matches('input,button'))return;if(e.key==='Escape'){S.pinned=null;drawMap()}if(e.key==='ArrowRight'){S.year=Math.min(2100,S.year+1);yr.value=S.year;drawAll()}if(e.key==='ArrowLeft'){S.year=Math.max(1950,S.year-1);yr.value=S.year;drawAll()}});
 }
