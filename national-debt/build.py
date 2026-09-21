@@ -35,5 +35,32 @@ import re
 art=re.sub(r'<!--DL-->.*?<!--/DL-->','',art,flags=re.S)
 art=re.sub(r"const dl=\$\('#download'\);.*?\n",'',art,flags=re.S)  # no page-initiated downloads in the artifact build
 open(root/'artifact.html','w').write(art)
+
+# ---- card.json for the landing page: debt vs GDP miniature + headline figure
+import bisect
+def _gdp_at(gdp, day):
+    # gdp: [(date, billions)] quarterly; value placed at quarter midpoint, linear between
+    pts=[(dt.date.fromisoformat(d)+dt.timedelta(days=45), v*1e9) for d,v in gdp]
+    if day<=pts[0][0]: return pts[0][1]
+    if day>=pts[-1][0]: return pts[-1][1]
+    for i in range(len(pts)-1):
+        a,b=pts[i],pts[i+1]
+        if a[0]<=day<=b[0]:
+            f=(day-a[0]).days/(b[0]-a[0]).days; return a[1]+(b[1]-a[1])*f
+    return pts[-1][1]
+_gdp=payload['gdp']; _rows=d['raw']
+_days=[dt.date.fromisoformat(r[0]) for r in _rows]; _vals=[float(r[1]) for r in _rows]
+_t0,_t1=_days[0],_days[-1]; _span=(_t1-_t0).days
+_cross=next((i for i in range(len(_rows)) if _vals[i]>_gdp_at(_gdp,_days[i])), None)
+_maxv=max(_vals[-1], _gdp_at(_gdp,_t1))*1.05
+_samp=[i for i in range(0,len(_rows),max(1,len(_rows)//60))]+[len(_rows)-1]
+_card={'kind':'crossover',
+ 'a':[[round((_days[i]-_t0).days/_span,4), round(_vals[i]/_maxv,4)] for i in _samp],
+ 'b':[[round((_days[i]-_t0).days/_span,4), round(_gdp_at(_gdp,_days[i])/_maxv,4)] for i in _samp],
+ 'cross':[round((_days[_cross]-_t0).days/_span,4), round(_vals[_cross]/_maxv,4)] if _cross is not None else None,
+ 'figure':'$'+f"{_vals[-1]/1e12:.2f}"+'T','label':'total federal debt, '+dt.date.fromisoformat(last[0]).strftime('%b %-d, %Y'),
+ 'updated':payload['retrieved']}
+json.dump(_card,open(root/'card.json','w'),separators=(',',':'))
+
 json.dump({'plot':'national-debt','updated':payload['retrieved'],'through':last[0]},open(root/'meta.json','w'))
 print('index.html',len(open(root/'index.html').read())//1024,'KB; artifact.html',len(art)//1024,'KB')

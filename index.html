@@ -53,7 +53,7 @@ a{color:var(--accent-ink)}
 .intro p{margin:0;color:var(--ink-2);font-size:16px}
 .section-label{font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:500;margin:0 0 12px}
 .stories{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;list-style:none;padding:0;margin:0 0 40px}
-.story{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 20px 16px;display:flex;flex-direction:column;gap:8px;min-height:190px;position:relative;text-decoration:none;color:inherit;transition:border-color .15s}
+.story{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 20px 16px;display:flex;flex-direction:column;gap:6px;position:relative;text-decoration:none;color:inherit;transition:border-color .15s;height:100%}
 .story{--tc:var(--accent);border-top:3px solid var(--tc)}
 .story:hover{border-color:var(--tc)}
 .story[data-theme="economy"]{--tc:var(--t-economy)}
@@ -65,6 +65,7 @@ a{color:var(--accent-ink)}
 .story .kicker{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:500;display:flex;justify-content:space-between;gap:8px}
 .story h2{font-size:19px;font-weight:600;margin:0;letter-spacing:-.01em;line-height:1.25}
 .story p{margin:0;color:var(--ink-2);font-size:13.5px;line-height:1.5;flex:1}
+.stories li{display:flex}
 .story .figure{font-family:var(--mono);font-size:22px;font-weight:500;color:var(--accent-ink);letter-spacing:-.01em;line-height:1.1}
 .story .figure small{display:block;font-family:var(--sans);font-size:11.5px;color:var(--muted);font-weight:400;margin-top:2px}
 .story .meta{font-size:12px;color:var(--muted);display:flex;justify-content:space-between;gap:8px}
@@ -74,9 +75,18 @@ a{color:var(--accent-ink)}
 .pill{display:inline-block;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;font-weight:600;border-radius:4px;padding:1px 6px}
 .pill.live{color:var(--surface);background:var(--accent)}
 .pill.soon{color:var(--gold);border:1px solid var(--gold)}
-.spark{height:44px;width:100%}
-.spark path{fill:none;stroke:var(--tc);stroke-width:1.8;stroke-linejoin:round}
-.spark .fill{fill:var(--tc);opacity:.14;stroke:none}
+.viz{height:72px;margin:4px 0 2px;border-radius:6px;overflow:hidden}
+.viz svg{display:block;width:100%;height:100%}
+.viz.empty{border:1px dashed var(--border)}
+.viz .v-a{fill:none;stroke:var(--tc);stroke-width:2;stroke-linejoin:round}
+.viz .v-b{fill:none;stroke:var(--muted);stroke-width:1.4;stroke-dasharray:4 3;opacity:.8}
+.viz .v-f{fill:var(--tc);opacity:.10}
+.viz .v-dot{fill:var(--gold);stroke:var(--surface);stroke-width:1.5}
+.viz .v-open{fill:none;stroke:var(--gold);stroke-width:1.5}
+.viz .v-base{stroke:var(--border)}
+.fig{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin:2px 0 4px}
+.fig b{font-family:var(--mono);font-size:21px;font-weight:500;letter-spacing:-.01em;color:var(--ink);line-height:1.1}
+.fig span{font-size:11.5px;color:var(--muted)}
 .about{border-top:1px solid var(--border);padding-top:20px;color:var(--ink-2);font-size:13.5px;max-width:72ch}
 .about p{margin:0 0 10px}
 @media (max-width:520px){.page{padding-block:20px 48px}.masthead{margin-bottom:28px}.story{min-height:0}}
@@ -97,40 +107,32 @@ a{color:var(--accent-ink)}
   <p class="section-label">Plots</p>
   <ul class="stories" aria-label="Plots">
     <li>
-      <a class="story" href="national-debt/" data-theme="economy">
+      <a class="story" href="national-debt/" data-theme="economy" data-card="national-debt">
         <span class="kicker"><span>Economy</span><span class="pill live">Live</span></span>
         <h2>The National Debt</h2>
+        <div class="viz"><svg viewBox="0 0 300 72" preserveAspectRatio="none" aria-hidden="true"><path class="v-b" d="M0,66 L60,62 L120,56 L180,48 L240,38 L300,30"/><path class="v-a" d="M0,68 L60,64 L120,58 L180,46 L240,30 L300,6"/><circle class="v-dot" cx="176" cy="47" r="4"/></svg></div>
+        <div class="fig"><b>$40.09T</b><span>total federal debt</span></div>
         <p>How the national debt has grown over three decades and six presidential terms, and how that growth lines up with GDP, unemployment and inflation.</p>
-        <svg class="spark" viewBox="0 0 300 44" preserveAspectRatio="none" aria-hidden="true">
-          <path class="fill" d="M0,40 L30,39 L60,38 L90,36 L120,32 L150,25 L180,22 L210,18 L230,10 L260,7 L300,2 L300,44 L0,44 Z"/>
-          <path d="M0,40 L30,39 L60,38 L90,36 L120,32 L150,25 L180,22 L210,18 L230,10 L260,7 L300,2"/>
-        </svg>
         <span class="meta"><span data-updated="national-debt">Auto-updated Sep 20, 2026</span></span>
       </a>
     </li>
     <li>
-      <a class="story" href="the-curve/" data-theme="technology">
+      <a class="story" href="the-curve/" data-theme="technology" data-card="the-curve">
         <span class="kicker"><span>Technology</span><span class="pill live">Live</span></span>
         <h2>The Curve</h2>
+        <div class="viz"><svg viewBox="0 0 300 72" preserveAspectRatio="none" aria-hidden="true"><path class="v-b" d="M0,66 L220,36 L300,26"/><path class="v-b" d="M0,68 L220,36 L300,18"/><path class="v-b" d="M0,70 L220,36 L300,10"/><path class="v-a" d="M0,71 L220,36 L300,2"/></svg></div>
+        <div class="fig"><b>×2 / 5.6 mo</b><span>AI training compute doubling time</span></div>
         <p>Moore's Law has doubled chips every two years for sixty years. AI's own growth, set against it, doubles every six months. How much of that exponent do the chips explain?</p>
-        <svg class="spark" viewBox="0 0 300 44" preserveAspectRatio="none" aria-hidden="true">
-          <path class="fill" d="M0,42 L60,40 L120,37 L170,33 L200,30 L220,26 L240,20 L260,13 L280,7 L300,2 L300,44 L0,44 Z"/>
-          <path d="M0,42 L60,40 L120,37 L170,33 L200,30 L220,26 L240,20 L260,13 L280,7 L300,2"/>
-          <path d="M0,43 L100,41 L200,38 L300,34" style="stroke:var(--muted);stroke-dasharray:4 3"/>
-        </svg>
         <span class="meta"><span data-updated="the-curve">Auto-updated Sep 20, 2026</span></span>
       </a>
     </li>
     <li>
-      <a class="story" href="the-tests/" data-theme="technology">
+      <a class="story" href="the-tests/" data-theme="technology" data-card="the-tests">
         <span class="kicker"><span>Technology</span><span class="pill live">Live</span></span>
         <h2>How Fast the Tests Fall</h2>
+        <div class="viz"><svg viewBox="0 0 300 72" preserveAspectRatio="none" aria-hidden="true"><circle class="v-dot" cx="290" cy="8" r="3"/><circle class="v-dot" cx="130" cy="20" r="3"/><circle class="v-dot" cx="170" cy="32" r="3"/><circle class="v-dot" cx="80" cy="44" r="3"/><circle class="v-dot" cx="50" cy="56" r="3"/><circle class="v-dot" cx="12" cy="68" r="3"/></svg></div>
+        <div class="fig"><b>11 months</b><span>median time to solve a recent benchmark</span></div>
         <p>Every major AI benchmark on one calendar, from the day each was published to the day it was solved. Tests that once lasted years now fall in months.</p>
-        <svg class="spark" viewBox="0 0 300 44" preserveAspectRatio="none" aria-hidden="true">
-          <path d="M0,40 L60,36 L120,30 L180,22 L240,12 L300,6" style="stroke:var(--muted);opacity:.5"/>
-          <path d="M120,40 L150,30 L180,18 L210,10 L240,6" style="stroke:var(--muted);opacity:.7"/>
-          <path d="M200,40 L215,24 L230,10 L245,4 L300,3"/>
-        </svg>
         <span class="meta"><span data-updated="the-tests">Auto-updated Sep 20, 2026</span></span>
       </a>
     </li>
@@ -138,6 +140,8 @@ a{color:var(--accent-ink)}
       <div class="story soon" data-theme="politics">
         <span class="kicker"><span>Politics</span><span class="pill soon">In progress</span></span>
         <h2>The Mamdani Scorecard</h2>
+        <div class="viz empty"></div>
+        <div class="fig"><b>&nbsp;</b><span>&nbsp;</span></div>
         <p>Campaign promises against the record: what was pledged, what has moved, and what the city's own numbers say.</p>
         <span class="meta"><span>Coming</span></span>
       </div>
@@ -151,6 +155,14 @@ a{color:var(--accent-ink)}
 </div>
 <script>
 (function(){const root=document.documentElement;try{const s=localStorage.getItem('plotline-theme');if(s)root.dataset.theme=s}catch(e){}
+const NS='http://www.w3.org/2000/svg';const mk=(t,a)=>{const n=document.createElementNS(NS,t);for(const k in a)n.setAttribute(k,a[k]);return n};
+const W=300,H=72,X=x=>x*W,Y=y=>H-4-y*(H-10);
+function drawCard(card,c){const svg=mk('svg',{viewBox:'0 0 300 72',preserveAspectRatio:'none','aria-hidden':'true'});const path=(pts,cls)=>mk('path',{class:cls,d:pts.map((p,i)=>(i?'L':'M')+X(p[0]).toFixed(1)+','+Y(p[1]).toFixed(1)).join('')});
+  if(card.kind==='crossover'){svg.append(mk('path',{class:'v-f',d:card.a.map((p,i)=>(i?'L':'M')+X(p[0]).toFixed(1)+','+Y(p[1]).toFixed(1)).join('')+`L${W},${H}L0,${H}Z`}));svg.append(path(card.b,'v-b'),path(card.a,'v-a'));if(card.cross)svg.append(mk('circle',{class:'v-dot',cx:X(card.cross[0]),cy:Y(card.cross[1]),r:4}))}
+  else if(card.kind==='fan'){card.lines.forEach((l,i)=>svg.append(path(l,i===card.lines.length-1?'v-a':'v-b')));svg.append(mk('circle',{class:'v-dot',cx:X(card.base[0]),cy:Y(card.base[1]),r:3.5}))}
+  else if(card.kind==='dots'){const n=card.rows.length;card.rows.forEach((r,i)=>{const y=6+i*(H-12)/(n-1);svg.append(mk('line',{class:'v-base',x1:0,x2:W,y1:y,y2:y}));svg.append(mk('circle',{class:r.open?'v-open':'v-dot',cx:X(Math.min(r.x,0.98)),cy:y,r:3}))})}
+  const slot=c.querySelector('.viz');slot.replaceChildren(svg);const f=c.querySelector('.fig');if(f&&card.figure){f.querySelector('b').textContent=card.figure;f.querySelector('span').textContent=card.label}}
+document.querySelectorAll('[data-card]').forEach(async c=>{try{const r=await fetch(c.dataset.card+'/card.json',{cache:'no-cache'});if(!r.ok)return;drawCard(await r.json(),c)}catch(e){}});
 document.querySelectorAll('[data-updated]').forEach(async s=>{try{const r=await fetch(s.dataset.updated+'/meta.json',{cache:'no-cache'});if(!r.ok)return;const m=await r.json();s.textContent='Auto-updated '+new Date(m.updated+'T12:00:00Z').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric',timeZone:'UTC'})}catch(e){}});
 document.getElementById('theme').onclick=()=>{const dark=getComputedStyle(root).colorScheme==='dark';root.dataset.theme=dark?'light':'dark';try{localStorage.setItem('plotline-theme',root.dataset.theme)}catch(e){}}})();
 </script>
