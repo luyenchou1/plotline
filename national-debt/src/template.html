@@ -549,7 +549,7 @@ function setCursor(d,pin=false){
   const tw=tip.offsetWidth,th=tip.offsetHeight;let left=px+14;if(left+tw>w-m.r)left=px-14-tw;tip.style.left=Math.max(0,left)+'px';tip.style.top=clamp(y(d.v)-th/2,m.t,h-m.b-th)+'px';
 }
 function clearCursor(){S.hover=null;S.evHover=null;$('#cursor-main')?.replaceChildren();for(const ind of IND){$('#cursor-'+ind.key)?.replaceChildren();const latest=[...ind.map].reverse().find(([k,v])=>v!=null);const e=$('#val-'+ind.key);if(e)e.textContent=latest?ind.fmt(latest[1]):''}$('#tip').hidden=true}
-document.addEventListener('keydown',e=>{if(e.target.matches('input,button,select,textarea'))return;if(e.key==='Escape'){S.pinned=null;clearCursor();return}if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();let i=S.pinned==null?bisect(S.t1):S.pinned;i=clamp(i+(e.key==='ArrowRight'?1:-1),bisect(S.t0),Math.min(N-1,bisect(S.t1)));S.pinned=i;setCursor(D[i],true)}});
+document.addEventListener('keydown',e=>{if(e.target&&e.target.matches&&e.target.matches('input,button,select,textarea'))return;if(e.key==='Escape'){S.pinned=null;clearCursor();return}if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();let i=S.pinned==null?bisect(S.t1):S.pinned;i=clamp(i+(e.key==='ArrowRight'?1:-1),bisect(S.t0),Math.min(N-1,bisect(S.t1)));S.pinned=i;setCursor(D[i],true)}});
 
 /* ---------- events UI ---------- */
 function openEvent(e){showEventDialog(e)}
