@@ -81,7 +81,7 @@ h1{font-size:clamp(22px,2.6vw,28px);font-weight:600;letter-spacing:-.02em;margin
 .scrolly{position:relative}
 .stage{position:sticky;top:0;height:100vh;display:flex;align-items:center;z-index:0}
 .stage svg{width:100%;height:min(74vh,620px)}
-.stage-note{position:absolute;right:24px;top:calc(50% - min(37vh,310px) + 8px);font-family:var(--mono);font-size:12.5px;color:var(--ink-2);text-align:right;line-height:1.6;white-space:pre-line;pointer-events:none}
+.stage-note{position:absolute;left:calc(36vw + 64px);top:calc(50% - min(37vh,310px) + 6px);font-family:var(--mono);font-size:12.5px;color:var(--ink-2);text-align:left;line-height:1.6;white-space:pre-line;pointer-events:none}
 .stage-note b{color:var(--ink);font-weight:500}
 .steps{position:relative;z-index:2;margin-top:-100vh;pointer-events:none}
 .step{min-height:100vh;display:flex;align-items:center}
@@ -108,7 +108,7 @@ h1{font-size:clamp(22px,2.6vw,28px);font-weight:600;letter-spacing:-.02em;margin
   .opener-fig{max-width:220px}
   .stage{height:48vh;top:0;align-items:flex-start;background:var(--bg);z-index:1;border-bottom:1px solid var(--border)}
   .stage svg{height:44vh}
-  .stage-note{top:8px;right:12px;font-size:11px}
+  .stage-note{top:6px;left:56px;font-size:11px}
   .steps{margin-top:0;z-index:0}
   .step{min-height:60vh;align-items:flex-start;padding-top:12px}
   .step .card{width:100%;opacity:1;transform:none}
@@ -596,7 +596,7 @@ $('#replay').onclick=()=>{if(replaying)return;replaying=true;S.pinned=null;drawA
   let cur={t0:TARGET[0].t0,t1:TARGET[0].t1,mode:'linear',layers:['transistors'],prog:1,apollo:true,box:null,note:TARGET[0].note},active=-1,raf=null;
   const ease=u=>u<.5?2*u*u:1-Math.pow(-2*u+2,2)/2;
   function render(){
-    const w=svg.clientWidth||800,h=svg.clientHeight||500,mob=mobile();const m={l:mob?48:(mob?0:Math.round(w*0.36)+56),r:mob?16:28,t:34,b:30};
+    const w=svg.clientWidth||800,h=svg.clientHeight||500,mob=mobile();const m={l:mob?48:(mob?0:Math.round(w*0.36)+56),r:mob?16:28,t:mob?70:100,b:30};
     const {t0,t1,mode,layers,prog,apollo,box}=cur;const x=t=>m.l+(t-t0)/(t1-t0)*(w-m.l-m.r);
     svg.setAttribute('viewBox',`0 0 ${w} ${h}`);svg.replaceChildren();
     let y;
