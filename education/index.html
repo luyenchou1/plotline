@@ -153,6 +153,7 @@ table.rank{width:100%;border-collapse:collapse;font-size:13px}
 table.rank td{padding:4px 0;border-bottom:1px solid var(--grid);vertical-align:baseline}
 table.rank tr:last-child td{border-bottom:none}
 table.rank td.n{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+table.rank td small{color:var(--muted);font-size:11px;font-family:var(--mono)}
 table.rank td.r{color:var(--muted);font-family:var(--mono);font-size:12px;padding-right:12px;white-space:nowrap}
 table.rank tr.us td{color:var(--accent-ink);font-weight:600}
 table.rank tr.gap td{color:var(--muted);text-align:center;padding:2px 0;font-size:11px;letter-spacing:.2em}
@@ -340,10 +341,15 @@ function drawPisa(){const subject=S.subject,D=DATA.pisa[subject];const svg=$('#p
   for(const [n,e] of top)if(!labels.some(l=>l.name===n)){const last=lastOf(e.scores);labels.push({name:n,cls:'top',y:y(last[1]),x:x(last[0])+8,val:fmt1(last[1])})}
   labels.sort((a,b)=>a.y-b.y);for(let i=1;i<labels.length;i++)if(labels[i].y-labels[i-1].y<13)labels[i].y=labels[i-1].y+13;
   for(const l of labels){svg.append(svgEl('text',{class:'lab name '+(l.cls==='top'?'':l.cls),x:l.x,y:l.y+4},`${l.name} ${l.val}`))}
-  // rank table
-  const r=rankIn(subject,yLast);const tbl=$('#rank');tbl.replaceChildren();$('#rank-h').textContent=`OECD members, ${({math:'mathematics',reading:'reading',science:'science'})[subject]} ${yLast}`;
-  const add=(i,row)=>{const tr=el('tr',row[0]==='United States'?'us':'');const a=el('a',null,row[0]);a.onclick=()=>{S.pick=row[0]==='United States'?null:row[0];drawPisa()};const td=el('td');td.append(a);tr.append(el('td','r',ord(i+1)),td,el('td','n',fmt1(row[1])));tbl.append(tr)};
-  const usI=r.us-1;const shown=new Set([0,1,2,3,4,5,6,7,usI-1,usI,usI+1,r.n-2,r.n-1].filter(i=>i>=0&&i<r.n));let prev=-1;for(let i=0;i<r.n;i++){if(!shown.has(i))continue;if(i-prev>1){const tr=el('tr','gap');const td=el('td','',null);td.colSpan=3;td.textContent='···';tr.append(td);tbl.append(tr)}add(i,r.rows[i]);prev=i}
+  // rank table: by score in the latest round, or by change since each country's first round in the gainers / decliners views
+  const r=rankIn(subject,yLast);const tbl=$('#rank');tbl.replaceChildren();const subjLong=({math:'mathematics',reading:'reading',science:'science'})[subject];
+  const addRow=(i,name,val,us,sub)=>{const tr=el('tr',us?'us':'');const a=el('a',null,name);a.onclick=()=>{S.pick=name==='United States'?null:name;drawPisa()};const td=el('td');td.append(a);if(sub)td.append(el('small',null,' '+sub));const n=el('td','n',val);tr.append(el('td','r',ord(i+1)),td,n);tbl.append(tr)};
+  if(S.view==='all'){$('#rank-h').textContent=`OECD members, ${subjLong} ${yLast}`;
+    const usI=r.us-1;const shown=new Set([0,1,2,3,4,5,6,7,usI-1,usI,usI+1,r.n-2,r.n-1].filter(i=>i>=0&&i<r.n));let prev=-1;for(let i=0;i<r.n;i++){if(!shown.has(i))continue;if(i-prev>1){const tr=el('tr','gap');const td=el('td','',null);td.colSpan=3;td.textContent='···';tr.append(td);tbl.append(tr)}addRow(i,r.rows[i][0],fmt1(r.rows[i][1]),r.rows[i][0]==='United States');prev=i}}
+  else{const rows=Object.entries(D).filter(([n,e])=>e.oecd&&e.scores.length>=2).map(([n,e])=>[n,change(e),e.scores[0],lastOf(e.scores)]).filter(x=>S.view==='gain'?x[1]>0:x[1]<0).sort((a,b)=>S.view==='gain'?b[1]-a[1]:a[1]-b[1]);
+    $('#rank-h').textContent=`OECD members that ${S.view==='gain'?'gained':'declined'} in ${subjLong}, by change since their first round`;
+    rows.forEach((x,i)=>addRow(i,x[0],(x[1]>0?'+':'−')+fmt1(Math.abs(x[1])),x[0]==='United States',`${x[2][0]}–${x[3][0]}`));
+    if(!rows.length){const tr=el('tr','gap');const td=el('td');td.colSpan=3;td.textContent='none';tr.append(td);tbl.append(tr)}}
   document.querySelectorAll('#subjects .chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.s===subject));document.querySelectorAll('#views .chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===S.view));
   const lg=$('#pisa-legend');lg.replaceChildren();const li=(cls,t)=>{const sp=el('span');const i=el('i');if(cls)i.className=cls;sp.append(i,t);lg.append(sp)};li('','United States');li('oecd','OECD average');if(S.view==='all')li('faint','Other OECD members');else{li('gain','Gained since its first round');li('loss','Declined')}li('pick','Picked country');
   const us=D['United States'].scores,oa=D['OECD average'].scores;const usF=us[0],usL=lastOf(us),oaL=oa.find(s=>s[0]===yLast)||lastOf(oa);const topN=top[0];
