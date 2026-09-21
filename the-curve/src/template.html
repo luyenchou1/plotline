@@ -82,7 +82,7 @@ h1{font-size:clamp(22px,2.6vw,28px);font-weight:600;letter-spacing:-.02em;margin
 .stage{position:sticky;top:0;height:100vh;display:flex;align-items:center;z-index:0}
 .stage svg{width:100%;height:min(74vh,620px)}
 .stage-note{position:absolute;left:calc(36vw + 64px);top:calc(50% - min(37vh,310px) + 6px);font-family:var(--mono);font-size:12.5px;color:var(--ink-2);text-align:left;line-height:1.6;white-space:pre-line;pointer-events:none}
-.stage-note b{color:var(--ink);font-weight:500}
+.stage-note b{color:var(--ink);font-weight:600}
 .steps{position:relative;z-index:2;margin-top:-100vh;pointer-events:none}
 .step{min-height:100vh;display:flex;align-items:center}
 .step .card{pointer-events:auto;width:min(380px,36vw);background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 18px;box-shadow:var(--shadow);font-size:14.5px;line-height:1.6;color:var(--ink-2);opacity:.55;transform:translateY(6px);transition:opacity .35s,transform .35s}
@@ -589,11 +589,13 @@ $('#replay').onclick=()=>{if(replaying)return;replaying=true;S.pinned=null;drawA
     {t0:Date.UTC(1971,0,1),t1:Date.UTC(2020,0,1),mode:'linear',layers:['transistors'],prog:1,apollo:false,box:null,note:'Transistors per chip, record holder\n<b>×2 every '+RATE('transistors')+' months</b>'},
     {t0:Date.UTC(1971,0,1),t1:T1,mode:'linear',layers:['transistors'],prog:1,apollo:false,box:{t1:Date.UTC(2020,0,1),v:rec2019.v},note:'Record chip today\n<b>'+recNow.name+' · '+fmtCount(recNow.v)+'</b>'},
     {t0:Date.UTC(1971,0,1),t1:T1,mode:'indexed',layers:['transistors'],prog:1,apollo:false,box:null,note:'Indexed to 2012\nstraight line = steady doubling'},
-    {t0:Date.UTC(1971,0,1),t1:T1,mode:'indexed',layers:['transistors','compute'],prog:1,apollo:false,box:null,note:'Training compute <b>×2 / '+RATE('compute')+' mo</b>\nTransistors ×2 / '+RATE('transistors')+' mo'},
-    {t0:Date.UTC(1971,0,1),t1:T1,mode:'indexed',layers:['transistors','hardware','params','compute'],prog:1,apollo:false,box:null,note:'Compute ×2 / '+RATE('compute')+' mo\nParameters ×2 / '+RATE('params')+' mo\nAccelerators ×2 / '+RATE('hardware')+' mo\n<b>Transistors ×2 / '+RATE('transistors')+' mo</b>'},
-    {t0:Date.UTC(1971,0,1),t1:T1,mode:'indexed',layers:['transistors','hardware','params','compute'],prog:1,apollo:false,box:null,note:''},
+    {t0:Date.UTC(1971,0,1),t1:T1,mode:'indexed',layers:['transistors','compute'],prog:1,apollo:false,box:null,noteLines:true,hlFinal:'compute'},
+    {t0:Date.UTC(1971,0,1),t1:T1,mode:'indexed',layers:['transistors','compute','hardware','params'],prog:1,apollo:false,box:null,noteLines:true,hlFinal:'transistors'},
+    {t0:Date.UTC(1971,0,1),t1:T1,mode:'indexed',layers:['transistors','compute','hardware','params'],prog:1,apollo:false,box:null,note:''},
   ];
-  let cur={t0:TARGET[0].t0,t1:TARGET[0].t1,mode:'linear',layers:['transistors'],prog:1,apollo:true,box:null,note:TARGET[0].note},active=-1,raf=null;
+  let cur={t0:TARGET[0].t0,t1:TARGET[0].t1,mode:'linear',layers:['transistors'],prog:1,apollo:true,box:null,note:TARGET[0].note,lp:{},hl:null},active=-1,raf=null,token=0;
+  const RATE_LINE=k=>({transistors:'Transistors',compute:'Training compute',hardware:'Accelerators',params:'Parameters'})[k]+' ×2 / '+RATE(k)+' mo';
+  const noteFor=()=>{if(!cur.noteLines)return cur.note||'';const order=['compute','params','hardware','transistors'];return order.filter(k=>cur.layers.includes(k)&&(cur.lp[k]??1)>0).map(k=>(k===cur.hl?'<b>':'<span style="opacity:.55">')+RATE_LINE(k)+(k===cur.hl?'</b>':'</span>')).join('\n')};
   const ease=u=>u<.5?2*u*u:1-Math.pow(-2*u+2,2)/2;
   function render(){
     const w=svg.clientWidth||800,h=svg.clientHeight||500,mob=mobile();const m={l:mob?48:(mob?0:Math.round(w*0.36)+56),r:mob?16:28,t:mob?70:100,b:30};
@@ -609,32 +611,38 @@ $('#replay').onclick=()=>{if(replaying)return;replaying=true;S.pinned=null;drawA
       const g=svgEl('g',{class:'grid'});const dec=Math.max(1,Math.ceil((lb-la)/7));for(let e=Math.ceil(la);e<=Math.floor(lb);e++){if(((e%dec)+dec)%dec)continue;const v=Math.pow(10,e);g.append(svgEl('line',{x1:m.l,x2:w-m.r,y1:y(v),y2:y(v)}));g.append(svgEl('text',{x:m.l-8,y:y(v)+4,'text-anchor':'end'},e===0?'1×':fmtPow(v)+'×'))}
       g.append(svgEl('line',{class:'base-line',x1:m.l,x2:w-m.r,y1:y(1),y2:y(1)}));g.append(svgEl('text',{class:'base-label',x:w-m.r-4,y:y(1)-4,'text-anchor':'end'},'2012 level'));if(BASE_T>t0&&BASE_T<t1)g.append(svgEl('line',{class:'base-line',x1:x(BASE_T),x2:x(BASE_T),y1:m.t,y2:h-m.b}));svg.append(g)}
     const ax=svgEl('g',{class:'axis-x'});for(const tk of xTicks(t0,t1,w-m.l-m.r)){ax.append(svgEl('text',{x:x(tk.t),y:h-m.b+16,'text-anchor':'middle'},tk.label))}ax.append(svgEl('line',{x1:m.l,x2:w-m.r,y1:h-m.b,y2:h-m.b,stroke:'var(--axis)'}));svg.append(ax);
-    const tEnd=t0+(t1-t0)*prog;const ends=[];
-    for(const k of layers){const l=L[k];const val=v=>mode==='linear'?v:idx(l,v);
+    const ends=[];
+    for(const k of layers){const l=L[k];const val=v=>mode==='linear'?v:idx(l,v);const lpk=(cur.lp&&cur.lp[k]!=null)?cur.lp[k]:prog;if(lpk<=0)continue;const tEnd=t0+(t1-t0)*lpk;
       const pts=[];const ra=recAt(l,t0);if(ra)pts.push({t:t0,v:ra.v});for(const p of l.rec){if(p.t<=t0||p.t>tEnd)continue;pts.push({t:p.t,v:pts.length?pts[pts.length-1].v:p.v});pts.push(p)}const rb=recAt(l,tEnd);if(rb&&pts.length)pts.push({t:tEnd,v:rb.v});
       if(!pts.length)continue;const d=pts.map((p,i)=>(i?'L':'M')+x(p.t).toFixed(1)+','+y(val(p.v)).toFixed(1)).join('');
       if(mode==='linear')svg.append(svgEl('path',{class:'st-area',d:d+`L${x(tEnd).toFixed(1)},${h-m.b}L${x(t0).toFixed(1)},${h-m.b}Z`}));
       svg.append(svgEl('path',{class:'st-line',d,style:'stroke:'+l.color}));
       if(mode==='linear'){for(const p of l.rec){if(p.t<t0||p.t>tEnd)continue;svg.append(svgEl('circle',{class:'st-dot',cx:x(p.t),cy:y(p.v),r:3.2,fill:l.color}))}}
-      const last=pts[pts.length-1];ends.push({k,l,x:x(last.t),y:y(val(last.v)),name:rb?rb.name:'',v:rb?rb.v:0})}
-    if(mode==='linear'&&ends.length){const e=ends[0];if(prog>0.05){const anchorEnd=e.x>w-m.r-170;svg.append(svgEl('text',{class:'st-label',x:anchorEnd?e.x-10:e.x+10,y:e.y-8,'text-anchor':anchorEnd?'end':'start'},e.name));svg.append(svgEl('text',{class:'st-sub',x:anchorEnd?e.x-10:e.x+10,y:e.y+8,'text-anchor':anchorEnd?'end':'start'},fmtCount(e.v)+' transistors · '+fmtY(recAt(L.transistors,tEnd).t)))}
+      const last=pts[pts.length-1];ends.push({k,l,x:x(last.t),y:y(val(last.v)),name:rb?rb.name:'',v:rb?rb.v:0,tEnd})}
+    if(mode==='linear'&&ends.length){const e=ends[0];if(prog>0.05){const anchorEnd=e.x>w-m.r-170;svg.append(svgEl('text',{class:'st-label',x:anchorEnd?e.x-10:e.x+10,y:e.y-8,'text-anchor':anchorEnd?'end':'start'},e.name));svg.append(svgEl('text',{class:'st-sub',x:anchorEnd?e.x-10:e.x+10,y:e.y+8,'text-anchor':anchorEnd?'end':'start'},fmtCount(e.v)+' transistors · '+fmtY(recAt(L.transistors,e.tEnd).t)))}
       if(rec4004.t>=t0&&rec4004.t<=tEnd&&!apollo){svg.append(svgEl('text',{class:'st-sub',x:x(rec4004.t)+8,y:y(rec4004.v)-8},'Intel 4004 · 2,300 · 1971'))}}
-    else{ends.sort((a,b)=>a.y-b.y);for(let i=1;i<ends.length;i++)if(ends[i].y-ends[i-1].y<14)ends[i].y=ends[i-1].y+14;for(const e of ends)svg.append(svgEl('text',{class:'st-end',x:e.x-6,y:e.y-7,'text-anchor':'end',style:'fill:'+e.l.color},e.l.short))}
+    else{ends.sort((a,b)=>a.y-b.y);for(let i=1;i<ends.length;i++)if(ends[i].y-ends[i-1].y<14)ends[i].y=ends[i-1].y+14;for(const e of ends)svg.append(svgEl('text',{class:'st-end',x:e.x-6,y:e.y-7,'text-anchor':'end',style:'fill:'+e.l.color+(cur.hl&&cur.hl!==e.k?';opacity:.55':'')},e.l.short))}
     if(apollo){const ax2=x(APOLLO_T),ay2=y(APOLLO_V);svg.append(svgEl('circle',{class:'st-dot',cx:ax2,cy:ay2,r:5,fill:'var(--event)'}));svg.append(svgEl('text',{class:'st-label',x:ax2+10,y:ay2-10},'Apollo 11 · July 1969'));svg.append(svgEl('text',{class:'st-sub',x:ax2+10,y:ay2+6},'6 transistors per chip'));
       if(rec4004.t<=t1){svg.append(svgEl('circle',{class:'st-dot',cx:x(rec4004.t),cy:y(rec4004.v),r:4,fill:L.transistors.color}));svg.append(svgEl('text',{class:'st-label',x:x(rec4004.t)+10,y:y(rec4004.v)-10},'Intel 4004 · 1971'));svg.append(svgEl('text',{class:'st-sub',x:x(rec4004.t)+10,y:y(rec4004.v)+6},'2,300 transistors'))}}
     if(box&&mode==='linear'){const bx=x(t0),bw=x(Math.min(box.t1,t1))-bx,by=y(box.v);svg.append(svgEl('rect',{class:'st-box',x:bx,y:by,width:bw,height:h-m.b-by}));svg.append(svgEl('text',{class:'st-boxlabel',x:bx+bw/2,y:by-8,'text-anchor':'middle'},'the chart you just saw fits in this box'))}
-    note.innerHTML=cur.note||'';
+    note.innerHTML=noteFor();
   }
-  function goTo(i){if(i===active)return;active=i;steps.forEach((s,k)=>s.classList.toggle('active',k===i));const to=TARGET[i];const from={...cur};
+  function goTo(i){if(i===active)return;active=i;steps.forEach((s,k)=>s.classList.toggle('active',k===i));const to=TARGET[i];const from={...cur};const my=++token;
     const modeChange=from.mode!==to.mode;const dur=reduced?0:(i===1?2600:1100);const start=performance.now();if(raf)cancelAnimationFrame(raf);
+    const added=to.mode==='indexed'&&!modeChange?to.layers.filter(k=>!from.layers.includes(k)):[];
+    if(added.length){const lp={};for(const k of to.layers)lp[k]=added.includes(k)?0:1;cur={...to,lp,hl:null};render();
+      const per=reduced?0:1500;let idx2=0;
+      const drawNext=()=>{if(my!==token)return;if(idx2>=added.length){cur={...to,lp:{},hl:to.hlFinal||null};render();return}const k=added[idx2++];const s0=performance.now();cur.hl=k;
+        (function fr(now){if(my!==token)return;const u=per?Math.min(1,(now-s0)/per):1;cur.lp[k]=ease(u);render();if(u<1)raf=requestAnimationFrame(fr);else{cur.lp[k]=1;drawNext()}})(s0)};
+      drawNext();return}
     const fromProg=(i===1&&from.mode==='linear'&&Math.abs(from.t1-Date.UTC(1976,0,1))<DAY)?0:from.prog;
     (function frame(now){const u=dur?Math.min(1,(now-start)/dur):1,e=ease(u);
-      if(modeChange){cur={...to,prog:1};svg.style.opacity=u<0.5?String(1-u*2):String((u-0.5)*2);if(u<0.5){cur={...from};}}
-      else{cur={...to,t0:from.t0+(to.t0-from.t0)*e,t1:from.t1+(to.t1-from.t1)*e,prog:fromProg+(to.prog-fromProg)*e,apollo:to.apollo||(from.apollo&&u<0.4),box:u>0.6?to.box:null};svg.style.opacity='1'}
-      render();if(u<1)raf=requestAnimationFrame(frame);else{cur={...to};svg.style.opacity='1';render()}})(start)}
+      if(modeChange){cur={...to,prog:1,lp:{},hl:null};svg.style.opacity=u<0.5?String(1-u*2):String((u-0.5)*2);if(u<0.5){cur={...from};}}
+      else{cur={...to,t0:from.t0+(to.t0-from.t0)*e,t1:from.t1+(to.t1-from.t1)*e,prog:fromProg+(to.prog-fromProg)*e,apollo:to.apollo||(from.apollo&&u<0.4),box:u>0.6?to.box:null,lp:{},hl:null};svg.style.opacity='1'}
+      render();if(u<1)raf=requestAnimationFrame(frame);else{cur={...to,lp:{},hl:to.hlFinal||null};svg.style.opacity='1';render()}})(start)}
   const io=new IntersectionObserver(entries=>{for(const en of entries){if(en.isIntersecting)goTo(+en.target.dataset.step)}},{rootMargin:'-45% 0px -45% 0px',threshold:0});
   steps.forEach(s=>io.observe(s));
-  render();window.__story={goTo,state:()=>cur,jump:i=>{if(raf)cancelAnimationFrame(raf);active=i;steps.forEach((s,k)=>s.classList.toggle('active',k===i));cur={...TARGET[i]};svg.style.opacity='1';render()}};
+  render();window.__story={goTo,state:()=>cur,jump:i=>{if(raf)cancelAnimationFrame(raf);token++;active=i;steps.forEach((s,k)=>s.classList.toggle('active',k===i));cur={...TARGET[i],lp:{},hl:TARGET[i].hlFinal||null};svg.style.opacity='1';render()}};
   new ResizeObserver(()=>render()).observe(stage);
 })();
 
