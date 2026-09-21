@@ -30,6 +30,11 @@ A living record of the design principles and patterns we settle on while buildin
 - Honest charts: one y-axis per chart, no dual axes; a log axis is labeled as one and a fitted axis says it does not start at zero; the evaluation protocol is named wherever numbers differ across sources. Where a linear view tells the story better (the vertical takeoff), offer it, with log one click away. *(2026-09-20)*
 - Drama comes from the data and the framing, not from motion. A replay that draws the line through time is fine; decorative animation is not.
 
+## The landing cards
+
+- A card shows the plot's aha in miniature and one headline figure, both drawn from the plot's own data: each build writes a `card.json` (kind, a few dozen normalized points, figure, label, updated date) and the landing page draws the card from it. Nothing on a card is hand-drawn or typed in, so cards update with the data. *(2026-09-20)*
+- Cards share one skeleton in a fixed order (kicker, title, a 72px chart slot, figure, blurb, date) so the graphics line up across a row whatever the text length; a plot that is not live yet keeps the skeleton with an empty slot. Cards do not list sources; every plot has several and the card would always be incomplete. *(2026-09-20)*
+
 ## Plots update themselves
 
 - Auto-updating is a feature to sell, not hide. Every plot shows "Auto-updated <date>" subtly in its nav line, the landing cards show the same date, and a scheduled job re-fetches, rebuilds and commits. Going to a plot should always show the latest record holder and the latest state of the art. *(2026-09-20)*

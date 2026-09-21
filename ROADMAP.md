@@ -17,4 +17,4 @@ Living list. Ordered roughly by what's next; dated when added. Done items move t
 
 ## Done
 
-- Ledes on all three plots and the landing intro, from Luyen's own drafts. Landing page, The National Debt, The Curve, How Fast the Tests Fall; design comps reviewed and current design kept; theme colors on cards; Plotline mark and favicon; "Auto-updated" stamps with `meta.json`; weekly refresh workflow for the Epoch-based plots; `PRINCIPLES.md`. *(2026-09-20)*
+- Data-driven landing cards (miniature + headline figure from each plot's `card.json`). Ledes on all three plots and the landing intro, from Luyen's own drafts. Landing page, The National Debt, The Curve, How Fast the Tests Fall; design comps reviewed and current design kept; theme colors on cards; Plotline mark and favicon; "Auto-updated" stamps with `meta.json`; weekly refresh workflow for the Epoch-based plots; `PRINCIPLES.md`. *(2026-09-20)*

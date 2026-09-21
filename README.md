@@ -18,7 +18,7 @@ Each plot is one folder with a static `index.html` that works offline and needs 
 cd national-debt && python3 build.py
 ```
 
-The landing page at the repo root lists the plots by hand; add a card when a plot goes live.
+The landing page at the repo root lists the plots by hand; add a card when a plot goes live. Each build also writes `meta.json` (the refresh date) and `card.json` (the card's miniature and headline figure), which the landing page reads at load.
 
 ## Deploying
 
