@@ -463,8 +463,8 @@ function drawMain(){
     for(const e of inRange){const px=x(e.t),d=nearest(e.t),py=y(d.v);
       evg.append(svgEl('line',{class:'ev-line',x1:px,x2:px,y1:m.t,y2:h-m.b}));
       const width=e.name.length*6.2+8,anchorEnd=px+width>w-m.r,left=anchorEnd?px-width:px,right=left+width;let lane=-1;for(let k=0;k<3;k++){if((lanes[k]??-1e9)+8<=left){lane=k;break}}
-      if(lane>=0){lanes[lane]=right;const tx=svgEl('text',{class:'ev-label',x:anchorEnd?px-5:px+5,y:m.t+12+lane*14,'text-anchor':anchorEnd?'end':'start'},e.name);tx.onclick=()=>openEvent(e);tx.onpointerenter=()=>{if(S.pinned==null)hoverEvent(e)};tx.onpointerleave=()=>{if(S.pinned==null)clearCursor()};evg.append(tx)}
-      const dot=svgEl('circle',{class:'ev-dot'+(S.evOpen===e.id?' on':''),cx:px,cy:py,r:mobile?3.5:5});dot.setAttribute('aria-label',e.name+' · '+fmtDate(e.t));dot.onclick=ev=>{ev.stopPropagation();openEvent(e)};dot.onpointerenter=()=>{if(S.pinned==null)hoverEvent(e)};dot.onpointerleave=()=>{if(S.pinned==null)clearCursor()};evg.append(dot)}
+      if(lane>=0){lanes[lane]=right;const tx=svgEl('text',{class:'ev-label',x:anchorEnd?px-5:px+5,y:m.t+12+lane*14,'text-anchor':anchorEnd?'end':'start'},e.name);tx.onclick=()=>showEventDialog(e);evg.append(tx)}
+      const dot=svgEl('circle',{class:'ev-dot'+(S.evOpen===e.id?' on':''),cx:px,cy:py,r:mobile?3.5:5});dot.setAttribute('aria-label',e.name+' · '+fmtDate(e.t));dot.onclick=ev=>{ev.stopPropagation();S.evOpen=e.id;drawAll()};evg.append(dot)}
   }
   svg.append(evg);
   svg.append(svgEl('g',{id:'cursor-main','pointer-events':'none'}));
@@ -544,16 +544,16 @@ function clearCursor(){S.hover=null;S.evHover=null;$('#cursor-main')?.replaceChi
 $('#main').addEventListener('keydown',e=>{if(e.key==='Escape'){S.pinned=null;clearCursor();return}if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();let i=S.pinned==null?bisect(S.t1):S.pinned;i=clamp(i+(e.key==='ArrowRight'?1:-1),bisect(S.t0),Math.min(N-1,bisect(S.t1)));S.pinned=i;setCursor(D[i],true)}});
 
 /* ---------- events UI ---------- */
-function openEvent(e){S.evOpen=e.id;S.pinned=nearest(e.t).i;drawAll();S.evHover=e.id;setCursor(D[S.pinned],true)}
+function openEvent(e){showEventDialog(e)}
 function closeEvent(redraw){S.evOpen=null;const dlg=$('#event-dialog');if(dlg.open)dlg.close();if(redraw)drawAll()}
 function showEventDialog(e){const dlg=$('#event-dialog');dlg.replaceChildren();
   const eb=el('div','eyebrow');eb.append(el('span','tag','Milestone'),document.createTextNode(fmtDate(e.t)));
   const h=el('h3',null,e.title);h.id='ev-dlg-title';
-  const row=el('div','row');const z=el('button','btn','Zoom to this period');z.onclick=()=>{dlg.close();setRange(e.t-18*30*DAY,e.t+18*30*DAY);openEvent(e)};
+  const row=el('div','row');const z=el('button','btn','Zoom to this period');z.onclick=()=>{dlg.close();setRange(e.t-18*30*DAY,e.t+18*30*DAY);S.evOpen=e.id;drawAll()};
   const c=el('button','btn primary','Close');c.onclick=()=>dlg.close();const a=el('a','src','Source ↗');a.href=e.url;a.target='_blank';a.rel='noopener';row.append(c,z,a);
   dlg.append(eb,h,el('p',null,e.text),row);dlg.showModal();
   dlg.onclick=ev=>{if(ev.target===dlg)dlg.close()}}
-function drawEventList(){const ol=$('#event-list');ol.replaceChildren();for(const e of events){const li=el('li');const b=el('button','ev-chip'+(e.t>=S.t0&&e.t<=S.t1?' in':'')+(S.evOpen===e.id?' on':''));b.append(el('span',null,fmtMY(e.t)),document.createTextNode(e.name));b.onclick=()=>{if(e.t<S.t0||e.t>S.t1)setRange(e.t-18*30*DAY,e.t+18*30*DAY);openEvent(e);showEventDialog(e)};li.append(b);ol.append(li)}}
+function drawEventList(){const ol=$('#event-list');ol.replaceChildren();for(const e of events){const li=el('li');const b=el('button','ev-chip'+(e.t>=S.t0&&e.t<=S.t1?' in':'')+(S.evOpen===e.id?' on':''));b.append(el('span',null,fmtMY(e.t)),document.createTextNode(e.name));b.onclick=()=>{if(e.t<S.t0||e.t>S.t1)setRange(e.t-18*30*DAY,e.t+18*30*DAY);showEventDialog(e)};li.append(b);ol.append(li)}}
 
 /* ---------- navigator (brush) ---------- */
 let navBuilt=false;
