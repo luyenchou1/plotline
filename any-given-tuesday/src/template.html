@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Any Given Tuesday</title>
+<meta name="description" content="Are NFL injuries really rising, or does it only feel that way? Every team's weekly injury report and reserve list since 2009, and how your team compares.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 37 30%27%3E%3Crect x=%271.5%27 y=%276.5%27 width=%2725%27 height=%2722%27 rx=%275%27 fill=%27%231d7a4e%27/%3E%3Cpath d=%27M6 23 C 12 23, 15 20.5, 19 16 S 27.5 5.5, 32.5 3%27 fill=%27none%27 stroke=%27%23ffffff%27 stroke-width=%273%27 stroke-linecap=%27round%27/%3E%3Ccircle cx=%2732.5%27 cy=%273%27 r=%273.4%27 fill=%27%238a6a24%27/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  color-scheme:light;
+  --bg:#f1f4f2;--surface:#fbfcfb;--surface-2:#e9eeeb;--ink:#14201a;--ink-2:#4f5c55;--muted:#7f8a84;
+  --grid:#e1e7e3;--axis:#c3cbc6;--border:rgba(20,32,26,.11);
+  --accent:#1d7a4e;--accent-ink:#17643f;--accent-soft:rgba(29,122,78,.13);--event:#8a6a24;
+  --bar-out:#1d7a4e;--bar-res:#9fcdb4;--bar-dim:rgba(20,32,26,.10);
+  --r1:#dbe9f7;--r2:#b9d3f0;--r3:#8fb6e6;--r4:#6397d8;--r5:#3f78c4;--r6:#2a5ea6;--r7:#1e4784;--r8:#163462;--r9:#0f2445;--r10:#081629;
+  --tip-bg:#14201a;--tip-ink:#f6f8f7;--tip-muted:#aab5ae;--focus:#1d7a4e;--shadow:0 6px 24px rgba(20,32,26,.10);
+  --sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',sans-serif;--mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#0e1311;--surface:#161c19;--surface-2:#1f2622;--ink:#eef3f0;--ink-2:#b6c1ba;--muted:#86918b;
+    --grid:#242c28;--axis:#38423c;--border:rgba(255,255,255,.10);
+    --accent:#4cc38a;--accent-ink:#6fd3a1;--accent-soft:rgba(76,195,138,.16);--event:#d4b36a;
+    --bar-out:#4cc38a;--bar-res:#2b5a44;--bar-dim:rgba(238,243,240,.10);
+    --r1:#12233a;--r2:#1a3454;--r3:#24466f;--r4:#2f5a8c;--r5:#3d70a9;--r6:#5288c2;--r7:#74a3d6;--r8:#9bbfe6;--r9:#c2d9f2;--r10:#e3eefa;
+    --tip-bg:#eef3f0;--tip-ink:#14201a;--tip-muted:#5c6862;--focus:#4cc38a;--shadow:0 6px 24px rgba(0,0,0,.4);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0e1311;--surface:#161c19;--surface-2:#1f2622;--ink:#eef3f0;--ink-2:#b6c1ba;--muted:#86918b;
+  --grid:#242c28;--axis:#38423c;--border:rgba(255,255,255,.10);
+  --accent:#4cc38a;--accent-ink:#6fd3a1;--accent-soft:rgba(76,195,138,.16);--event:#d4b36a;
+  --bar-out:#4cc38a;--bar-res:#2b5a44;--bar-dim:rgba(238,243,240,.10);
+  --r1:#12233a;--r2:#1a3454;--r3:#24466f;--r4:#2f5a8c;--r5:#3d70a9;--r6:#5288c2;--r7:#74a3d6;--r8:#9bbfe6;--r9:#c2d9f2;--r10:#e3eefa;
+  --tip-bg:#eef3f0;--tip-ink:#14201a;--tip-muted:#5c6862;--focus:#4cc38a;--shadow:0 6px 24px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 var(--sans);-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:var(--accent-ink)}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.page{max-width:1180px;margin:0 auto;padding-block:20px 56px;padding-inline:clamp(16px,3vw,32px)}
+.site-nav{display:flex;align-items:baseline;gap:12px;margin-bottom:14px;font-size:12.5px;color:var(--muted)}
+.site-nav .updated{margin-left:auto;font-variant-numeric:tabular-nums}
+.site-nav .updated b{font-weight:500;color:var(--ink-2)}
+.site-nav a{font-family:var(--mono);font-weight:500;font-size:14px;color:var(--ink);text-decoration:none}
+.site-nav a.home{display:inline-flex;align-items:center;gap:9px}
+.site-nav a.home:hover .lg-tile{fill:var(--accent-ink)}
+.logo{display:inline-block;vertical-align:-5px;overflow:visible}
+.logo .lg-tile{fill:var(--accent)}
+.logo .lg-curve{fill:none;stroke:var(--surface);stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.logo .lg-dot{fill:var(--event);stroke:var(--surface);stroke-width:1.3}
+.top{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:12px}
+.eyebrow{display:block;font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:500;margin-bottom:6px}
+h1{font-size:clamp(22px,2.6vw,28px);font-weight:600;letter-spacing:-.02em;margin:0;line-height:1.15}
+.top-right{display:flex;align-items:center;gap:14px;color:var(--ink-2);font-size:13px}
+.top-right b{color:var(--ink);font-weight:500}
+.icon-btn{width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:var(--surface);display:grid;place-items:center;font-size:15px;color:var(--ink-2)}
+.lede{max-width:72ch;font-size:15.5px;color:var(--ink-2);line-height:1.6;margin:0 0 16px}
+.lede p{margin:0 0 10px}
+.lede b{color:var(--ink);font-weight:500}
+.lede a{color:var(--accent-ink);text-decoration:none;border-bottom:1px solid var(--accent-soft)}
+
+/* team picker + marks */
+.pick{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px;font-size:13px;color:var(--ink-2)}
+.pick select{border:1px solid var(--border);background:var(--surface);border-radius:8px;padding:6px 10px;font-size:13.5px;color:var(--ink)}
+.pick .swatch{width:14px;height:14px;border-radius:50%;display:inline-block;vertical-align:-2px;margin-right:2px;border:2px solid var(--surface);box-shadow:0 0 0 1px var(--border)}
+.marks{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.mark{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 18px 12px}
+.mark .lab{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:500}
+.mark .big{font-family:var(--mono);font-size:clamp(26px,3vw,36px);font-weight:500;letter-spacing:-.01em;line-height:1.1;margin:6px 0 4px;font-variant-numeric:tabular-nums}
+.mark .sub{font-size:12.5px;color:var(--ink-2);line-height:1.4}
+
+/* panels */
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 20px 12px;margin-bottom:14px}
+.panel-head{display:flex;flex-direction:column;align-items:flex-start;gap:4px;margin-bottom:8px}
+.panel h2{font-size:17px;font-weight:600;margin:0;letter-spacing:-.01em}
+.panel-head p{margin:0;color:var(--ink-2);font-size:13px;max-width:82ch}
+.panel .explain{margin:0 0 10px;color:var(--ink-2);font-size:13.5px;line-height:1.55;max-width:92ch}
+.panel .explain b{color:var(--ink);font-weight:500}
+.ctl-row{display:flex;gap:18px;flex-wrap:wrap;align-items:center;margin-bottom:6px}
+.ctl-row .lbl{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:500;margin-right:2px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:1px solid var(--border);background:transparent;border-radius:999px;padding:4px 11px;font-size:12.5px;color:var(--ink-2);line-height:1.3}
+.chip:hover{border-color:var(--axis);color:var(--ink)}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--ink-2);align-items:center}
+.legend i{display:inline-block;width:14px;height:10px;border-radius:2px;vertical-align:-1px;margin-right:6px}
+.legend i.out{background:var(--bar-out)}
+.legend i.res{background:var(--bar-res)}
+.legend i.dim{background:var(--bar-dim)}
+.legend i.line{width:18px;height:0;border-top:2.5px solid var(--tc,var(--ink));border-radius:0}
+.two{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:16px 26px}
+.chart-wrap{position:relative}
+svg{display:block;width:100%;overflow:visible}
+.grid{stroke:var(--grid)}
+.axis{stroke:var(--axis)}
+.tick{font-size:11px;fill:var(--muted);font-family:var(--mono)}
+.axis-title{font-size:11px;fill:var(--muted);letter-spacing:.04em}
+.bar.out{fill:var(--bar-out)}
+.bar.res{fill:var(--bar-res)}
+.bar.dim{fill:var(--bar-dim)}
+.bar.partial{opacity:.55}
+.ln{fill:none;stroke-width:2.4;stroke-linejoin:round;stroke-linecap:round}
+.dot{stroke:var(--surface);stroke-width:1.5}
+.lab{font-size:11px;fill:var(--ink-2);paint-order:stroke;stroke:var(--surface);stroke-width:3px}
+.lab.val{font-family:var(--mono);fill:var(--ink);font-weight:500}
+.lab.name{font-weight:500}
+.area{stroke:var(--surface);stroke-width:.6}
+.ms-line{stroke:var(--event);stroke-dasharray:2 4;opacity:.35}
+.ms-line.on{opacity:.9}
+.ms-tick{fill:var(--surface);stroke:var(--event);stroke-width:2;cursor:pointer}
+.ms-tick:hover,.ms-tick.on{fill:var(--event)}
+.ms-label{font-size:10.5px;fill:var(--event);letter-spacing:.04em;font-weight:500;cursor:pointer}
+.ms-label:hover,.ms-label.on{text-decoration:underline}
+.tooltip{position:absolute;z-index:4;background:var(--tip-bg);color:var(--tip-ink);border-radius:10px;padding:9px 12px 8px;font-size:12.5px;line-height:1.45;pointer-events:none;box-shadow:var(--shadow);width:max-content;max-width:300px}
+.tip-head{font-size:13.5px;font-weight:600;margin:0 0 4px}
+.tip-row{display:flex;justify-content:space-between;gap:14px}
+.tip-row .k{color:var(--tip-muted)}
+.tip-row b{font-family:var(--mono);font-weight:500;font-variant-numeric:tabular-nums}
+.hint{font-size:12px;color:var(--muted);margin-top:6px}
+.event-dialog{border:1px solid var(--border);border-left:4px solid var(--event);border-radius:12px;background:var(--surface);color:var(--ink);padding:20px 24px 18px;max-width:min(560px,calc(100vw - 32px));box-shadow:var(--shadow)}
+.event-dialog::backdrop{background:rgba(10,14,12,.45);backdrop-filter:blur(2px)}
+.event-dialog .tag{display:inline-block;font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:var(--surface);background:var(--event);border-radius:4px;padding:1px 6px;margin-right:8px;vertical-align:1px}
+.event-dialog .eyebrow{margin-bottom:8px}
+.event-dialog h3{margin:0 0 8px;font-size:17px;font-weight:600;line-height:1.3}
+.event-dialog p{margin:0;font-size:14px;color:var(--ink-2);line-height:1.6}
+.event-dialog .row{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap;align-items:center}
+.btn{border:1px solid var(--border);background:var(--surface);border-radius:8px;padding:6px 12px;font-size:13px;color:var(--ink)}
+.btn.primary{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.event-dialog .src{margin-left:auto;font-size:13px}
+
+/* scatter */
+.disc{stroke:var(--surface);stroke-width:1.5;cursor:pointer}
+.disc.pick{stroke:var(--ink);stroke-width:2.5}
+.disc-text{font-family:var(--mono);font-size:9.5px;font-weight:500;fill:#fff;pointer-events:none;text-anchor:middle;paint-order:stroke;stroke:rgba(0,0,0,.35);stroke-width:2px}
+.median{stroke:var(--axis);stroke-dasharray:3 4}
+.quad{font-size:10.5px;fill:var(--muted);font-style:italic}
+table.rank{width:100%;border-collapse:collapse;font-size:13px}
+table.rank td{padding:4px 0;border-bottom:1px solid var(--grid);vertical-align:baseline}
+table.rank tr:last-child td{border-bottom:none}
+table.rank td.n{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+table.rank td.r{color:var(--muted);font-family:var(--mono);font-size:12px;padding-right:12px;white-space:nowrap}
+table.rank tr.pick td{font-weight:600;color:var(--ink)}
+table.rank tr.gap td{color:var(--muted);text-align:center;padding:2px 0;font-size:11px;letter-spacing:.2em}
+table.rank td small{color:var(--muted);font-size:11px;margin-left:5px}
+table.rank a{color:inherit;text-decoration:none;border-bottom:1px dotted var(--axis);cursor:pointer}
+table.rank i.sw{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:7px;vertical-align:-1px}
+.this-week{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:6px 18px;font-size:13px}
+.this-week div{display:flex;justify-content:space-between;gap:8px;border-bottom:1px solid var(--grid);padding:3px 0}
+.this-week small{color:var(--muted)}
+.foot{color:var(--ink-2);font-size:13px;line-height:1.6}
+.foot h2{font-size:15px;margin:0 0 6px;color:var(--ink)}
+.foot p{margin:0 0 10px;max-width:82ch}
+h3.sub{font-size:13px;font-weight:600;margin:0 0 4px}
+@media (max-width:860px){.two{grid-template-columns:1fr}.marks{grid-template-columns:1fr}}
+@media (max-width:520px){.page{padding-block:16px 40px}.panel{padding:14px 12px 12px;border-radius:12px}}
+</style>
+</head>
+<body>
+<div class="page">
+<nav class="site-nav"><a class="home" href="../" aria-label="Plotline home" title="Plotline home"><svg class="logo" viewBox="0 0 37 30" width="30" height="24" aria-hidden="true"><rect x="1.5" y="6.5" width="25" height="22" rx="6" class="lg-tile"/><path d="M6 23 C 12 23, 15 20.5, 19 16 S 27.5 5.5, 32.5 3" class="lg-curve"/><circle cx="32.5" cy="3" r="3" class="lg-dot"/></svg>Plotline</a><span class="updated">Auto-updated <b id="updated"></b></span></nav>
+<header class="top">
+  <div><span class="eyebrow">Culture · the NFL injury report · 2009 to this week</span><h1>Any Given Tuesday</h1></div>
+  <div class="top-right"><span>Through <b id="through"></b></span><button class="icon-btn" id="theme" aria-label="Switch light or dark theme" title="Light / dark">◐</button></div>
+</header>
+
+<div class="lede" id="lede">
+  <p>As a long-suffering New York Giants fan, I'm accustomed to hopes being dashed and elation turning to despair. But this week's injury report, after a particularly miserable Monday night loss, made me wonder whether serious injuries are on the rise in the NFL, or only on my favorite team.</p>
+  <p id="lede2"></p>
+</div>
+
+<div class="pick"><span>Your team</span><select id="team" aria-label="Team"></select><span id="pick-note"></span></div>
+
+<section class="marks" aria-label="Three numbers">
+  <div class="mark"><div class="lab" id="m1l"></div><div class="big" id="m1"></div><div class="sub" id="m1s"></div></div>
+  <div class="mark"><div class="lab">League, per team per week</div><div class="big" id="m2"></div><div class="sub" id="m2s"></div></div>
+  <div class="mark"><div class="lab" id="m3l"></div><div class="big" id="m3"></div><div class="sub" id="m3s"></div></div>
+</section>
+
+<section class="panel" aria-labelledby="trend-h">
+  <div class="panel-head"><h2 id="trend-h">Every team, every week</h2><p>Player-weeks lost to injury per team per regular-season week: players listed <b>Out</b> on the weekly injury report, plus players on a <b>reserve list</b> (injured reserve and physically unable to perform). The bars are the league average; the line is your team. Per week, because the season grew from 17 weeks to 18 in 2021.</p></div>
+  <p class="explain" id="trend-explain"></p>
+  <div class="ctl-row"><div class="legend"><span><i class="out"></i>Out on the report</span><span><i class="res"></i>On a reserve list</span><span><i class="dim"></i>Reserve before 2016, undercounted</span><span id="lg-team"><i class="line"></i>Your team, total</span></div></div>
+  <div class="chart-wrap"><svg id="trend" role="img" aria-label="Player-weeks lost per team per week by season"></svg><div class="tooltip" id="tip-trend" hidden></div></div>
+  <p class="hint">Hover a season for the numbers · gold ticks are rule changes and events, click for the note</p>
+</section>
+
+<section class="panel" aria-labelledby="what-h">
+  <div class="panel-head"><h2 id="what-h">What gets hurt</h2><p>The share of Out listings by body part, league-wide, one column per season. The report names the injury only for players on the active roster, so this is the weekly report alone, not the reserve list.</p></div>
+  <p class="explain" id="what-explain"></p>
+  <div class="ctl-row"><span class="lbl">Show</span><div class="chips" id="what-kind" role="group" aria-label="Breakdown"></div></div>
+  <div class="two"><div class="chart-wrap"><svg id="what" role="img" aria-label="Share of injuries by body part or position by season"></svg><div class="tooltip" id="tip-what" hidden></div></div><div><h3 class="sub" id="what-legend-h"></h3><table class="rank" id="what-legend"></table></div></div>
+</section>
+
+<section class="panel" aria-labelledby="teams-h">
+  <div class="panel-head"><h2 id="teams-h">Thirty-two teams</h2><p>Every team in one season: how many players missed at least a game, against how many player-weeks were lost in total. Up and to the right is the corner nobody wants. The dashed lines are the league medians.</p></div>
+  <p class="explain" id="teams-explain"></p>
+  <div class="ctl-row"><span class="lbl">Season</span><div class="chips" id="teams-season" role="group" aria-label="Season"></div></div>
+  <div class="two"><div class="chart-wrap"><svg id="teams" role="img" aria-label="Teams by players injured and player-weeks lost"></svg><div class="tooltip" id="tip-teams" hidden></div></div><div><h3 class="sub" id="rank-h"></h3><table class="rank" id="rank"></table></div></div>
+  <p class="hint">Hover a team · click to make it your team</p>
+</section>
+
+<section class="panel" aria-labelledby="week-h">
+  <div class="panel-head"><h2 id="week-h">This week's report</h2><p id="week-p"></p></div>
+  <div class="this-week" id="week-list"></div>
+</section>
+
+<section class="foot" aria-labelledby="src-h">
+  <h2 id="src-h">Reading this page</h2>
+  <p>The counts are built from two public files kept by the <a href="https://github.com/nflverse/nflverse-data" target="_blank" rel="noopener">nflverse</a> project (CC BY 4.0): the league's weekly injury reports since 2009 and the weekly rosters. A player-week is lost when a player is listed Out on the report for that week's game, or when he is on a reserve list that week (injured reserve, physically unable to perform, non-football injury); a player on both is counted once. Listings that are not injuries, such as illness or personal matters, are left out, and so is the COVID reserve list where the roster data marks it (2021 on; 2020 cannot be separated). Only the regular season is counted.</p>
+  <p>Two things to hold in mind. The weekly report only names players on the active roster, and its rules changed in 2016, when "Probable" was dropped and reporting was tightened. The reserve-list series is thin before 2016 in the roster data, so those years are shown faded and the long-run comparison should be read from the Out series. Rule changes that move injuries between the two lists are marked in gold.</p>
+  <p>The league's own injury numbers, compiled by IQVIA and published each February, cover concussions, ACL tears, lower-body strains and games missed from 2015; they are <a href="https://www.nfl.com/playerhealthandsafety/health-and-wellness/injury-data/injury-data" target="_blank" rel="noopener">here</a>, and they are not machine-readable, so they are cited in the notes rather than plotted. This page refreshes from the nflverse files on a schedule; in season that means every week.</p>
+</section>
+</div>
+<dialog class="event-dialog" id="event-dialog" aria-labelledby="ev-dlg-title"></dialog>
+
+<script>
+/*__DATA__*/
+(function(){
+'use strict';
+const $=s=>document.querySelector(s);
+const el=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!=null)n.textContent=text;return n};
+const svgEl=(tag,attrs,text)=>{const n=document.createElementNS('http://www.w3.org/2000/svg',tag);for(const k in attrs)n.setAttribute(k,attrs[k]);if(text!=null)n.textContent=text;return n};
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const fmt1=v=>(Math.round(v*10)/10).toFixed(1);
+const fmtDate=s=>new Date(s+'T12:00:00Z').toLocaleDateString('en-US',{month:'short',year:'numeric',timeZone:'UTC'});
+const ord=n=>n+(n%100>=11&&n%100<=13?'th':['th','st','nd','rd'][Math.min(n%10,4)]||'th');
+const root=document.documentElement;
+try{const s=localStorage.getItem('plotline-theme');if(s)root.dataset.theme=s}catch(e){}
+$('#theme').onclick=()=>{const dark=getComputedStyle(root).colorScheme==='dark';root.dataset.theme=dark?'light':'dark';try{localStorage.setItem('plotline-theme',root.dataset.theme)}catch(e){}};
+const MS=DATA.milestones.map(m=>({...m,t:+m.date.slice(0,4)+(+m.date.slice(5,7)-1)/12+(+m.date.slice(8,10)-1)/365}));
+const TEAMS=DATA.teams,SE=DATA.seasons,complete=SE.filter(s=>s.complete),last=complete[complete.length-1],cur=SE[SE.length-1];
+const S={team:'NYG',kind:'types',season:last.season};
+const RES_OK=2016;   // reserve-list counts are thin in the roster data before this
+const lastOf=a=>a[a.length-1];
+$('#updated').textContent=new Date(DATA.retrieved+'T12:00:00Z').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric',timeZone:'UTC'});
+$('#through').textContent=`${cur.season} week ${DATA.latest.week}`;
+
+/* ---------- team picker ---------- */
+const sel=$('#team');for(const [abbr,t] of Object.entries(TEAMS).sort((a,b)=>a[1].name.localeCompare(b[1].name))){const o=el('option',null,t.name);o.value=abbr;sel.append(o)}
+sel.value=S.team;sel.onchange=()=>{S.team=sel.value;drawAll()};
+const tcolor=abbr=>TEAMS[abbr].color.toLowerCase()==='#000000'||TEAMS[abbr].color.toLowerCase()==='#ffffff'?TEAMS[abbr].color2:TEAMS[abbr].color;
+
+/* ---------- shared ---------- */
+function frame(w,h,m,x0,x1,y0,y1){return {x:v=>m.l+(v-x0)/(x1-x0)*(w-m.l-m.r),y:v=>h-m.b-(v-y0)/(y1-y0)*(h-m.t-m.b)}}
+function milestones(svg,x,h,m,w,t0,t1){const g=svgEl('g',{class:'ms'});svg.append(g);const placed=[[],[],[],[]];
+  for(const e of MS.filter(e=>e.t>=t0&&e.t<=t1)){const px=x(e.t);const line=svgEl('line',{class:'ms-line',x1:px,x2:px,y1:m.t,y2:h-m.b});g.append(line);const tick=svgEl('path',{class:'ms-tick',d:`M${px},${h-m.b+2} l4,5 l-4,5 l-4,-5 Z`});tick.onclick=()=>showEvent(e);g.append(tick);
+    const tx=svgEl('text',{class:'ms-label',x:px,y:h-m.b+38,'text-anchor':'middle'},e.name);g.append(tx);const tw=tx.getBBox().width||e.name.length*6.5;const cx=clamp(px,m.l+tw/2,w-m.r-tw/2);const a=cx-tw/2-5,b=cx+tw/2+5;let lane=0;while(lane<3&&placed[lane].some(([pa,pb])=>a<pb&&pa<b))lane++;placed[lane].push([a,b]);tx.setAttribute('x',cx);tx.setAttribute('y',h-m.b+38+lane*15);tx.onclick=()=>showEvent(e);
+    const link=on=>{tick.classList.toggle('on',on);tx.classList.toggle('on',on);line.classList.toggle('on',on)};tx.onpointerenter=()=>link(true);tx.onpointerleave=()=>link(false);tick.onpointerenter=()=>link(true);tick.onpointerleave=()=>link(false)}}
+function showEvent(e){const dlg=$('#event-dialog');dlg.replaceChildren();const eb=el('div','eyebrow');eb.append(el('span','tag','Milestone'),document.createTextNode(fmtDate(e.date)));const h=el('h3',null,e.title);h.id='ev-dlg-title';const row=el('div','row');const c=el('button','btn primary','Close');c.onclick=()=>dlg.close();const a=el('a','src','Source ↗');a.href=e.url;a.target='_blank';a.rel='noopener';row.append(c,a);dlg.append(eb,h,el('p',null,e.text),row);dlg.showModal()}
+function placeTip(tip,wrap,px,py){const tw=tip.offsetWidth,th=tip.offsetHeight;let left=px+14;if(left+tw>wrap.clientWidth-4)left=px-14-tw;tip.style.left=Math.max(0,left)+'px';tip.style.top=clamp(py-th/2,0,Math.max(0,wrap.clientHeight-th))+'px'}
+const perWeek=(s,v)=>v/s.weeks;
+
+/* ---------- headline numbers ---------- */
+function drawMarks(){const t=S.team,T=TEAMS[t];const rng=complete.filter(s=>s.season>=RES_OK);
+  const teamSum=rng.reduce((a,s)=>a+s.teams[t].lost,0),lgSum=rng.reduce((a,s)=>a+s.league.lost,0);const ratio=teamSum/lgSum;
+  const ranks=complete.map(s=>{const vals=Object.entries(s.teams).map(([k,v])=>[k,v.out]).sort((a,b)=>b[1]-a[1]);return vals.findIndex(v=>v[0]===t)+1});const top4=ranks.filter(r=>r<=4).length,first=ranks.filter(r=>r===1).length;
+  $('#m1l').textContent=`${T.nick}, against an average team`;$('#m1').textContent=(ratio>=1?'+':'−')+Math.round(Math.abs(ratio-1)*100)+'%';$('#m1s').textContent=`player-weeks lost, ${rng[0].season} to ${lastOf(rng).season}: ${teamSum.toLocaleString()} against a league average of ${Math.round(lgSum).toLocaleString()}.`;
+  const f=complete.find(s=>s.season>=RES_OK),l=lastOf(complete);$('#m2').textContent=`${fmt1(perWeek(f,f.league.lost))} → ${fmt1(perWeek(l,l.league.lost))}`;$('#m2s').textContent=`player-weeks lost per team per week, ${f.season} and ${l.season}. On the report alone, ${fmt1(perWeek(complete[0],complete[0].league.out))} in ${complete[0].season} to ${fmt1(perWeek(l,l.league.out))}.`;
+  $('#m3l').textContent=`${T.nick} on the weekly report`;$('#m3').textContent=`${first}× 1st`;$('#m3s').textContent=`most players listed Out in the league ${first} of ${complete.length} seasons, top four in ${top4}. ${l.season}: ${ord(ranks[ranks.length-1])} of 32.`;
+  const p=$('#pick-note');p.replaceChildren();const sw=el('i','swatch');sw.style.background=tcolor(t);p.append(sw,`${T.name} in every chart`);
+  $('#lg-team').style.setProperty('--tc',tcolor(t));
+  const l2=$('#lede2');l2.replaceChildren();l2.append(`Below is every weekly injury report and reserve list since 2009, for every team. Pick yours; the Giants are the default for obvious reasons. The short answer so far: on the weekly report the league lost about `,Object.assign(el('b'),{textContent:`${fmt1(perWeek(complete[0],complete[0].league.out))} player-weeks per team per week in ${complete[0].season} and ${fmt1(perWeek(l,l.league.out))} in ${l.season}`}),`, with the rise coming in steps that match changes to the rules of the report and the reserve list more than anything on the field. And the Giants have lost ${Math.round((ratio-1)*100)} percent more player-weeks than an average team since ${rng[0].season}, so it has not only been in my head.`)}
+
+/* ---------- trend ---------- */
+function drawTrend(){const svg=$('#trend');svg.replaceChildren();const w=svg.clientWidth||900,h=Math.round(Math.max(300,Math.min(430,w*0.42))),m={l:44,r:30,t:16,b:86};svg.setAttribute('viewBox',`0 0 ${w} ${h}`);svg.setAttribute('height',h);
+  const x0=SE[0].season-0.5,x1=cur.season+0.5;const maxV=Math.max(...SE.map(s=>Math.max(perWeek(s,s.league.lost),perWeek(s,s.teams[S.team].lost))));const y1=Math.ceil(maxV/2)*2+1;const {x,y}=frame(w,h,m,x0,x1,0,y1);
+  for(let v=0;v<=y1;v+=2){svg.append(svgEl('line',{class:'grid',x1:m.l,x2:w-m.r,y1:y(v),y2:y(v)}));svg.append(svgEl('text',{class:'tick',x:m.l-6,y:y(v)+4,'text-anchor':'end'},v))}
+  for(const s of SE)if(s.season%2===1||s===cur)svg.append(svgEl('text',{class:'tick',x:x(s.season),y:h-m.b+14,'text-anchor':'middle'},s.season));
+  svg.append(svgEl('line',{class:'axis',x1:m.l,x2:w-m.r,y1:h-m.b,y2:h-m.b}));svg.append(svgEl('text',{class:'axis-title',x:m.l,y:m.t-4},'player-weeks lost per team per week, league average (bars) and your team (line)'));
+  const bw=(x(1)-x(0))*0.62;const tip=$('#tip-trend'),wrap=svg.parentElement;
+  for(const s of SE){const o=perWeek(s,s.league.out),r=perWeek(s,s.league.res);const dimRes=s.season<RES_OK;const partial=!s.complete;
+    svg.append(svgEl('rect',{class:'bar out'+(partial?' partial':''),x:x(s.season)-bw/2,y:y(o),width:bw,height:y(0)-y(o)}));
+    svg.append(svgEl('rect',{class:'bar '+(dimRes?'dim':'res')+(partial?' partial':''),x:x(s.season)-bw/2,y:y(o+r),width:bw,height:y(o)-y(o+r)}));
+    const hit=svgEl('rect',{x:x(s.season)-bw/2-2,y:m.t,width:bw+4,height:h-m.t-m.b,fill:'transparent'});
+    hit.onpointerenter=()=>{tip.hidden=false;tip.replaceChildren(el('div','tip-head',s.season+(partial?` · ${s.weeks} weeks so far`:'')));const T=s.teams[S.team];const row=(k,v)=>{const rr=el('div','tip-row');rr.append(el('span','k',k),el('b',null,v));tip.append(rr)};row('League, Out on report',fmt1(o)+' / wk');row('League, on reserve',fmt1(r)+' / wk'+(dimRes?' (undercounted)':''));row(TEAMS[S.team].nick+', total',fmt1(perWeek(s,T.lost))+' / wk');row(TEAMS[S.team].nick+', players hurt',T.players);const b=svg.getBoundingClientRect(),wb=wrap.getBoundingClientRect();placeTip(tip,wrap,x(s.season)*(b.width/w)+b.left-wb.left,y(o+r)*(b.height/h)+b.top-wb.top)};hit.onpointerleave=()=>{tip.hidden=true};svg.append(hit)}
+  milestones(svg,x,h,m,w,x0,x1);
+  const col=tcolor(S.team);const pts=SE.map(s=>[s.season,perWeek(s,s.teams[S.team].lost)]);
+  svg.append(svgEl('path',{class:'ln',stroke:col,d:pts.map((p,i)=>(i?'L':'M')+x(p[0]).toFixed(1)+','+y(p[1]).toFixed(1)).join('')}));
+  for(const p of pts)svg.append(svgEl('circle',{class:'dot',fill:col,cx:x(p[0]),cy:y(p[1]),r:3.4}));
+  const lp=lastOf(pts);svg.append(svgEl('text',{class:'lab name',x:x(lp[0])+8,y:y(lp[1])+4,fill:col},`${TEAMS[S.team].nick} ${fmt1(lp[1])}`));
+  // explainer
+  const f=complete[0],l=lastOf(complete);const o0=perWeek(f,f.league.out),o1=perWeek(l,l.league.out);const pk=complete.reduce((a,s)=>perWeek(s,s.league.lost)>perWeek(a,a.league.lost)?s:a);
+  const T=TEAMS[S.team];const tr=complete.filter(s=>s.season>=RES_OK);const worst=tr.reduce((a,s)=>perWeek(s,s.teams[S.team].lost)>perWeek(a,a.teams[S.team].lost)?s:a);
+  $('#trend-explain').replaceChildren(`On the weekly report, the league went from `,Object.assign(el('b'),{textContent:`${fmt1(o0)} players Out per team per week in ${f.season} to ${fmt1(o1)} in ${l.season}`}),`. Counting the reserve list as well, the worst season on record is ${pk.season} at ${fmt1(perWeek(pk,pk.league.lost))} per team per week. The ${T.nick}' worst since ${RES_OK} was ${worst.season}, ${fmt1(perWeek(worst,worst.teams[S.team].lost))} per week with ${worst.teams[S.team].players} different players missing at least a game.`+(cur.complete?'':` ${cur.season} is ${cur.weeks} weeks old and drawn faded.`));
+}
+
+/* ---------- what gets hurt ---------- */
+const KINDS={types:{label:'Body part',key:'types'},pos:{label:'Position',key:'pos'}};
+const POSNAME={QB:'Quarterbacks',RB:'Running backs',WR:'Receivers',TE:'Tight ends',OL:'Offensive line',DL:'Defensive line',LB:'Linebackers',DB:'Defensive backs',ST:'Specialists',Other:'Other'};
+function drawWhat(){const svg=$('#what');svg.replaceChildren();const w=svg.clientWidth||700,h=Math.round(Math.max(280,Math.min(400,w*0.5))),m={l:40,r:16,t:16,b:86};svg.setAttribute('viewBox',`0 0 ${w} ${h}`);svg.setAttribute('height',h);
+  const key=KINDS[S.kind].key;const rows=complete;const tot=new Map();for(const s of rows)for(const [k,v] of Object.entries(s[key]))tot.set(k,(tot.get(k)||0)+v);
+  let cats=[...tot.entries()].filter(([k])=>k!=='Unspecified').sort((a,b)=>b[1]-a[1]).map(([k])=>k);const TOPN=9;let top=cats.slice(0,TOPN);if(cats.length>TOPN)top.push('Other');top=[...new Set(top)];
+  const share=s=>{const total=Object.entries(s[key]).filter(([k])=>k!=='Unspecified').reduce((a,[,v])=>a+v,0);const out={};for(const c of top)out[c]=0;for(const [k,v] of Object.entries(s[key])){if(k==='Unspecified')continue;out[top.includes(k)?k:'Other']=(out[top.includes(k)?k:'Other']||0)+v/total}return out};
+  const x0=rows[0].season-0.5,x1=lastOf(rows).season+0.5;const {x,y}=frame(w,h,m,x0,x1,0,1);
+  for(let v=0;v<=1;v+=0.25){svg.append(svgEl('line',{class:'grid',x1:m.l,x2:w-m.r,y1:y(v),y2:y(v)}));svg.append(svgEl('text',{class:'tick',x:m.l-6,y:y(v)+4,'text-anchor':'end'},Math.round(v*100)+'%'))}
+  for(const s of rows)if(s.season%2===1)svg.append(svgEl('text',{class:'tick',x:x(s.season),y:h-m.b+14,'text-anchor':'middle'},s.season));
+  svg.append(svgEl('line',{class:'axis',x1:m.l,x2:w-m.r,y1:h-m.b,y2:h-m.b}));
+  const shares=rows.map(share);const tip=$('#tip-what'),wrap=svg.parentElement;
+  top.forEach((c,i)=>{const ramp=`var(--r${Math.max(1,Math.round(10-i*9/Math.max(1,top.length-1)))})`;let dUp='',dDown='';
+    rows.forEach((s,j)=>{let base=0;for(let k=0;k<i;k++)base+=shares[j][top[k]];const v=shares[j][c]||0;dUp+=(j?'L':'M')+x(s.season).toFixed(1)+','+y(base+v).toFixed(1);dDown=('L'+x(s.season).toFixed(1)+','+y(base).toFixed(1))+dDown});
+    const p=svgEl('path',{class:'area',fill:ramp,d:dUp+dDown.replace(/^L/,'L')+'Z'});p.dataset.cat=c;svg.append(p);
+    p.onpointermove=ev=>{const b=svg.getBoundingClientRect();const sx=(ev.clientX-b.left)*(w/b.width);const j=clamp(Math.round((sx-m.l)/(w-m.l-m.r)*(rows.length-1)),0,rows.length-1);const s=rows[j];tip.hidden=false;tip.replaceChildren(el('div','tip-head',`${c}, ${s.season}`));const r=el('div','tip-row');r.append(el('span','k','Share of Out listings'),el('b',null,Math.round((shares[j][c]||0)*100)+'%'));tip.append(r);const r2=el('div','tip-row');r2.append(el('span','k','Listings'),el('b',null,(s[key][c]||0).toLocaleString()));tip.append(r2);const wb=wrap.getBoundingClientRect();placeTip(tip,wrap,ev.clientX-wb.left,ev.clientY-wb.top)};p.onpointerleave=()=>{tip.hidden=true}});
+  milestones(svg,x,h,m,w,x0,x1);
+  const lg=$('#what-legend');lg.replaceChildren();$('#what-legend-h').textContent=`${KINDS[S.kind].label}, share of Out listings, ${rows[0].season} and ${lastOf(rows).season}`;
+  top.forEach((c,i)=>{const tr=el('tr');const td=el('td');const sw=el('i','sw');sw.style.background=`var(--r${Math.max(1,Math.round(10-i*9/Math.max(1,top.length-1)))})`;td.append(sw,S.kind==='pos'?(POSNAME[c]||c):c);const a=shares[0][c]||0,b=lastOf(shares)[c]||0;const n=el('td','n',Math.round(a*100)+'% → '+Math.round(b*100)+'%');tr.append(td,n);lg.append(tr)});
+  const first=shares[0],lastS=lastOf(shares);const rise=top.map(c=>[c,(lastS[c]||0)-(first[c]||0)]).sort((a,b)=>b[1]-a[1]);
+  $('#what-explain').replaceChildren(S.kind==='types'?`Knees, ankles and hamstrings are most of the report in every season. The biggest shift since ${rows[0].season}: `:`By position group, the biggest shift since ${rows[0].season}: `,Object.assign(el('b'),{textContent:`${S.kind==='pos'?(POSNAME[rise[0][0]]||rise[0][0]):rise[0][0]} up ${Math.round(rise[0][1]*100)} points`}),`, ${S.kind==='pos'?(POSNAME[lastOf(rise)[0]]||lastOf(rise)[0]):lastOf(rise)[0]} down ${Math.round(-lastOf(rise)[1]*100)}. Shares, not counts, so they say what the injuries are, not how many.`);
+}
+
+/* ---------- thirty-two teams ---------- */
+function drawTeams(){const svg=$('#teams');svg.replaceChildren();const w=svg.clientWidth||700,h=Math.round(Math.max(320,Math.min(460,w*0.62))),m={l:46,r:20,t:18,b:44};svg.setAttribute('viewBox',`0 0 ${w} ${h}`);svg.setAttribute('height',h);
+  let rows;if(S.season==='all'){const rng=complete.filter(s=>s.season>=RES_OK);rows=Object.keys(TEAMS).map(t=>({t,players:rng.reduce((a,s)=>a+s.teams[t].players,0),lost:rng.reduce((a,s)=>a+s.teams[t].lost,0)}))}else{const s=SE.find(s=>s.season===S.season);rows=Object.keys(TEAMS).map(t=>({t,players:s.teams[t].players,lost:s.teams[t].lost}))}
+  const xs=rows.map(r=>r.players),ys=rows.map(r=>r.lost);const pad=v=>v*0.08;const x0=Math.max(0,Math.min(...xs)-pad(Math.max(...xs))),x1=Math.max(...xs)+pad(Math.max(...xs)),y0=Math.max(0,Math.min(...ys)-pad(Math.max(...ys))),y1=Math.max(...ys)+pad(Math.max(...ys));const {x,y}=frame(w,h,m,x0,x1,y0,y1);
+  const med=a=>{const s=[...a].sort((p,q)=>p-q);return (s[15]+s[16])/2};const mx=med(xs),my=med(ys);
+  const step=v=>{const p=Math.pow(10,Math.floor(Math.log10(v/4)));const c=v/4/p;return (c<1.5?1:c<3.5?2:c<7.5?5:10)*p};const sy=step(y1-y0),sx=step(x1-x0);
+  for(let v=Math.ceil(y0/sy)*sy;v<=y1;v+=sy){svg.append(svgEl('line',{class:'grid',x1:m.l,x2:w-m.r,y1:y(v),y2:y(v)}));svg.append(svgEl('text',{class:'tick',x:m.l-6,y:y(v)+4,'text-anchor':'end'},Math.round(v)))}
+  for(let v=Math.ceil(x0/sx)*sx;v<=x1;v+=sx)svg.append(svgEl('text',{class:'tick',x:x(v),y:h-m.b+14,'text-anchor':'middle'},Math.round(v)));
+  svg.append(svgEl('line',{class:'axis',x1:m.l,x2:w-m.r,y1:h-m.b,y2:h-m.b}));
+  svg.append(svgEl('line',{class:'median',x1:x(mx),x2:x(mx),y1:m.t,y2:h-m.b}));svg.append(svgEl('line',{class:'median',x1:m.l,x2:w-m.r,y1:y(my),y2:y(my)}));
+  svg.append(svgEl('text',{class:'axis-title',x:w-m.r,y:h-m.b+30,'text-anchor':'end'},'players who missed at least one game →'));svg.append(svgEl('text',{class:'axis-title',x:m.l,y:m.t-6},'↑ player-weeks lost'));
+  svg.append(svgEl('text',{class:'quad',x:w-m.r-4,y:m.t+12,'text-anchor':'end'},'many players, long absences'));svg.append(svgEl('text',{class:'quad',x:m.l+4,y:h-m.b-6},'few players, short absences'));
+  const tip=$('#tip-teams'),wrap=svg.parentElement;const r0=w<640?11:13;
+  rows.sort((a,b)=>(a.t===S.team)-(b.t===S.team));
+  for(const r of rows){const col=tcolor(r.t);const g=svgEl('g',{});const c=svgEl('circle',{class:'disc'+(r.t===S.team?' pick':''),cx:x(r.players),cy:y(r.lost),r:r0,fill:col});g.append(c);g.append(svgEl('text',{class:'disc-text',x:x(r.players),y:y(r.lost)+3.5},r.t));
+    c.onpointerenter=ev=>{tip.hidden=false;tip.replaceChildren(el('div','tip-head',TEAMS[r.t].name));const a=el('div','tip-row');a.append(el('span','k','Players who missed a game'),el('b',null,r.players));const b2=el('div','tip-row');b2.append(el('span','k','Player-weeks lost'),el('b',null,r.lost.toLocaleString()));const b3=el('div','tip-row');b3.append(el('span','k','Weeks per injured player'),el('b',null,fmt1(r.lost/Math.max(1,r.players))));tip.append(a,b2,b3);const wb=wrap.getBoundingClientRect();placeTip(tip,wrap,ev.clientX-wb.left,ev.clientY-wb.top)};c.onpointerleave=()=>{tip.hidden=true};c.onclick=()=>{S.team=r.t;sel.value=r.t;drawAll()};svg.append(g)}
+  // rank table
+  const ranked=[...rows].sort((a,b)=>b.lost-a.lost);const tbl=$('#rank');tbl.replaceChildren();$('#rank-h').textContent=(S.season==='all'?`Player-weeks lost, ${RES_OK} to ${lastOf(complete).season}`:`Player-weeks lost, ${S.season}`);
+  const i0=ranked.findIndex(r=>r.t===S.team);const shown=new Set([0,1,2,3,4,5,6,7,i0-1,i0,i0+1,30,31].filter(i=>i>=0&&i<32));let prev=-1;
+  ranked.forEach((r,i)=>{if(!shown.has(i))return;if(i-prev>1){const tr=el('tr','gap');const td=el('td');td.colSpan=3;td.textContent='···';tr.append(td);tbl.append(tr)}const tr=el('tr',r.t===S.team?'pick':'');const td=el('td');const sw=el('i','sw');sw.style.background=tcolor(r.t);const a=el('a',null,TEAMS[r.t].nick);a.onclick=()=>{S.team=r.t;sel.value=r.t;drawAll()};td.append(sw,a,el('small',null,r.players+' players'));tr.append(el('td','r',ord(i+1)),td,el('td','n',r.lost.toLocaleString()));tbl.append(tr);prev=i});
+  document.querySelectorAll('#teams-season .chip').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.s)===String(S.season)));
+  const me=rows.find(r=>r.t===S.team);const top=ranked[0];const pos=ranked.findIndex(r=>r.t===S.team)+1;
+  $('#teams-explain').replaceChildren(`${S.season==='all'?`Since ${RES_OK}`:S.season}, the ${TEAMS[top.t].nick} lost the most, ${top.lost.toLocaleString()} player-weeks across ${top.players} players. The `,Object.assign(el('b'),{textContent:`${TEAMS[S.team].nick}: ${ord(pos)} of 32, ${me.lost.toLocaleString()} player-weeks across ${me.players} players`}),`, about ${fmt1(me.lost/Math.max(1,me.players))} weeks for each player who got hurt.`);
+}
+
+/* ---------- this week ---------- */
+function drawWeek(){const L=DATA.latest;const list=L.outList;const mine=list.filter(p=>p.team===S.team);$('#week-p').textContent=`${L.season}, week ${L.week}: ${list.length} players listed Out league-wide, ${mine.length} of them ${TEAMS[S.team].nick}. The report is final on Friday; the file behind this page refreshes on a schedule, so the newest listings can lag by a few days.`;
+  const box=$('#week-list');box.replaceChildren();const show=mine.length?mine:[];if(!show.length){box.append(el('div',null,`No ${TEAMS[S.team].nick} listed Out in the file yet for week ${L.week}.`));return}
+  for(const p of show){const d=el('div');d.append(el('span',null,`${p.name} `),el('small',null,`${p.pos} · ${p.inj||'unspecified'}`));box.append(d)}}
+
+/* ---------- controls ---------- */
+(function(){const k=$('#what-kind');for(const id in KINDS){const b=el('button','chip',KINDS[id].label);b.dataset.k=id;b.onclick=()=>{S.kind=id;document.querySelectorAll('#what-kind .chip').forEach(x=>x.setAttribute('aria-pressed',x.dataset.k===id));drawWhat()};b.setAttribute('aria-pressed',id===S.kind);k.append(b)}
+  const sb=$('#teams-season');const opts=[...complete.slice(-5).map(s=>s.season).reverse()];if(!cur.complete)opts.unshift(cur.season);opts.push('all');
+  for(const s of opts){const b=el('button','chip',s==='all'?`${RES_OK} to ${lastOf(complete).season}`:(s===cur.season&&!cur.complete?`${s} so far`:String(s)));b.dataset.s=s;b.onclick=()=>{S.season=s==='all'?'all':+s;drawTeams()};sb.append(b)}})();
+function drawAll(){drawMarks();drawTrend();drawWhat();drawTeams();drawWeek()}
+drawAll();
+let rt;new ResizeObserver(()=>{clearTimeout(rt);rt=setTimeout(drawAll,80)}).observe($('.page'));
+})();
+</script>
+</body>
+</html>
