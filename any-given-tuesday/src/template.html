@@ -149,7 +149,7 @@ table.rank tr:last-child td{border-bottom:none}
 table.rank td.nm{white-space:nowrap}
 table.rank td.n{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
 table.rank td.r{color:var(--muted);font-family:var(--mono);font-size:12px;padding-right:12px;white-space:nowrap}
-table.rank tr.pick td{font-weight:600;color:var(--ink)}
+table.rank tr.mine td{font-weight:600;color:var(--ink)}
 table.rank tr.gap td{color:var(--muted);text-align:center;padding:2px 0;font-size:11px;letter-spacing:.2em}
 table.rank td small{color:var(--muted);font-size:11px;margin-left:5px}
 table.rank a{color:inherit;text-decoration:none;border-bottom:1px dotted var(--axis);cursor:pointer}
@@ -340,7 +340,7 @@ function drawTeams(){const svg=$('#teams');svg.replaceChildren();const w=svg.cli
   // rank table, by either axis
   const ranked=[...rows].sort((a,b)=>b[by]-a[by]);const tbl=$('#rank');tbl.replaceChildren();$('#rank-h').textContent=(by==='lost'?'Player-weeks lost':'Players who missed a game')+(S.season==='all'?`, ${RES_OK} to ${lastOf(complete).season}`:`, ${S.season}`);
   const i0=ALL()?-1:ranked.findIndex(r=>r.t===S.team);const shown=new Set([0,1,2,3,4,5,6,7,i0-1,i0,i0+1,30,31].filter(i=>i>=0&&i<32));let prev=-1;
-  ranked.forEach((r,i)=>{if(!shown.has(i))return;if(i-prev>1){const tr=el('tr','gap');const td=el('td');td.colSpan=3;td.textContent='···';tr.append(td);tbl.append(tr)}const tr=el('tr',!ALL()&&r.t===S.team?'pick':'');const td=el('td','nm');const sw=el('i','sw');sw.style.background=tcolor(r.t);const a=el('a',null,TEAMS[r.t].nick);a.onclick=()=>{S.team=r.t;sel.value=r.t;drawAll()};td.append(sw,a);tr.append(el('td','r',ord(i+1)),td,el('td','n',r[by].toLocaleString()));tbl.append(tr);prev=i});
+  ranked.forEach((r,i)=>{if(!shown.has(i))return;if(i-prev>1){const tr=el('tr','gap');const td=el('td');td.colSpan=3;td.textContent='···';tr.append(td);tbl.append(tr)}const tr=el('tr',!ALL()&&r.t===S.team?'mine':'');const td=el('td','nm');const sw=el('i','sw');sw.style.background=tcolor(r.t);const a=el('a',null,TEAMS[r.t].nick);a.onclick=()=>{S.team=r.t;sel.value=r.t;drawAll()};td.append(sw,a);tr.append(el('td','r',ord(i+1)),td,el('td','n',r[by].toLocaleString()));tbl.append(tr);prev=i});
   document.querySelectorAll('#rank-by .chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.b===by));
   document.querySelectorAll('#teams-season .chip').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.s)===String(S.season)));
   const topL=[...rows].sort((a,b)=>b.lost-a.lost)[0],topP=[...rows].sort((a,b)=>b.players-a.players)[0];const ex=$('#teams-explain');ex.replaceChildren(`${S.season==='all'?`Since ${RES_OK}`:S.season}: the ${TEAMS[topL.t].nick} lost the most player-weeks, ${topL.lost.toLocaleString()} across ${topL.players} players; the ${TEAMS[topP.t].nick} had the most players miss a game, ${topP.players}.`);
