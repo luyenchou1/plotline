@@ -239,7 +239,7 @@ try{const s=localStorage.getItem('plotline-theme');if(s)root.dataset.theme=s}cat
 $('#theme').onclick=()=>{const dark=getComputedStyle(root).colorScheme==='dark';root.dataset.theme=dark?'light':'dark';try{localStorage.setItem('plotline-theme',root.dataset.theme)}catch(e){}};
 const MS=DATA.milestones.map(m=>({...m,t:+m.date.slice(0,4)+(+m.date.slice(5,7)-1)/12+(+m.date.slice(8,10)-1)/365}));
 const TEAMS=DATA.teams,SE=DATA.seasons,complete=SE.filter(s=>s.complete),last=complete[complete.length-1],cur=SE[SE.length-1];
-const S={team:'NYG',kind:'types',season:last.season};
+const S={team:'NYG',kind:'types',season:'all'};
 const RES_OK=2016;   // reserve-list counts are thin in the roster data before this
 const lastOf=a=>a[a.length-1];
 $('#updated').textContent=new Date(DATA.retrieved+'T12:00:00Z').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric',timeZone:'UTC'});
