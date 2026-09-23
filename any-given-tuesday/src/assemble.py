@@ -47,6 +47,14 @@ for f in sorted(glob.glob(str(raw/'ros_*.csv'))):
         resset[(s, t)].add(key); lost[(s, t)].add(key)
         p = POS.get(r['position'], 'Other'); posc[s][p] += 1; pteam[(s, t)][p] += 1
 
+# regular-season records from the nflverse games file
+rec = collections.defaultdict(lambda: [0, 0, 0])
+for r in csv.DictReader(open(raw/'games.csv', encoding='utf-8')):
+    if r['game_type'] != 'REG' or r['home_score'] in ('', 'NA') or int(r['season']) < 2009: continue
+    s = int(r['season']); h, a = fr(r['home_team']), fr(r['away_team']); hs, as_ = int(r['home_score']), int(r['away_score'])
+    if hs > as_: rec[(s, h)][0] += 1; rec[(s, a)][1] += 1
+    elif hs < as_: rec[(s, a)][0] += 1; rec[(s, h)][1] += 1
+    else: rec[(s, h)][2] += 1; rec[(s, a)][2] += 1
 allseasons = sorted(weeks)
 out = {'retrieved': datetime.date.today().isoformat(), 'seasons': [], 'teams': teams,
        'source': 'nflverse weekly injury reports and weekly rosters (CC BY 4.0)'}
@@ -54,7 +62,7 @@ for s in allseasons:
     nweeks = max(weeks[s]); T = {}
     for t in teams:
         L = lost[(s, t)]; players = {k[0] for k in L}
-        T[t] = {'out': len(outset[(s, t)]), 'res': len(resset[(s, t)]), 'lost': len(L), 'players': len(players),
+        T[t] = {'out': len(outset[(s, t)]), 'res': len(resset[(s, t)]), 'lost': len(L), 'players': len(players), 'rec': rec.get((s, t), [0, 0, 0]),
                 'types': dict(tteam[(s, t)].most_common(6)), 'pos': dict(pteam[(s, t)])}
     n = len(teams)
     league = {'out': round(sum(v['out'] for v in T.values())/n, 1), 'res': round(sum(v['res'] for v in T.values())/n, 1),

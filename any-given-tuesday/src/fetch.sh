@@ -10,5 +10,6 @@ for y in $(seq 2009 $Y); do
   get "https://github.com/nflverse/nflverse-data/releases/download/weekly_rosters/roster_weekly_$y.csv" ros_$y.csv
 done
 get "https://raw.githubusercontent.com/nflverse/nflverse-pbp/master/teams_colors_logos.csv" teams.csv
+get "https://github.com/nflverse/nfldata/raw/master/data/games.csv" games.csv
 echo "fetched $(date -u +%F)"
 cd .. && python3 assemble.py

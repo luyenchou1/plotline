@@ -8,7 +8,7 @@ Are NFL injuries really rising, or does it only feel that way? Every team's week
 src/fetch.sh        downloads the nflverse weekly injury reports (injuries_{season}.csv) and weekly rosters
                     (roster_weekly_{season}.csv) for 2009 to the current year, plus teams_colors_logos.csv, into src/raw/ (git-ignored)
 src/assemble.py     -> src/data.json: per season and team, player-weeks Out on the report, on a reserve list, lost (union),
-                       players who missed a game; league averages; Out listings by body part and position; the latest week's Out list
+                       players who missed a game, regular-season record (from games.csv); league averages; Out listings by body part and position; the latest week's Out list
 src/milestones.json rule changes and events (gold ticks)
 build.py            -> index.html (data embedded), meta.json, card.json
 ```
@@ -23,4 +23,5 @@ Runs from `.github/workflows/refresh.yml` on Mondays, Thursdays and Saturdays.
 
 - nflverse-data, injuries and weekly rosters. https://github.com/nflverse/nflverse-data (CC BY 4.0)
 - Team names and colours: nflverse teams_colors_logos.csv
+- Game results for records: nflverse nfldata games.csv
 - League-published injury figures (not machine-readable, cited in the notes): https://www.nfl.com/playerhealthandsafety/health-and-wellness/injury-data/injury-data

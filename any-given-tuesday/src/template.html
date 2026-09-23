@@ -209,6 +209,14 @@ h3.sub{font-size:13px;font-weight:600;margin:0 0 4px}
   <p class="hint">Hover a team · click to make it your team</p>
 </section>
 
+<section class="panel" aria-labelledby="wins-h">
+  <div class="panel-head"><h2 id="wins-h">Does it cost wins?</h2><p>The same teams and seasons, with player-weeks lost against regular-season winning percentage. Injuries and losing feed each other in both directions, so the line is a correlation, not a verdict: teams that are losing also shut players down, and teams with thin rosters do both.</p></div>
+  <p class="explain" id="wins-explain"></p>
+  <div class="ctl-row"><span class="lbl">Season</span><div class="chips" id="wins-season" role="group" aria-label="Season"></div></div>
+  <div class="two"><div class="chart-wrap"><svg id="wins" role="img" aria-label="Teams by player-weeks lost and winning percentage"></svg><div class="tooltip" id="tip-wins" hidden></div></div><div><h3 class="sub" id="wins-rank-h"></h3><table class="rank" id="wins-rank"></table></div></div>
+  <p class="hint">Hover a team · click to make it your team</p>
+</section>
+
 <section class="panel" aria-labelledby="week-h">
   <div class="panel-head"><h2 id="week-h">This week's report</h2><p id="week-p"></p></div>
   <div class="this-week" id="week-list"></div>
@@ -347,6 +355,31 @@ function drawTeams(){const svg=$('#teams');svg.replaceChildren();const w=svg.cli
   if(!ALL()){const me=rows.find(r=>r.t===S.team);const pos=[...rows].sort((a,b)=>b.lost-a.lost).findIndex(r=>r.t===S.team)+1;ex.append(' The ',Object.assign(el('b'),{textContent:`${TEAMS[S.team].nick}: ${ord(pos)} of 32 in player-weeks lost, ${me.lost.toLocaleString()} across ${me.players} players`}),`, about ${fmt1(me.lost/Math.max(1,me.players))} weeks for each player who got hurt.`)}
 }
 
+/* ---------- does it cost wins ---------- */
+function drawWins(){const svg=$('#wins');svg.replaceChildren();const w=svg.clientWidth||700,h=Math.round(Math.max(320,Math.min(460,w*0.62))),m={l:56,r:20,t:18,b:48};svg.setAttribute('viewBox',`0 0 ${w} ${h}`);svg.setAttribute('height',h);
+  let rows;const pct=r=>(r[0]+r[2]/2)/Math.max(1,r[0]+r[1]+r[2]);
+  if(S.season==='all'){const rng=complete.filter(s=>s.season>=RES_OK);rows=Object.keys(TEAMS).map(t=>{const R=rng.reduce((a,s)=>[a[0]+s.teams[t].rec[0],a[1]+s.teams[t].rec[1],a[2]+s.teams[t].rec[2]],[0,0,0]);return {t,lost:rng.reduce((a,s)=>a+s.teams[t].lost,0),rec:R,pct:pct(R)}})}
+  else{const s=SE.find(s=>s.season===S.season);rows=Object.keys(TEAMS).map(t=>({t,lost:s.teams[t].lost,rec:s.teams[t].rec,pct:pct(s.teams[t].rec)}))}
+  rows=rows.filter(r=>r.rec[0]+r.rec[1]+r.rec[2]>0);
+  const xs=rows.map(r=>r.lost),ys=rows.map(r=>r.pct);const px=(Math.max(...xs)-Math.min(...xs))*0.08;const x0=Math.max(0,Math.min(...xs)-px),x1=Math.max(...xs)+px,y0=0,y1=1;const {x,y}=frame(w,h,m,x0,x1,y0,y1);
+  for(let v=0;v<=1;v+=0.25){svg.append(svgEl('line',{class:'grid',x1:m.l,x2:w-m.r,y1:y(v),y2:y(v)}));svg.append(svgEl('text',{class:'tick',x:m.l-6,y:y(v)+4,'text-anchor':'end'},v.toFixed(3).replace(/^0/,'')))}
+  const step=v=>{const p=Math.pow(10,Math.floor(Math.log10(v/4)));const c=v/4/p;return (c<1.5?1:c<3.5?2:c<7.5?5:10)*p};const sx=step(x1-x0);for(let v=Math.ceil(x0/sx)*sx;v<=x1;v+=sx)svg.append(svgEl('text',{class:'tick',x:x(v),y:h-m.b+14,'text-anchor':'middle'},Math.round(v)));
+  svg.append(svgEl('line',{class:'axis',x1:m.l,x2:w-m.r,y1:h-m.b,y2:h-m.b}));svg.append(svgEl('line',{class:'median',x1:m.l,x2:w-m.r,y1:y(0.5),y2:y(0.5)}));
+  svg.append(svgEl('text',{class:'axis-title',x:(m.l+w-m.r)/2,y:h-m.b+32,'text-anchor':'middle'},'player-weeks lost →'));svg.append(svgEl('text',{class:'axis-title',x:12,y:(m.t+h-m.b)/2,'text-anchor':'middle',transform:`rotate(-90 12 ${(m.t+h-m.b)/2})`},'winning percentage →'));
+  // least-squares line and correlation
+  const n=rows.length,mx=xs.reduce((a,b)=>a+b,0)/n,my=ys.reduce((a,b)=>a+b,0)/n;let sxy=0,sxx=0,syy=0;rows.forEach(r=>{sxy+=(r.lost-mx)*(r.pct-my);sxx+=(r.lost-mx)**2;syy+=(r.pct-my)**2});const slope=sxy/sxx,icpt=my-slope*mx,rr=sxy/Math.sqrt(sxx*syy);
+  svg.append(svgEl('line',{class:'ln',stroke:'var(--muted)','stroke-width':1.5,'stroke-dasharray':'6 4',x1:x(x0),y1:y(clamp(icpt+slope*x0,0,1)),x2:x(x1),y2:y(clamp(icpt+slope*x1,0,1))}));
+  const tip=$('#tip-wins'),wrap=svg.parentElement;const r0=w<640?11:13;rows.sort((a,b)=>(a.t===S.team)-(b.t===S.team));
+  for(const r of rows){const col=tcolor(r.t);const g=svgEl('g',{});const c=svgEl('circle',{class:'disc'+(!ALL()&&r.t===S.team?' pick':''),cx:x(r.lost),cy:y(r.pct),r:r0,fill:col});g.append(c);g.append(svgEl('text',{class:'disc-text',x:x(r.lost),y:y(r.pct)+3.5},r.t));
+    c.onpointerenter=ev=>{tip.hidden=false;tip.replaceChildren(el('div','tip-head',TEAMS[r.t].name));const a=el('div','tip-row');a.append(el('span','k','Record'),el('b',null,`${r.rec[0]}-${r.rec[1]}`+(r.rec[2]?`-${r.rec[2]}`:'')));const b2=el('div','tip-row');b2.append(el('span','k','Player-weeks lost'),el('b',null,r.lost.toLocaleString()));tip.append(a,b2);const wb=wrap.getBoundingClientRect();placeTip(tip,wrap,ev.clientX-wb.left,ev.clientY-wb.top)};c.onpointerleave=()=>{tip.hidden=true};c.onclick=()=>{S.team=r.t;sel.value=r.t;drawAll()};svg.append(g)}
+  const ranked=[...rows].sort((a,b)=>b.pct-a.pct||a.lost-b.lost);const tbl=$('#wins-rank');tbl.replaceChildren();$('#wins-rank-h').textContent=(S.season==='all'?`Record, ${RES_OK} to ${lastOf(complete).season}`:`Record, ${S.season}`);
+  const i0=ALL()?-1:ranked.findIndex(r=>r.t===S.team);const shown=new Set([0,1,2,3,4,5,6,7,i0-1,i0,i0+1,ranked.length-2,ranked.length-1].filter(i=>i>=0&&i<ranked.length));let prev=-1;
+  ranked.forEach((r,i)=>{if(!shown.has(i))return;if(i-prev>1){const tr=el('tr','gap');const td=el('td');td.colSpan=3;td.textContent='···';tr.append(td);tbl.append(tr)}const tr=el('tr',!ALL()&&r.t===S.team?'mine':'');const td=el('td','nm');const sw=el('i','sw');sw.style.background=tcolor(r.t);const a=el('a',null,TEAMS[r.t].nick);a.onclick=()=>{S.team=r.t;sel.value=r.t;drawAll()};td.append(sw,a,el('small',null,r.lost.toLocaleString()+' lost'));tr.append(el('td','r',ord(i+1)),td,el('td','n',`${r.rec[0]}-${r.rec[1]}`+(r.rec[2]?`-${r.rec[2]}`:'')));tbl.append(tr);prev=i});
+  document.querySelectorAll('#wins-season .chip').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.s)===String(S.season)));
+  const per100=slope*100;const ex=$('#wins-explain');ex.replaceChildren(`${S.season==='all'?`Across ${RES_OK} to ${lastOf(complete).season}`:`In ${S.season}`}, the correlation between player-weeks lost and winning percentage is `,Object.assign(el('b'),{textContent:`r = ${rr.toFixed(2)}`}),`: every 100 player-weeks lost goes with about ${Math.abs(per100*100).toFixed(1)} points of winning percentage ${per100<0?'lost':'gained'}. `+(Math.abs(rr)<0.3?'That is a weak relationship; a season of injuries is only a small part of a season of results.':Math.abs(rr)<0.6?'That is a moderate relationship: injuries explain about '+Math.round(rr*rr*100)+' percent of the spread in records.':'That is a strong relationship: injuries explain about '+Math.round(rr*rr*100)+' percent of the spread in records.'));
+  if(!ALL()){const me=rows.find(r=>r.t===S.team);if(me){const pos=ranked.findIndex(r=>r.t===S.team)+1;ex.append(' The ',Object.assign(el('b'),{textContent:`${TEAMS[S.team].nick}: ${me.rec[0]}-${me.rec[1]}${me.rec[2]?'-'+me.rec[2]:''}, ${ord(pos)} of 32`}),'.')}}
+}
+
 /* ---------- this week ---------- */
 function drawWeek(){const L=DATA.latest;const list=L.outList;const mine=ALL()?list:list.filter(p=>p.team===S.team);$('#week-p').textContent=`${L.season}, week ${L.week}: ${list.length} players listed Out league-wide${ALL()?'':`, ${mine.length} of them ${TEAMS[S.team].nick}`}. The report is final on Friday; the file behind this page refreshes on a schedule, so the newest listings can lag by a few days.`;
   const box=$('#week-list');box.replaceChildren();if(!mine.length){box.append(el('div',null,`No ${nick(S.team)} players listed Out in the file yet for week ${L.week}.`));return}
@@ -356,8 +389,8 @@ function drawWeek(){const L=DATA.latest;const list=L.outList;const mine=ALL()?li
 (function(){const k=$('#what-kind');for(const id in KINDS){const b=el('button','chip',KINDS[id].label);b.dataset.k=id;b.onclick=()=>{S.kind=id;document.querySelectorAll('#what-kind .chip').forEach(x=>x.setAttribute('aria-pressed',x.dataset.k===id));drawWhat()};b.setAttribute('aria-pressed',id===S.kind);k.append(b)}
   const rb=$('#rank-by');for(const [id,lab] of [['lost','Player-weeks lost'],['players','Players who missed a game']]){const b=el('button','chip',lab);b.dataset.b=id;b.onclick=()=>{S.rankBy=id;drawTeams()};rb.append(b)}
   const sb=$('#teams-season');const opts=[...complete.slice(-5).map(s=>s.season).reverse()];if(!cur.complete)opts.unshift(cur.season);opts.push('all');
-  for(const s of opts){const b=el('button','chip',s==='all'?`${RES_OK} to ${lastOf(complete).season}`:(s===cur.season&&!cur.complete?`${s} so far`:String(s)));b.dataset.s=s;b.onclick=()=>{S.season=s==='all'?'all':+s;drawTeams()};sb.append(b)}})();
-function drawAll(){drawMarks();drawTrend();drawWhat();drawTeams();drawWeek()}
+  for(const box of [sb,$('#wins-season')])for(const s of opts){const b=el('button','chip',s==='all'?`${RES_OK} to ${lastOf(complete).season}`:(s===cur.season&&!cur.complete?`${s} so far`:String(s)));b.dataset.s=s;b.onclick=()=>{S.season=s==='all'?'all':+s;drawTeams();drawWins()};box.append(b)}})();
+function drawAll(){drawMarks();drawTrend();drawWhat();drawTeams();drawWins();drawWeek()}
 drawAll();
 let rt;new ResizeObserver(()=>{clearTimeout(rt);rt=setTimeout(drawAll,80)}).observe($('.page'));
 })();
