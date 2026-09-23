@@ -197,5 +197,6 @@ document.querySelectorAll('[data-card]').forEach(async c=>{try{const r=await fet
 document.querySelectorAll('[data-updated]').forEach(async s=>{try{const r=await fetch(s.dataset.updated+'/meta.json',{cache:'no-cache'});if(!r.ok)return;const m=await r.json();s.textContent='Auto-updated '+new Date(m.updated+'T12:00:00Z').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric',timeZone:'UTC'})}catch(e){}});
 document.getElementById('theme').onclick=()=>{const dark=getComputedStyle(root).colorScheme==='dark';root.dataset.theme=dark?'light':'dark';try{localStorage.setItem('plotline-theme',root.dataset.theme)}catch(e){}}})();
 </script>
+<script>(function(){if(!/github\.io$/.test(location.hostname)||navigator.doNotTrack==='1')return;var r='';try{r=new URL(document.referrer).hostname}catch(e){}try{fetch('https://plotline-counter.luyen-9ce.workers.dev/hit',{method:'POST',body:JSON.stringify({p:'home',r:r}),keepalive:true}).catch(function(){})}catch(e){}})();</script>
 </body>
 </html>
