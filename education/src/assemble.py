@@ -92,6 +92,14 @@ latest = max(y for y in years if sum(1 for c in OECD if y in by.get(c, {})) >= 3
 oecd_spend = sorted(([c, by[c][latest]] for c in OECD if latest in by.get(c, {})), key=lambda x: -x[1])
 oecd_spend_year = latest
 
+# ---- never let a failed parse of the OECD tables downgrade the page: keep the last good PISA block
+prev = root/'data.json'
+if pisaMeta['latestRound'] is None and prev.exists():
+    old = json.load(open(prev))
+    if (old.get('pisaMeta') or {}).get('latestRound'):
+        pisa, pisaMeta = old['pisa'], old['pisaMeta']
+        print('WARNING: OECD tables not merged; keeping the previous PISA data (latest round', pisaMeta['latestRound'], ')')
+
 out = {'retrieved': datetime.date.today().isoformat(), 'pisa': pisa, 'pisaMeta': pisaMeta, 'naep': naep,
        'spend': {'series': spend, 'base': base, 'source': 'NCES Digest of Education Statistics, table 236.55'},
        'oecdSpend': {'year': oecd_spend_year, 'rows': oecd_spend, 'unit': 'USD PPP per student, constant 2020 prices, primary to post-secondary non-tertiary'}}

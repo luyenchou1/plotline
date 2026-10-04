@@ -18,6 +18,9 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Python packages the fetchers need
+        run: pip install openpyxl
+
       - name: Refresh The Curve and The Tests (Epoch AI, Wikipedia)
         run: |
           bash the-curve/src/fetch.sh
